@@ -223,17 +223,25 @@ impl Provider for AptProvider {
     }
 }
 
-/// Time since the newest `*_Packages` file in the lists directory was written.
+/// Time since `apt-get update` last ran, or `None` when there are no package lists.
+///
+/// The list files themselves are no clock: apt stamps each one with the mirror's
+/// Last-Modified time, so a list can be weeks old right after an update. apt does write
+/// to `partial/` on every update, even when nothing changed upstream, so its mtime is
+/// used; the newest list is only the fallback when `partial/` is missing.
 fn lists_age(dir: &Path) -> Option<Duration> {
-    let newest = std::fs::read_dir(dir)
+    let newest_list = std::fs::read_dir(dir)
         .ok()?
         .filter_map(Result::ok)
         .filter(|e| e.file_name().to_string_lossy().contains("_Packages"))
         .filter_map(|e| e.metadata().ok()?.modified().ok())
         .max()?;
+    let updated = std::fs::metadata(dir.join("partial"))
+        .and_then(|m| m.modified())
+        .unwrap_or(newest_list);
     Some(
         SystemTime::now()
-            .duration_since(newest)
+            .duration_since(updated)
             .unwrap_or(Duration::ZERO),
     )
 }

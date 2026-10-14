@@ -163,6 +163,26 @@ fn lists_age_reads_newest_packages_file() {
     std::fs::remove_dir_all(&dir).unwrap();
 }
 
+/// apt stamps each list with the mirror's Last-Modified time, so a list can be days old
+/// right after `apt-get update`. The `partial/` directory is touched on every update.
+#[test]
+fn lists_age_follows_last_update_not_mirror_timestamps() {
+    let dir = std::env::temp_dir().join(format!("patchd-lists-partial-{}", std::process::id()));
+    std::fs::create_dir_all(dir.join("partial")).unwrap();
+    let list = dir.join("deb.debian.org_debian_dists_bookworm_main_binary-amd64_Packages.lz4");
+    std::fs::write(&list, "").unwrap();
+    let ninety_days_ago = SystemTime::now() - Duration::from_secs(90 * 86_400);
+    std::fs::File::options()
+        .write(true)
+        .open(&list)
+        .unwrap()
+        .set_modified(ninety_days_ago)
+        .unwrap();
+
+    assert!(lists_age(&dir).unwrap() < Duration::from_secs(60));
+    std::fs::remove_dir_all(&dir).unwrap();
+}
+
 #[tokio::test]
 async fn failing_held_lookup_is_a_warning_not_an_error() {
     let dir = fixture_dir("debian-12");
