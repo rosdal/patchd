@@ -9,7 +9,6 @@ use clap::Args;
 use patchd_core::apply::{self, ApplyOptions, Outcome, RunResult};
 use patchd_core::lock::{LockError, RunLock};
 use patchd_core::preflight::{self, Check};
-use patchd_core::provider::Provider;
 use patchd_core::root::Root;
 use patchd_core::runlog::{self, Event, EventSink, RunLog};
 use patchd_core::runner::SystemRunner;
@@ -99,7 +98,7 @@ pub async fn run(args: &ApplyArgs, config_path: Option<&Path>, verbose: u8) -> u
         }
     };
 
-    let (host, apt, in_container) = crate::system_apt();
+    let (host, all, in_container) = crate::system_providers();
     log.emit(Event::RunStarted {
         agent_version: patchd_core::build::LONG_VERSION.to_owned(),
         host: host.clone(),
@@ -117,10 +116,7 @@ pub async fn run(args: &ApplyArgs, config_path: Option<&Path>, verbose: u8) -> u
     let interrupted = Arc::new(AtomicBool::new(false));
     watch_signals(&interrupted);
 
-    let mut providers: Vec<&dyn Provider> = Vec::new();
-    if apt.detect(&host).await {
-        providers.push(&apt);
-    }
+    let providers = crate::detected(&host, &all).await;
     let checks = vec![
         preflight::root_check(true),
         Check::pass("lock", format!("holding {}", patchd_core::lock::LOCK_PATH)),

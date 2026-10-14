@@ -14,7 +14,9 @@ use std::sync::Arc;
 use clap::{ArgAction, Parser, Subcommand};
 use patchd_core::config::Config;
 use patchd_core::host::{self, HostInfo};
+use patchd_core::provider::Provider;
 use patchd_core::providers::apt::AptProvider;
+use patchd_core::providers::dnf::DnfProvider;
 use patchd_core::runner::SystemRunner;
 use tracing_subscriber::EnvFilter;
 
@@ -114,28 +116,51 @@ fn load_config(path: Option<&Path>) -> Result<Config, String> {
     Config::load(path, std::env::vars()).map_err(|e| e.to_string())
 }
 
-/// The real host and its apt provider, and whether we run in a container.
-fn system_apt() -> (HostInfo, AptProvider, bool) {
+/// Every provider patchd knows, for detection on the host.
+pub type Providers = Vec<Box<dyn Provider>>;
+
+/// The real host, every provider, and whether we run in a container.
+fn system_providers() -> (HostInfo, Providers, bool) {
     let host = HostInfo::detect();
-    let apt = AptProvider::new(Arc::new(SystemRunner)).ubuntu(host.os.is_ubuntu_like());
-    (host, apt, host::in_container())
+    let runner = Arc::new(SystemRunner);
+    let providers: Providers = vec![
+        Box::new(AptProvider::new(runner.clone()).ubuntu(host.os.is_ubuntu_like())),
+        Box::new(DnfProvider::new(runner)),
+    ];
+    let in_container = host::in_container();
+    (host, providers, in_container)
 }
 
-/// The host and apt provider replayed from a fixture directory (debug builds only).
+/// The host and a provider replayed from a fixture directory (debug builds only): apt
+/// for a directory with `dpkg-query.txt`, dnf for one with `rpm-qa.txt`.
 #[cfg(debug_assertions)]
-fn fixture_apt(dir: &Path) -> Result<(HostInfo, AptProvider), String> {
-    let os_release = std::fs::read_to_string(dir.join("os-release"))
-        .map_err(|e| format!("{}: {e}", dir.display()))?;
+fn fixture_providers(dir: &Path) -> Result<(HostInfo, Providers), String> {
+    let err = |e: std::io::Error| format!("{}: {e}", dir.display());
+    let os_release = std::fs::read_to_string(dir.join("os-release")).map_err(err)?;
     let host = HostInfo {
         hostname: "example".to_owned(),
         os: host::OsInfo::from_os_release(&os_release),
         arch: "x86_64".to_owned(),
         kernel: None,
     };
-    let (apt, _) =
-        AptProvider::from_fixtures(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
-    let apt = apt.ubuntu(host.os.is_ubuntu_like());
-    Ok((host, apt))
+    let provider: Box<dyn Provider> = if dir.join("rpm-qa.txt").exists() {
+        Box::new(DnfProvider::from_fixtures(dir).map_err(err)?.0)
+    } else {
+        let (apt, _) = AptProvider::from_fixtures(dir).map_err(err)?;
+        Box::new(apt.ubuntu(host.os.is_ubuntu_like()))
+    };
+    Ok((host, vec![provider]))
+}
+
+/// The providers that apply to this host.
+async fn detected<'a>(host: &HostInfo, providers: &'a Providers) -> Vec<&'a dyn Provider> {
+    let mut out = Vec::new();
+    for p in providers {
+        if p.detect(host).await {
+            out.push(p.as_ref());
+        }
+    }
+    out
 }
 
 /// Colour only on a terminal, and never with `NO_COLOR`.

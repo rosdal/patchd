@@ -6,8 +6,6 @@ use std::path::Path;
 use clap::Args;
 use patchd_core::host::HostInfo;
 use patchd_core::plan::{Filter, Plan};
-use patchd_core::provider::Provider;
-use patchd_core::providers::apt::AptProvider;
 
 use crate::render;
 
@@ -57,26 +55,27 @@ pub async fn run(args: &PlanArgs, config_path: Option<&Path>) -> u8 {
     let filter = filter_override(args.security, args.all).unwrap_or(config.apply.filter);
     let exclude = config.exclusions();
 
-    let (host, apt) = match setup(args) {
+    let (host, all) = match setup(args) {
         Ok(x) => x,
         Err(e) => {
             eprintln!("error: {e}");
             return EXIT_ERROR;
         }
     };
-
+    let detected = crate::detected(&host, &all).await;
+    if detected.is_empty() {
+        eprintln!("error: no supported package manager found on this host");
+        return EXIT_ERROR;
+    }
     let mut providers = Vec::new();
-    if apt.detect(&host).await {
-        match apt.plan(filter, &exclude).await {
-            Ok(p) => providers.push(p),
+    for p in detected {
+        match p.plan(filter, &exclude).await {
+            Ok(plan) => providers.push(plan),
             Err(e) => {
-                eprintln!("error: apt: {e}");
+                eprintln!("error: {}: {e}", p.id());
                 return EXIT_ERROR;
             }
         }
-    } else {
-        eprintln!("error: no supported package manager found on this host");
-        return EXIT_ERROR;
     }
     let plan = Plan::new(filter, providers);
 
@@ -100,12 +99,12 @@ pub async fn run(args: &PlanArgs, config_path: Option<&Path>) -> u8 {
     }
 }
 
-fn setup(args: &PlanArgs) -> Result<(HostInfo, AptProvider), String> {
+fn setup(args: &PlanArgs) -> Result<(HostInfo, crate::Providers), String> {
     #[cfg(debug_assertions)]
     if let Some(dir) = &args.fixtures {
-        return crate::fixture_apt(dir);
+        return crate::fixture_providers(dir);
     }
     let _ = args;
-    let (host, apt, _) = crate::system_apt();
-    Ok((host, apt))
+    let (host, providers, _) = crate::system_providers();
+    Ok((host, providers))
 }

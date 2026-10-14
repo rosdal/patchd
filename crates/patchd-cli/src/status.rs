@@ -4,7 +4,6 @@ use std::io::Write as _;
 
 use clap::Args;
 use patchd_core::model::UpdateKind;
-use patchd_core::provider::Provider;
 use patchd_core::root::Root;
 use patchd_core::runlog;
 use patchd_core::runner::{Cmd, Runner, SystemRunner};
@@ -38,9 +37,13 @@ pub async fn run(args: &StatusArgs) -> u8 {
         Ok(mut runs) => (runs.pop(), None),
         Err(e) => (None, Some(e.to_string())),
     };
-    let (host, apt, in_container) = crate::system_apt();
-    let reboot = apt.reboot_required().await.unwrap_or_default();
-    let providers: Vec<Box<dyn Provider>> = vec![Box::new(apt)];
+    let (host, providers, in_container) = crate::system_providers();
+    let mut reboot = patchd_core::reboot::RebootStatus::default();
+    for p in crate::detected(&host, &providers).await {
+        if let Ok(s) = p.reboot_required().await {
+            reboot.merge(s);
+        }
+    }
     let report = patchd_core::scan::scan(host, &providers, None, in_container).await;
     let pending: Vec<_> = report.updates().filter(|u| !u.held).collect();
     let status = Status {

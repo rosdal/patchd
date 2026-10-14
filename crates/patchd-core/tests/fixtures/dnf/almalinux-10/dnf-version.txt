@@ -1,0 +1,6 @@
+4.20.0
+  Installed: dnf-0:4.20.0-22.el10_2.alma.1.noarch at Fri Oct  2 09:04:44 2026
+  Built    : AlmaLinux Packaging Team <packager@almalinux.org> at Wed May 20 06:02:01 2026
+
+  Installed: rpm-0:4.19.1.1-23.el10.alma.1.x86_64 at Fri Oct  2 09:04:44 2026
+  Built    : AlmaLinux Packaging Team <packager@almalinux.org> at Tue Feb 17 21:26:50 2026

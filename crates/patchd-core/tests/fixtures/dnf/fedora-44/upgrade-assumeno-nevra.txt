@@ -1,0 +1,13 @@
+Package                   Arch   Version          Repository                            Size
+Upgrading:
+ curl                     x86_64 0:8.18.0-14.fc44 updates                          480.0 KiB
+   replacing curl         x86_64 0:8.18.0-8.fc44  0eae96ab45874228a86a12a132e699ed 480.0 KiB
+ libcurl                  x86_64 0:8.18.0-14.fc44 updates                            1.0 MiB
+   replacing libcurl      x86_64 0:8.18.0-8.fc44  0eae96ab45874228a86a12a132e699ed   1.0 MiB
+ openssl-libs             x86_64 1:3.5.9-1.fc44   updates                            9.2 MiB
+   replacing openssl-libs x86_64 1:3.5.7-2.fc44   0eae96ab45874228a86a12a132e699ed   9.2 MiB
+
+Transaction Summary:
+ Upgrading:          3 packages
+ Replacing:          3 packages
+

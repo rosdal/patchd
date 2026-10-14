@@ -1,0 +1,28 @@
+Last metadata expiration check: 0:00:02 ago on Wed Oct 14 14:37:19 2026.
+Dependencies resolved.
+================================================================================
+ Package                   Arch      Version                    Repo       Size
+================================================================================
+Upgrading:
+ curl                      x86_64    8.12.1-4.el10_2.7          baseos    218 k
+ glibc                     x86_64    2.39-142.el10_2.alma.1     baseos    2.1 M
+ glibc-common              x86_64    2.39-142.el10_2.alma.1     baseos    316 k
+ glibc-minimal-langpack    x86_64    2.39-142.el10_2.alma.1     baseos     28 k
+ gnutls                    x86_64    3.8.10-5.el10_2            baseos    1.6 M
+ libcurl-minimal           x86_64    8.12.1-4.el10_2.7          baseos    297 k
+ openssl-fips-provider     x86_64    1:3.5.8-2.el10_2.alma.1    baseos    810 k
+ openssl-libs              x86_64    1:3.5.8-2.el10_2.alma.1    baseos    2.3 M
+ pcre2                     x86_64    10.44-1.5.el10_2           baseos    244 k
+ pcre2-syntax              noarch    10.44-1.5.el10_2           baseos    153 k
+ python3                   x86_64    3.12.15-1.el10_2           baseos     27 k
+ python3-libs              x86_64    3.12.15-1.el10_2           baseos    9.4 M
+ rpm-sequoia               x86_64    1.10.2.1-1.el10_2          baseos    967 k
+ tzdata                    noarch    2026e-1.el10_2.alma.1      baseos    898 k
+ vim-data                  noarch    2:9.1.083-9.el10_2.22      baseos     19 k
+ vim-minimal               x86_64    2:9.1.083-9.el10_2.22      baseos    806 k
+
+Transaction Summary
+================================================================================
+Upgrade  16 Packages
+
+Total download size: 20 M

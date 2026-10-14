@@ -7,8 +7,6 @@ use patchd_core::host::HostInfo;
 use patchd_core::lock::RunLock;
 use patchd_core::model::{ScanReport, UpdateKind};
 use patchd_core::preflight;
-use patchd_core::provider::Provider;
-use patchd_core::providers::apt::AptProvider;
 use patchd_core::root::Root;
 use patchd_core::runlog::NullSink;
 
@@ -35,10 +33,11 @@ pub struct ScanArgs {
     quiet: bool,
 
     /// Only run this provider.
-    #[arg(long, value_parser = ["apt"])]
+    #[arg(long, value_parser = ["apt", "dnf"])]
     provider: Option<String>,
 
-    /// Run `apt-get update` first. Needs root, and waits for no other patchd run.
+    /// Refresh the package lists first (`apt-get update`, `dnf makecache`). Needs root,
+    /// and fails while another patchd run holds the lock.
     #[arg(long)]
     refresh: bool,
 
@@ -53,7 +52,7 @@ pub struct ScanArgs {
 }
 
 pub async fn run(args: &ScanArgs) -> u8 {
-    let (host, apt, in_container) = match setup(args) {
+    let (host, providers, in_container) = match setup(args) {
         Ok(setup) => setup,
         Err(msg) => return fail(args, &msg),
     };
@@ -65,7 +64,7 @@ pub async fn run(args: &ScanArgs) -> u8 {
         if !preflight::is_root() {
             return fail(
                 args,
-                "--refresh runs `apt-get update`, which needs root; run `sudo patchd scan --refresh`",
+                "--refresh refreshes the package lists, which needs root; run `sudo patchd scan --refresh`",
             );
         }
         // Held only while the lists are refreshed; the read-only scan needs no lock.
@@ -73,15 +72,24 @@ pub async fn run(args: &ScanArgs) -> u8 {
             Ok(lock) => lock,
             Err(e) => return fail(args, &e.to_string()),
         };
-        if apt.detect(&host).await {
-            if let Err(e) = apt.refresh(&NullSink).await {
-                return fail(args, &format!("refreshing package lists failed: {e}"));
+        for p in crate::detected(&host, &providers).await {
+            if args
+                .provider
+                .as_deref()
+                .is_some_and(|only| only != p.id().as_str())
+            {
+                continue;
+            }
+            if let Err(e) = p.refresh(&NullSink).await {
+                return fail(
+                    args,
+                    &format!("{}: refreshing package lists failed: {e}", p.id()),
+                );
             }
         }
         drop(lock);
     }
 
-    let providers: Vec<Box<dyn Provider>> = vec![Box::new(apt)];
     let mut report =
         patchd_core::scan::scan(host, &providers, args.provider.as_deref(), in_container).await;
     if report.providers.is_empty() {
@@ -127,14 +135,14 @@ fn fail(args: &ScanArgs, msg: &str) -> u8 {
     EXIT_PROVIDER_FAILED
 }
 
-fn setup(args: &ScanArgs) -> Result<(HostInfo, AptProvider, bool), String> {
+fn setup(args: &ScanArgs) -> Result<(HostInfo, crate::Providers, bool), String> {
     #[cfg(debug_assertions)]
     if let Some(dir) = &args.fixtures {
-        let (host, apt) = crate::fixture_apt(dir)?;
-        return Ok((host, apt, false));
+        let (host, providers) = crate::fixture_providers(dir)?;
+        return Ok((host, providers, false));
     }
     let _ = args;
-    Ok(crate::system_apt())
+    Ok(crate::system_providers())
 }
 
 fn in_fixture_mode(args: &ScanArgs) -> bool {
