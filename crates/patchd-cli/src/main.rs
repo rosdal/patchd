@@ -102,13 +102,18 @@ fn init_logging(verbose: u8, default: &str) {
         1 => "debug",
         _ => "trace",
     };
-    tracing_subscriber::fmt()
+    let builder = tracing_subscriber::fmt()
         .with_env_filter(
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(level)),
         )
         .with_writer(std::io::stderr)
-        .with_ansi(std::io::stderr().is_terminal())
-        .init();
+        .with_ansi(std::io::stderr().is_terminal());
+    // Under systemd stderr goes to the journal, which timestamps every line itself.
+    if std::env::var_os("JOURNAL_STREAM").is_some() {
+        builder.without_time().init();
+    } else {
+        builder.init();
+    }
 }
 
 /// The config file plus `PATCHD_*` overrides.
