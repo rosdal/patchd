@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 use async_trait::async_trait;
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncRead, BufReader};
 use tracing::Instrument;
 
 /// Default timeout for `dpkg-query`.
@@ -24,10 +24,11 @@ pub struct Cmd {
     pub ok_codes: &'static [i32],
     /// Extra environment variables, on top of the C locale.
     pub env: Vec<(&'static str, String)>,
-    /// Start the child in its own process group, so a Ctrl-C in the terminal or a
-    /// signal to patchd's group never reaches it. Used for dpkg runs, which must not be
-    /// interrupted.
-    pub own_process_group: bool,
+    /// For dpkg and rpm runs, which must never be interrupted: the child gets its own
+    /// process group, so a Ctrl-C in the terminal or a signal to patchd's group never
+    /// reaches it, and it is never killed, not at its timeout and not when patchd stops
+    /// waiting for it. The timeout only logs that it is taking long.
+    pub protected: bool,
 }
 
 impl Cmd {
@@ -43,7 +44,7 @@ impl Cmd {
             timeout: QUERY_TIMEOUT,
             ok_codes: &[0],
             env: Vec::new(),
-            own_process_group: false,
+            protected: false,
         }
     }
 
@@ -54,8 +55,8 @@ impl Cmd {
     }
 
     #[must_use]
-    pub fn own_process_group(mut self) -> Self {
-        self.own_process_group = true;
+    pub fn protected(mut self) -> Self {
+        self.protected = true;
         self
     }
 
@@ -227,12 +228,27 @@ impl Runner for SystemRunner {
     async fn run_streaming(&self, cmd: &Cmd, on_line: LineSink<'_>) -> Result<CmdOutput, RunError> {
         let span = tracing::debug_span!("cmd", program = cmd.program, args = ?cmd.args);
         async {
-            let out = tokio::time::timeout(cmd.timeout, stream(cmd, on_line))
-                .await
-                .map_err(|_| RunError::Timeout {
-                    program: cmd.program,
-                    secs: cmd.timeout.as_secs(),
-                })??;
+            let run = stream(cmd, on_line);
+            tokio::pin!(run);
+            let out = match tokio::time::timeout(cmd.timeout, &mut run).await {
+                Ok(out) => out?,
+                Err(_) if cmd.protected => {
+                    let msg = format!(
+                        "patchd: {} is still running after {}s; waiting for it rather than interrupting it",
+                        cmd.program,
+                        cmd.timeout.as_secs()
+                    );
+                    tracing::warn!("{msg}");
+                    on_line(Stream::Stderr, &msg);
+                    run.await?
+                }
+                Err(_) => {
+                    return Err(RunError::Timeout {
+                        program: cmd.program,
+                        secs: cmd.timeout.as_secs(),
+                    });
+                }
+            };
             tracing::debug!(exit = out.status, "command finished");
             check_status(cmd, out)
         }
@@ -252,9 +268,9 @@ fn spawn(cmd: &Cmd) -> Result<tokio::process::Child, RunError> {
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .kill_on_drop(true);
+        .kill_on_drop(!cmd.protected);
     #[cfg(unix)]
-    if cmd.own_process_group {
+    if cmd.protected {
         command.process_group(0);
     }
     command.spawn().map_err(|e| match e.kind() {
@@ -263,39 +279,88 @@ fn spawn(cmd: &Cmd) -> Result<tokio::process::Child, RunError> {
     })
 }
 
-/// Reads stdout and stderr line by line as they arrive, until both close.
+/// How long to keep reading output after the process has exited. A daemon started by a
+/// maintainer script can inherit the pipes and hold them open for ever.
+const DRAIN_AFTER_EXIT: Duration = Duration::from_secs(5);
+
+/// Reads stdout and stderr line by line as they arrive, until the process has exited and
+/// both pipes are closed, or [`DRAIN_AFTER_EXIT`] after the exit. Bytes that are not
+/// UTF-8 are replaced, never an error: a read error must not abandon a running dpkg.
 async fn stream(cmd: &Cmd, on_line: LineSink<'_>) -> Result<CmdOutput, RunError> {
     let mut child = spawn(cmd)?;
-    let mut stdout = BufReader::new(child.stdout.take().expect("piped stdout")).lines();
-    let mut stderr = BufReader::new(child.stderr.take().expect("piped stderr")).lines();
+    let mut stdout = Lines::new(child.stdout.take().expect("piped stdout"));
+    let mut stderr = Lines::new(child.stderr.take().expect("piped stderr"));
     let (mut out, mut err) = (String::new(), String::new());
-    let (mut out_open, mut err_open) = (true, true);
-    while out_open || err_open {
+    let mut exited: Option<std::process::ExitStatus> = None;
+    let drain = tokio::time::sleep(Duration::MAX);
+    tokio::pin!(drain);
+    loop {
+        if exited.is_some() && !stdout.open && !stderr.open {
+            break;
+        }
         tokio::select! {
-            line = stdout.next_line(), if out_open => match line? {
-                Some(l) => {
-                    on_line(Stream::Stdout, &l);
-                    out.push_str(&l);
-                    out.push('\n');
-                }
-                None => out_open = false,
+            line = stdout.next(), if stdout.open => if let Some(l) = line {
+                on_line(Stream::Stdout, &l);
+                out.push_str(&l);
+                out.push('\n');
             },
-            line = stderr.next_line(), if err_open => match line? {
-                Some(l) => {
-                    on_line(Stream::Stderr, &l);
-                    err.push_str(&l);
-                    err.push('\n');
-                }
-                None => err_open = false,
+            line = stderr.next(), if stderr.open => if let Some(l) = line {
+                on_line(Stream::Stderr, &l);
+                err.push_str(&l);
+                err.push('\n');
             },
+            status = child.wait(), if exited.is_none() => {
+                exited = Some(status?);
+                drain.as_mut().reset(tokio::time::Instant::now() + DRAIN_AFTER_EXIT);
+            },
+            () = &mut drain, if exited.is_some() => break,
         }
     }
-    let status = child.wait().await?.code().unwrap_or(-1);
+    let status = exited.and_then(|s| s.code()).unwrap_or(-1);
     Ok(CmdOutput {
         status,
         stdout: out,
         stderr: err,
     })
+}
+
+/// Lines from a pipe, with invalid UTF-8 replaced. `next` is cancel-safe: a partly read
+/// line stays in the buffer for the next call.
+struct Lines<R> {
+    reader: BufReader<R>,
+    buf: Vec<u8>,
+    open: bool,
+}
+
+impl<R: AsyncRead + Unpin> Lines<R> {
+    fn new(reader: R) -> Self {
+        Self {
+            reader: BufReader::new(reader),
+            buf: Vec::new(),
+            open: true,
+        }
+    }
+
+    /// The next line, or `None` (and `open` false) at end of file or on a read error.
+    async fn next(&mut self) -> Option<String> {
+        match self.reader.read_until(b'\n', &mut self.buf).await {
+            Ok(0) | Err(_) => {
+                self.open = false;
+                // A last line without a newline.
+                (!self.buf.is_empty()).then(|| self.take())
+            }
+            Ok(_) => Some(self.take()),
+        }
+    }
+
+    fn take(&mut self) -> String {
+        let mut line = String::from_utf8_lossy(&self.buf).into_owned();
+        self.buf.clear();
+        while line.ends_with(['\n', '\r']) {
+            line.pop();
+        }
+        line
+    }
 }
 
 /// Replays recorded output. Panics on any command it was not given, so a test also
@@ -457,7 +522,7 @@ mod tests {
         let lines = Mutex::new(Vec::new());
         let cmd = Cmd::new("sh", ["-c", r#"echo one; echo two >&2; echo "$PATCHD_X""#])
             .env("PATCHD_X", "three")
-            .own_process_group();
+            .protected();
         let out = SystemRunner
             .run_streaming(&cmd, &|s, l| lines.lock().unwrap().push((s, l.to_owned())))
             .await
@@ -489,6 +554,53 @@ mod tests {
             .await
             .unwrap_err();
         assert!(matches!(err, RunError::Timeout { .. }), "{err:?}");
+    }
+
+    /// Latin-1 from a maintainer script must not end the read loop.
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn streaming_survives_invalid_utf8() {
+        let cmd = Cmd::new("sh", ["-c", r"printf 'caf\351\nnext\n'"]);
+        let out = SystemRunner.run_streaming(&cmd, &|_, _| {}).await.unwrap();
+        assert_eq!(out.stdout, "caf\u{fffd}\nnext\n");
+    }
+
+    /// A daemon that inherits stdout keeps the pipe open after the command exits.
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn streaming_returns_after_exit_even_if_the_pipe_stays_open() {
+        let started = Instant::now();
+        let cmd = Cmd::new("sh", ["-c", "echo started; sleep 30 & exit 0"])
+            .timeout(Duration::from_secs(20));
+        let out = SystemRunner.run_streaming(&cmd, &|_, _| {}).await.unwrap();
+        assert_eq!(out.stdout, "started\n");
+        assert!(
+            started.elapsed() < DRAIN_AFTER_EXIT + Duration::from_secs(3),
+            "{:?}",
+            started.elapsed()
+        );
+    }
+
+    /// A protected command is waited for past its timeout, never killed.
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn protected_command_outlives_its_timeout() {
+        let lines = Mutex::new(Vec::new());
+        let cmd = Cmd::new("sh", ["-c", "sleep 1; echo done"])
+            .timeout(Duration::from_millis(200))
+            .protected();
+        let out = SystemRunner
+            .run_streaming(&cmd, &|_, l| lines.lock().unwrap().push(l.to_owned()))
+            .await
+            .unwrap();
+        assert_eq!(out.stdout, "done\n");
+        assert!(
+            lines
+                .into_inner()
+                .unwrap()
+                .iter()
+                .any(|l| l.contains("still running"))
+        );
     }
 
     #[tokio::test]

@@ -165,6 +165,8 @@ pub(super) struct Transaction {
     /// Installs, upgrades, downgrades and reinstalls, with `from_version: None` for a
     /// package that is not installed yet.
     pub changes: Vec<TxPackage>,
+    /// Packages removed for good. An install-only package (kernels) replaced by a newer
+    /// copy of itself, as `installonly_limit` does on every kernel update, is not one.
     pub removals: Vec<String>,
 }
 
@@ -260,5 +262,12 @@ pub(super) fn parse_transaction(out: &str) -> Transaction {
             Section::Other => {}
         }
     }
+    let rotated: Vec<String> = tx
+        .changes
+        .iter()
+        .filter(|p| p.new)
+        .map(|p| p.name.clone())
+        .collect();
+    tx.removals.retain(|name| !rotated.contains(name));
     tx
 }

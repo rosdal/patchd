@@ -175,9 +175,11 @@ fn exit_code(outcome: &Outcome) -> u8 {
         RunResult::Success => EXIT_OK,
         RunResult::SuccessRebootRequired => EXIT_REBOOT_REQUIRED,
         RunResult::AbortedPreflight => EXIT_PREFLIGHT,
-        RunResult::Partial | RunResult::Failed | RunResult::Interrupted | RunResult::Crashed => {
-            EXIT_FAILED
-        }
+        RunResult::Partial
+        | RunResult::Failed
+        | RunResult::Interrupted
+        | RunResult::Crashed
+        | RunResult::Running => EXIT_FAILED,
     }
 }
 

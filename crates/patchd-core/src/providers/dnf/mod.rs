@@ -175,7 +175,7 @@ fn install_cmd(updates: &[Update]) -> Cmd {
             .chain(nevras(updates)),
     )
     .timeout(INSTALL_TIMEOUT)
-    .own_process_group()
+    .protected()
 }
 
 /// `rpm -q` exits with the number of packages that are not installed.
@@ -190,9 +190,22 @@ fn verify_cmd(updates: &[Update]) -> Cmd {
             )
         })
         .collect();
-    Cmd::new("rpm", std::iter::once("-q".to_owned()).chain(all))
-        .ok_codes(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    Cmd::new("rpm", std::iter::once("-q".to_owned()).chain(all)).ok_codes(&ANY_EXIT_CODE)
 }
+
+/// rpm -q exits with the number of missing packages, so any count is an answer.
+const ANY_EXIT_CODE: [i32; 256] = {
+    let mut codes = [0; 256];
+    let mut i = 0;
+    while i < codes.len() {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)] // i < 256
+        {
+            codes[i] = i as i32;
+        }
+        i += 1;
+    }
+    codes
+};
 
 fn needs_restarting_cmd() -> Cmd {
     // Exit 1 means a reboot is needed; dnf4 needs dnf-plugins-core for it.
@@ -447,13 +460,13 @@ impl Provider for DnfProvider {
             audit: Vec::new(),
         });
 
-        if ctx.is_interrupted() {
+        let interrupted = ctx.is_interrupted();
+        if interrupted {
             report.result = RunResult::Interrupted;
             report.message = Some("interrupted; the install was allowed to finish".to_owned());
-        } else if install_error.is_some()
-            || !report.failed.is_empty()
-            || !scriptlet_errors.is_empty()
-        {
+        }
+        // A failed install outranks the interruption: it is what needs attention.
+        if install_error.is_some() || !report.failed.is_empty() || !scriptlet_errors.is_empty() {
             report.result = RunResult::Partial;
             let mut why = Vec::new();
             if let Some(e) = install_error {
@@ -472,6 +485,9 @@ impl Provider for DnfProvider {
                         .collect::<Vec<_>>()
                         .join(", ")
                 ));
+            }
+            if interrupted {
+                why.push("then interrupted".to_owned());
             }
             report.message = Some(why.join("; "));
         }

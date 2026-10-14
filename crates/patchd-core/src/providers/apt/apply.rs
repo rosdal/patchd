@@ -149,7 +149,8 @@ pub(super) fn check_simulation(
         ..SimCheck::default()
     };
     for inst in &sim.updates {
-        let plan_entry = planned.iter().find(|u| same_package(&u.name, &inst.name));
+        // apt spells names the same way in every simulation, so they compare exactly.
+        let plan_entry = planned.iter().find(|u| u.name == inst.name);
         match plan_entry {
             Some(p) if versions_equal(&p.to_version, &inst.to_version) => {}
             Some(p) => check.mismatches.push(format!(
@@ -170,7 +171,7 @@ pub(super) fn check_simulation(
         }
     }
     for p in planned {
-        if !sim.updates.iter().any(|i| same_package(&p.name, &i.name)) {
+        if !sim.updates.iter().any(|i| i.name == p.name) {
             check.mismatches.push(format!(
                 "{} {} is planned, but the install would not change it",
                 p.name, p.to_version
@@ -180,15 +181,16 @@ pub(super) fn check_simulation(
     check
 }
 
-/// `libc6` and `libc6:amd64` are the same package on an amd64 host; apt drops the native
-/// suffix in some places and dpkg-query adds it in others.
-fn same_package(a: &str, b: &str) -> bool {
-    a == b
-        || match (a.split_once(':'), b.split_once(':')) {
-            (Some((a, _)), None) => a == b,
-            (None, Some((b, _))) => a == b,
-            _ => false,
-        }
+/// Whether a `dpkg-query` row name is this update's package. `${binary:Package}` adds
+/// the architecture to Multi-Arch: same packages (`libc6:amd64`) where apt leaves the
+/// native one bare, so `libc6` planned for amd64 is `libc6` or `libc6:amd64`, never
+/// `libc6:i386`.
+fn installed_as(u: &Update, row: &str) -> bool {
+    row == u.name
+        || (!u.name.contains(':')
+            && u.arch
+                .as_deref()
+                .is_some_and(|arch| row == format!("{}:{arch}", u.name)))
 }
 
 fn versions_equal(a: &str, b: &str) -> bool {
@@ -283,7 +285,7 @@ async fn dpkg_health(runner: &dyn Runner, ctx: &ApplyCtx<'_>) -> Check {
             .env("DEBIAN_FRONTEND", "noninteractive")
             .env("UCF_FORCE_CONFFOLD", "1")
             .env("NEEDRESTART_SUSPEND", "1")
-            .own_process_group()
+            .protected()
             .timeout(REPAIR_TIMEOUT);
             let repaired = step(events, runner, "dpkg-repair", &repair).await.is_ok();
             let after = step(events, runner, "dpkg-audit", &audit_cmd()).await;
@@ -368,7 +370,7 @@ pub(super) async fn apply(
 
     // Pass 3: the real thing. In its own process group, so a signal to patchd never
     // reaches dpkg; SIGTERM only sets the interrupted flag.
-    let mut install = apt_get(args).timeout(INSTALL_TIMEOUT).own_process_group();
+    let mut install = apt_get(args).timeout(INSTALL_TIMEOUT).protected();
     if ctx.inhibit {
         install = inhibited(install);
     }
@@ -408,9 +410,7 @@ pub(super) async fn apply(
                     to: u.to_version.clone(),
                 };
                 let ok = installed.iter().any(|(n, v, st)| {
-                    same_package(&u.name, n)
-                        && st.starts_with("ii")
-                        && versions_equal(v, &u.to_version)
+                    installed_as(u, n) && st.starts_with("ii") && versions_equal(v, &u.to_version)
                 });
                 if ok {
                     report.installed.push(change);
@@ -445,20 +445,22 @@ pub(super) async fn apply(
         audit: audit.clone(),
     });
     report.failed = missed;
+    let interrupted = ctx.is_interrupted();
 
-    if ctx.is_interrupted() {
+    // Cleanup: old .debs only. No autoremove in v0.3. Skipped once interrupted.
+    if !interrupted {
+        if let Err(e) = step(events, runner, "autoclean", &apt_get(["autoclean"])).await {
+            report
+                .warnings
+                .push(format!("apt-get autoclean failed: {}", e.brief()));
+        }
+    }
+
+    if interrupted {
         report.result = RunResult::Interrupted;
         report.message = Some("interrupted; the install was allowed to finish".to_owned());
-        return report;
     }
-
-    // Cleanup: old .debs only. No autoremove in v0.3.
-    if let Err(e) = step(events, runner, "autoclean", &apt_get(["autoclean"])).await {
-        report
-            .warnings
-            .push(format!("apt-get autoclean failed: {}", e.brief()));
-    }
-
+    // A failed install outranks the interruption: it is what needs attention.
     if !verified || install_error.is_some() {
         report.result = RunResult::Partial;
         let mut why = Vec::new();
@@ -478,6 +480,9 @@ pub(super) async fn apply(
         }
         if !audit.is_empty() {
             why.push(format!("dpkg --audit: {}", summarize(&audit)));
+        }
+        if interrupted {
+            why.push("then interrupted".to_owned());
         }
         report.message = Some(why.join("; "));
     }

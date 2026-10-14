@@ -422,6 +422,16 @@ pub fn history(dir: &Path, limit: usize) -> io::Result<Vec<RunSummary>> {
         .collect())
 }
 
+/// Marks the newest run `running` instead of `crashed` when a run holds the lock: its log
+/// lacks `run_finished` because it has not finished yet.
+pub fn mark_running(runs: &mut [RunSummary], lock_held: bool) {
+    if let Some(newest) = runs.first_mut() {
+        if lock_held && newest.result == RunResult::Crashed {
+            newest.result = RunResult::Running;
+        }
+    }
+}
+
 /// The log file of the run whose ID starts with `prefix`.
 ///
 /// # Errors
@@ -532,6 +542,13 @@ mod tests {
         let runs = history(dir.path(), 20).unwrap();
         assert_eq!(runs[0].result, RunResult::Crashed);
         assert_eq!(runs[0].duration_ms, None);
+
+        let mut live = runs.clone();
+        mark_running(&mut live, true);
+        assert_eq!(live[0].result, RunResult::Running);
+        let mut done = runs;
+        mark_running(&mut done, false);
+        assert_eq!(done[0].result, RunResult::Crashed);
     }
 
     #[cfg(unix)]

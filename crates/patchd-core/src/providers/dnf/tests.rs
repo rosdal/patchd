@@ -141,6 +141,30 @@ Install  1 Package
     assert_eq!(tx.removals, ["old-thing", "old-dependent"]);
 }
 
+/// With `installonly_limit` reached, dnf removes the oldest kernel as it installs the
+/// new one. That is a rotation, not a removal `allow_removals` should refuse.
+#[test]
+fn kernel_rotation_is_not_a_removal() {
+    let out = "\
+Dependencies resolved.
+================================================================================
+ Package               Arch      Version                 Repository       Size
+================================================================================
+Installing:
+ kernel                x86_64    6.12.0-55.el10          baseos          1.1 M
+ kernel-core           x86_64    6.12.0-55.el10          baseos           18 M
+Removing:
+ kernel                x86_64    6.12.0-40.el10          @baseos           0
+ kernel-core           x86_64    6.12.0-40.el10          @baseos          66 M
+ unrelated             noarch    1.0-1.el10              @baseos          10 k
+
+Transaction Summary
+";
+    let tx = parse::parse_transaction(out);
+    assert_eq!(tx.changes.len(), 2);
+    assert_eq!(tx.removals, ["unrelated"]);
+}
+
 #[test]
 fn nevra_spelling() {
     assert_eq!(

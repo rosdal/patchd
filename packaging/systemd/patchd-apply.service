@@ -17,9 +17,10 @@ IOSchedulingClass=best-effort
 IOSchedulingPriority=7
 TimeoutStartSec=2h
 # On stop: SIGTERM to patchd only; it lets dpkg finish (dpkg runs in its own process
-# group), then exits. Whatever is left after TimeoutStopSec gets SIGKILL.
+# group), then exits. Whatever is left after TimeoutStopSec gets SIGKILL, dpkg included,
+# so it matches TimeoutStartSec: a stop never cuts short an install a start would allow.
 KillMode=mixed
-TimeoutStopSec=30min
+TimeoutStopSec=2h
 # /var/log/patchd for the run logs, /run/patchd for the run lock.
 LogsDirectory=patchd
 LogsDirectoryMode=0750

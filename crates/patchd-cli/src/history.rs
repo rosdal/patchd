@@ -5,6 +5,7 @@ use std::path::Path;
 
 use clap::Args;
 use comfy_table::{Cell, ContentArrangement, Table, presets};
+use patchd_core::lock;
 use patchd_core::root::Root;
 use patchd_core::runlog::{self, Event, Record, RunSummary};
 
@@ -37,7 +38,12 @@ pub fn run(args: &HistoryArgs) -> u8 {
     let dir = runlog::runs_dir(&root);
     let result = match &args.run_id {
         Some(id) => detail(&dir, id, args.json),
-        None => list(&dir, args.limit, args.json),
+        None => list(
+            &dir,
+            args.limit,
+            args.json,
+            lock::is_held(&lock::lock_path(&root)),
+        ),
     };
     match result {
         Ok(text) => {
@@ -62,8 +68,9 @@ fn access_hint(dir: &Path, e: &std::io::Error) -> String {
     }
 }
 
-fn list(dir: &Path, limit: usize, json: bool) -> Result<String, String> {
-    let runs = runlog::history(dir, limit).map_err(|e| access_hint(dir, &e))?;
+fn list(dir: &Path, limit: usize, json: bool, running: bool) -> Result<String, String> {
+    let mut runs = runlog::history(dir, limit).map_err(|e| access_hint(dir, &e))?;
+    runlog::mark_running(&mut runs, running);
     if json {
         return Ok(format!(
             "{}\n",

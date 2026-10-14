@@ -47,6 +47,9 @@ pub enum RunResult {
     /// Never written. `patchd history` reports it for a log that ends without
     /// `run_finished`.
     Crashed,
+    /// Never written. `patchd history` and `status` report it for the newest log while a
+    /// run holds the lock, instead of `crashed`.
+    Running,
 }
 
 impl RunResult {
@@ -60,6 +63,7 @@ impl RunResult {
             Self::AbortedPreflight => "aborted_preflight",
             Self::Interrupted => "interrupted",
             Self::Crashed => "crashed",
+            Self::Running => "running",
         }
     }
 
@@ -72,7 +76,7 @@ impl RunResult {
     #[must_use]
     pub fn worst(self, other: Self) -> Self {
         let rank = |r: Self| match r {
-            Self::Success | Self::SuccessRebootRequired => 0,
+            Self::Success | Self::SuccessRebootRequired | Self::Running => 0,
             Self::Interrupted => 1,
             Self::Partial => 2,
             Self::Failed => 3,

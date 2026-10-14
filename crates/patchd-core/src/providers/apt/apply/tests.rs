@@ -168,11 +168,22 @@ fn excluded_new_dependency_is_a_mismatch() {
 }
 
 #[test]
-fn native_arch_suffix_is_the_same_package() {
-    assert!(same_package("libc6", "libc6:amd64"));
-    assert!(same_package("libc6:amd64", "libc6"));
-    assert!(!same_package("libc6:i386", "libc6:amd64"));
-    assert!(!same_package("libc6", "libc6-dev"));
+fn verify_matches_the_right_architecture() {
+    let native = update("libc6", Some("1"), "2", UpdateKind::Minor);
+    let foreign = Update {
+        name: "libc6:i386".to_owned(),
+        arch: Some("i386".to_owned()),
+        ..native.clone()
+    };
+    assert!(installed_as(&native, "libc6"));
+    assert!(installed_as(&native, "libc6:amd64"));
+    assert!(
+        !installed_as(&native, "libc6:i386"),
+        "a foreign copy is not the native one"
+    );
+    assert!(!installed_as(&native, "libc6-dev"));
+    assert!(installed_as(&foreign, "libc6:i386"));
+    assert!(!installed_as(&foreign, "libc6"));
 }
 
 /// A runner that records every apply command for a pinned two-package plan.
@@ -396,7 +407,7 @@ impl Runner for InterruptDuring<'_> {
 async fn sigterm_during_install_lets_it_finish() {
     let p = security_plan();
     let h = Harness::new();
-    let install = apt_get(install_args(Mode::Pinned, &p.updates)).own_process_group();
+    let install = apt_get(install_args(Mode::Pinned, &p.updates)).protected();
     let runner = InterruptDuring {
         inner: runner_for(&p, &[]),
         flag: &h.interrupted,
@@ -529,4 +540,29 @@ async fn empty_plan_still_audits_dpkg() {
     assert_eq!(checks.len(), 1);
     assert!(checks[0].failed());
     assert_eq!(runner.seen(), ["dpkg --audit"]);
+}
+
+/// A failed install is what needs attention, even when a SIGTERM also arrived.
+#[tokio::test]
+async fn failed_install_outranks_the_interruption() {
+    let p = security_plan();
+    let h = Harness::new();
+    let install = apt_get(install_args(Mode::Pinned, &p.updates)).protected();
+    let failed = CmdOutput {
+        status: 100,
+        stdout: String::new(),
+        stderr: "E: Sub-process /usr/bin/dpkg returned an error code (1)\n".into(),
+    };
+    let runner = InterruptDuring {
+        inner: runner_for(&p, &[(&install, failed)]),
+        flag: &h.interrupted,
+        during: install.command_line(),
+    };
+    let report = apply(&runner, &p, &h.ctx(Filter::Security)).await;
+    assert_eq!(report.result, RunResult::Partial);
+    let msg = report.message.unwrap();
+    assert!(
+        msg.contains("install failed") && msg.ends_with("then interrupted"),
+        "{msg}"
+    );
 }
