@@ -3,6 +3,7 @@ use std::{env, process::Command};
 fn main() {
     let sha = env::var("PATCHD_GIT_SHA")
         .ok()
+        .filter(|s| !s.trim().is_empty())
         .or_else(|| {
             Command::new("git")
                 .args(["rev-parse", "HEAD"])

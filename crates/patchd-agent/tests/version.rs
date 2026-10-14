@@ -14,6 +14,7 @@ fn prints_version() {
 #[test]
 fn exits_cleanly_without_arguments() {
     let out = Command::new(env!("CARGO_BIN_EXE_patchd-agent"))
+        .env_remove("RUST_LOG")
         .output()
         .unwrap();
     assert!(out.status.success());
