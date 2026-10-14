@@ -1,9 +1,10 @@
 //! The apt provider for Debian, Ubuntu and derivatives (ADR 0006).
 //!
-//! Read-only: everything comes from `dpkg-query` and `apt-get -s dist-upgrade`, which
-//! need neither root nor the dpkg lock. Only [`AptProvider::refresh`] writes, and only
-//! to the package lists.
+//! Scanning and planning are read-only: everything comes from `dpkg-query` and
+//! `apt-get -s`, which need neither root nor the dpkg lock. `refresh` writes the package
+//! lists; `apply` (in `apply.rs`) installs.
 
+mod apply;
 mod available;
 mod inventory;
 
@@ -15,9 +16,15 @@ use async_trait::async_trait;
 
 pub use available::classify;
 
+use crate::apply::{ApplyCtx, ApplyReport, step};
 use crate::host::HostInfo;
 use crate::model::{ProviderId, Update};
+use crate::plan::{Exclusions, Filter, ProviderPlan, select};
+use crate::preflight::Check;
 use crate::provider::{Available, Inventory, Provider, ProviderError};
+use crate::reboot::{self, RebootStatus};
+use crate::root::Root;
+use crate::runlog::EventSink;
 use crate::runner::{Cmd, CmdOutput, FixtureRunner, RESOLVE_TIMEOUT, Runner};
 
 /// Where `apt-get update` stores the package lists.
@@ -34,6 +41,7 @@ pub struct AptProvider {
     lists_dir: Option<PathBuf>,
     check_binaries: bool,
     ubuntu: bool,
+    root: Root,
 }
 
 impl AptProvider {
@@ -45,6 +53,7 @@ impl AptProvider {
             lists_dir: Some(PathBuf::from(LISTS_DIR)),
             check_binaries: true,
             ubuntu: false,
+            root: Root::system(),
         }
     }
 
@@ -69,20 +78,29 @@ impl AptProvider {
             lists_dir: None,
             check_binaries: false,
             ubuntu: false,
+            root: Root::system(),
         };
         Ok((provider, runner))
     }
 
-    /// Runs `apt-get update`. Needs root; the caller checks.
-    ///
-    /// # Errors
-    ///
-    /// When `apt-get update` fails or times out.
-    pub async fn refresh(&self) -> Result<(), ProviderError> {
-        self.runner
-            .run(&Cmd::new("apt-get", ["update", "-q"]).timeout(REFRESH_TIMEOUT))
-            .await?;
-        Ok(())
+    /// A provider that reads system files (`/run/reboot-required`, `/lib/modules`) under
+    /// `root` instead of `/`.
+    #[must_use]
+    pub fn with_root(mut self, root: Root) -> Self {
+        self.root = root;
+        self
+    }
+
+    /// A provider driven by an arbitrary runner, for tests.
+    #[must_use]
+    pub fn with_runner(runner: Arc<dyn Runner>) -> Self {
+        Self {
+            runner,
+            lists_dir: None,
+            check_binaries: false,
+            ubuntu: false,
+            root: Root::system(),
+        }
     }
 
     /// Held packages that have a newer candidate, as `held: true` updates, plus the
@@ -105,6 +123,16 @@ fn parse_held(stdout: &str) -> Vec<String> {
 
 fn dpkg_query_cmd() -> Cmd {
     Cmd::new("dpkg-query", ["-W", inventory::FORMAT])
+}
+
+/// `apt-get update`. Without `Error-Mode=any` a broken repository only warns, and the
+/// plan silently misses its updates.
+fn refresh_cmd() -> Cmd {
+    Cmd::new(
+        "apt-get",
+        ["update", "-q", "-o", "APT::Update::Error-Mode=any"],
+    )
+    .timeout(REFRESH_TIMEOUT)
 }
 
 fn simulate_cmd() -> Cmd {
@@ -220,6 +248,68 @@ impl Provider for AptProvider {
             index_age_secs,
             warnings,
         })
+    }
+
+    async fn refresh(&self, events: &dyn EventSink) -> Result<(), ProviderError> {
+        step(events, self.runner.as_ref(), "refresh", &refresh_cmd()).await?;
+        Ok(())
+    }
+
+    /// Under the security filter, or with anything excluded, the install names the
+    /// planned packages, so only a simulation of that command can say which new
+    /// packages it pulls in, and whether it needs anything outside the plan.
+    async fn plan(
+        &self,
+        filter: Filter,
+        exclude: &Exclusions,
+    ) -> Result<ProviderPlan, ProviderError> {
+        let available = self.available().await?;
+        let mut plan = select(self.id(), &available.updates, filter, exclude);
+        let mode = apply::Mode::for_plan(filter, &plan);
+        if mode == apply::Mode::DistUpgrade {
+            plan.removals = available.removals;
+            return Ok(plan);
+        }
+        plan.updates.retain(|u| u.from_version.is_some());
+        if plan.updates.is_empty() {
+            return Ok(plan);
+        }
+        let out = self
+            .runner
+            .run(&apply::simulate_install_cmd(mode, &plan.updates))
+            .await?;
+        let sim = available::parse_simulation(&out.stdout)?;
+        let check = apply::check_simulation(&sim, &plan.updates, exclude);
+        plan.updates.extend(check.new_deps);
+        plan.removals = check.removals;
+        for m in check.mismatches {
+            plan.warnings.push(format!("apply will abort: {m}"));
+        }
+        Ok(plan)
+    }
+
+    async fn preflight(&self, plan: &ProviderPlan, ctx: &ApplyCtx<'_>) -> Vec<Check> {
+        apply::preflight(self.runner.as_ref(), plan, ctx).await
+    }
+
+    async fn apply(
+        &self,
+        plan: &ProviderPlan,
+        ctx: &ApplyCtx<'_>,
+    ) -> Result<ApplyReport, ProviderError> {
+        let started = std::time::Instant::now();
+        let mut report = apply::apply(self.runner.as_ref(), plan, ctx).await;
+        report.duration_ms = u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX);
+        Ok(report)
+    }
+
+    /// `/run/reboot-required`, needrestart when installed, and the running kernel
+    /// against `/lib/modules`.
+    async fn reboot_required(&self) -> Result<RebootStatus, ProviderError> {
+        let mut status = reboot::reboot_required_file(&self.root);
+        status.merge(reboot::needrestart(&self.root, self.runner.as_ref()).await);
+        status.merge(reboot::kernel_check(&self.root));
+        Ok(status)
     }
 }
 

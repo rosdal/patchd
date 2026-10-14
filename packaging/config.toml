@@ -1,0 +1,21 @@
+# Patchd configuration. Every key is optional; defaults shown.
+# Reference: https://github.com/rosdal/patchd/blob/main/docs/config.md
+# Check a change with `patchd config check` before the next run.
+#
+# The schedule is not set here: it is the OnCalendar of patchd-apply.timer. Override it
+# per host with a drop-in, /etc/systemd/system/patchd-apply.timer.d/schedule.conf.
+
+[apply]
+filter = "security"          # "security" | "all"
+refresh = true               # apt-get update / dnf makecache first
+allow_removals = false       # abort if the transaction would remove packages
+repair = false               # run dpkg --configure -a when dpkg --audit fails
+exclude = []                 # globs, e.g. ["pve-kernel-*", "docker-ce*"]
+
+[reboot]
+mode = "never"               # "never" | "if-required"
+delay_minutes = 5
+
+[log]
+retention_days = 90
+level = "info"               # overridden by RUST_LOG

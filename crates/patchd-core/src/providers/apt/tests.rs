@@ -213,6 +213,7 @@ async fn failing_held_lookup_is_a_warning_not_an_error() {
         lists_dir: None,
         check_binaries: false,
         ubuntu: false,
+        root: Root::system(),
     };
     let report = provider_report(&provider).await;
     assert_eq!(report.error, None);

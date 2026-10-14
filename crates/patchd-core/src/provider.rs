@@ -2,8 +2,13 @@
 
 use async_trait::async_trait;
 
+use crate::apply::{ApplyCtx, ApplyReport};
 use crate::host::HostInfo;
 use crate::model::{Package, ProviderId, Update};
+use crate::plan::{Exclusions, Filter, ProviderPlan, select};
+use crate::preflight::Check;
+use crate::reboot::RebootStatus;
+use crate::runlog::EventSink;
 use crate::runner::RunError;
 
 #[async_trait]
@@ -18,6 +23,42 @@ pub trait Provider: Send + Sync {
 
     /// What can be updated.
     async fn available(&self) -> Result<Available, ProviderError>;
+
+    /// Refreshes the package lists. Needs root; the caller checks. Each command it runs
+    /// is logged to `events`.
+    async fn refresh(&self, _events: &dyn EventSink) -> Result<(), ProviderError> {
+        Ok(())
+    }
+
+    /// The available updates with the filter, holds and exclusions applied. Read-only:
+    /// `patchd plan` is this, without root.
+    async fn plan(
+        &self,
+        filter: Filter,
+        exclude: &Exclusions,
+    ) -> Result<ProviderPlan, ProviderError> {
+        let available = self.available().await?;
+        let mut plan = select(self.id(), &available.updates, filter, exclude);
+        plan.removals = available.removals;
+        Ok(plan)
+    }
+
+    /// Provider-specific pre-flight checks, run just before [`Provider::apply`]: package
+    /// database health and a simulation of the exact install. Nothing here may change
+    /// installed packages, except the repair the config explicitly allows.
+    async fn preflight(&self, _plan: &ProviderPlan, _ctx: &ApplyCtx<'_>) -> Vec<Check> {
+        Vec::new()
+    }
+
+    /// Downloads and installs exactly `plan`, then verifies the result.
+    async fn apply(
+        &self,
+        plan: &ProviderPlan,
+        ctx: &ApplyCtx<'_>,
+    ) -> Result<ApplyReport, ProviderError>;
+
+    /// Whether the host needs a reboot, and why.
+    async fn reboot_required(&self) -> Result<RebootStatus, ProviderError>;
 }
 
 /// The result of [`Provider::inventory`].

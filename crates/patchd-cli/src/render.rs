@@ -4,6 +4,7 @@ use std::fmt::Write as _;
 
 use comfy_table::{Attribute, Cell, Color, ContentArrangement, Table, presets};
 use patchd_core::model::{ScanReport, Update, UpdateKind};
+use patchd_core::plan::{Plan, SkipReason, SkippedUpdate};
 
 pub fn table(report: &ScanReport, packages: bool, color: bool) -> String {
     let mut out = String::new();
@@ -72,6 +73,66 @@ pub fn table(report: &ScanReport, packages: bool, color: bool) -> String {
         pending.len(),
         plural(pending.len(), "update", "updates"),
         plural(removals, "removal", "removals"),
+    );
+    out
+}
+
+/// The table for `patchd plan`: the same columns as `scan`, planned updates first, then
+/// what the plan skips, then the footer.
+pub fn plan_table(plan: &Plan, color: bool) -> String {
+    let mut out = String::new();
+    let _ = writeln!(out, "plan  {} · filter {}", plan.id, plan.filter);
+
+    let mut planned: Vec<&Update> = plan.updates().collect();
+    planned.sort_by(|a, b| rank(a).cmp(&rank(b)).then_with(|| a.name.cmp(&b.name)));
+    let skipped: Vec<&SkippedUpdate> = plan
+        .providers
+        .iter()
+        .flat_map(|p| &p.held_skipped)
+        .collect();
+    if !planned.is_empty() || !skipped.is_empty() {
+        let mut t = new_table(color, &["KIND", "PACKAGE", "FROM", "TO", "ORIGIN"]);
+        let rows = planned
+            .iter()
+            .map(|u| (label(u), *u))
+            .chain(skipped.iter().map(|s| (s.reason.as_str(), &s.update)));
+        for (label, u) in rows {
+            let mut kind = Cell::new(label);
+            if color {
+                kind = match label {
+                    "security" => kind.fg(Color::Red).add_attribute(Attribute::Bold),
+                    "major" => kind.fg(Color::Yellow),
+                    "held" | "excluded" => kind.add_attribute(Attribute::Dim),
+                    _ => kind,
+                };
+            }
+            t.add_row(vec![
+                kind,
+                Cell::new(&u.name),
+                Cell::new(u.from_version.as_deref().unwrap_or("—")),
+                Cell::new(&u.to_version),
+                Cell::new(origin(u)),
+            ]);
+        }
+        out.push('\n');
+        out.push_str(&trimmed(&t));
+    }
+
+    let count = |reason: SkipReason| skipped.iter().filter(|s| s.reason == reason).count();
+    let removals: usize = plan.providers.iter().map(|p| p.removals.len()).sum();
+    let mut footer = format!(
+        "will install {}, skip {} held",
+        planned.len(),
+        count(SkipReason::Held)
+    );
+    let excluded = count(SkipReason::Excluded);
+    if excluded > 0 {
+        let _ = write!(footer, ", skip {excluded} excluded");
+    }
+    let _ = writeln!(
+        out,
+        "\n{footer}, {removals} {}",
+        plural(removals, "removal", "removals")
     );
     out
 }
