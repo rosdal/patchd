@@ -211,9 +211,9 @@ mod tests {
 
     #[test]
     fn raspberry_pi_os_64_bit_reports_debian() {
-        let os = fixture("raspios-bookworm-arm64");
+        let os = fixture("raspios-trixie-arm64");
         assert_eq!(os.id, "debian");
-        assert_eq!(os.codename.as_deref(), Some("bookworm"));
+        assert_eq!(os.codename.as_deref(), Some("trixie"));
     }
 
     /// Proxmox VE ships Debian's os-release unchanged. That is expected: the apt

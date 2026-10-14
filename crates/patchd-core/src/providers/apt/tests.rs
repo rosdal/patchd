@@ -37,6 +37,7 @@ snapshot_fixture!(snapshot_debian_12, "debian-12");
 snapshot_fixture!(snapshot_debian_13, "debian-13");
 snapshot_fixture!(snapshot_debian_13_held, "debian-13-held");
 snapshot_fixture!(snapshot_edge_cases, "edge-cases");
+snapshot_fixture!(snapshot_raspios_trixie_arm64, "raspios-trixie-arm64");
 
 #[tokio::test]
 async fn every_distro_has_base_packages() {
@@ -46,6 +47,7 @@ async fn every_distro_has_base_packages() {
         "ubuntu-26.04",
         "debian-12",
         "debian-13",
+        "raspios-trixie-arm64",
     ] {
         let (report, seen) = report(dir).await;
         assert_eq!(report.error, None, "{dir}");
@@ -220,5 +222,26 @@ async fn failing_held_lookup_is_a_warning_not_an_error() {
         report.warnings[0].contains("could not check held packages"),
         "{:?}",
         report.warnings
+    );
+}
+
+#[tokio::test]
+async fn raspberry_pi_os() {
+    let (report, _) = report("raspios-trixie-arm64").await;
+    assert!(
+        report
+            .packages
+            .iter()
+            .all(|p| p.arch.as_deref() != Some("amd64"))
+    );
+    for name in ["raspi-config", "rpi-eeprom", "raspberrypi-sys-mods"] {
+        assert!(report.packages.iter().any(|p| p.name == name), "{name}");
+    }
+    assert!(!report.updates.is_empty());
+    assert!(
+        report
+            .updates
+            .iter()
+            .all(|u| u.kind == UpdateKind::Security)
     );
 }

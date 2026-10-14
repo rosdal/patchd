@@ -18,6 +18,7 @@ Each directory is one host, recorded with `scripts/capture-fixtures.sh` under `L
 | --- | --- |
 | `ubuntu-22.04`, `ubuntu-24.04`, `ubuntu-26.04`, `debian-12`, `debian-13` | Captured from the official container images |
 | `ubuntu-24.04-held`, `debian-13-held` | Captured from the images after `apt-mark hold` on a package with a pending update |
+| `raspios-trixie-arm64` | Captured from the official Raspberry Pi OS Lite arm64 image (2026-10-06), unpacked into an arm64 container |
 | `edge-cases` | Hand-written (Proxmox-shaped): a removal, a new kernel dependency, an epoch, a `:i386` copy, a held package, a backports major bump, a half-configured package |
 | `ubuntu-24.04-phased` | `ubuntu-24.04` plus a hand-written "deferred due to phasing" section |
 | `no-updates`, `broken` | Hand-written for the CLI exit-code tests (0 and 1) |
