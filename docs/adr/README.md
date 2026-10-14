@@ -41,3 +41,7 @@ The other options and why they lost.
 | [0005](0005-async-providers.md) | Async providers on tokio | Accepted |
 | [0006](0006-apt-get-dist-upgrade-simulation.md) | apt updates come from an `apt-get -s dist-upgrade` simulation | Accepted |
 | [0007](0007-agent-reported-schemas-rust-first.md) | Agent-reported schemas are generated from Rust types | Accepted |
+| [0008](0008-systemd-timer-before-daemon.md) | A systemd timer schedules runs until the agent needs its own scheduler | Accepted |
+| [0009](0009-apply-exactly-the-plan.md) | `apply` installs exactly the plan | Accepted |
+| [0010](0010-replace-unattended-upgrades.md) | Patchd replaces unattended-upgrades | Accepted |
+| [0011](0011-reboot-detect-dont-act.md) | Detect reboots, act only when asked | Accepted |
