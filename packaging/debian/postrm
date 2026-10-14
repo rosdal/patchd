@@ -1,0 +1,8 @@
+#!/bin/sh
+# cargo-deb appends the systemd handling below #DEBHELPER#.
+set -e
+# Run logs and the lock are data, not configuration: only a purge removes them.
+if [ "$1" = purge ]; then
+  rm -rf /var/log/patchd /run/patchd
+fi
+#DEBHELPER#

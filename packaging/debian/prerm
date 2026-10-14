@@ -1,0 +1,8 @@
+#!/bin/sh
+# On removal, not on upgrade: stop the timer, so no run starts after the binary is gone.
+# A run already in progress is left to finish.
+set -e
+if [ "$1" = remove ] && [ -d /run/systemd/system ]; then
+  systemctl stop patchd-apply.timer >/dev/null 2>&1 || true
+fi
+#DEBHELPER#
