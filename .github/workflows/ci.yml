@@ -124,7 +124,7 @@ jobs:
           bin/patchd scan --json > report.json
           code=$?
           echo "exit code $code"
-          [ "$code" -eq 0 ] || [ "$code" -ge 10 ]
+          case $code in 0|10|11) ;; *) exit 1 ;; esac
       - name: Compare with apt
         run: |
           ours=$(jq '[.providers[] | select(.id=="apt") | .updates[] | select(.from_version != null and (.held | not))] | length' report.json)
