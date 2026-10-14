@@ -111,6 +111,16 @@ fn quiet_prints_nothing() {
 }
 
 #[test]
+fn quiet_hides_errors_that_stop_the_scan() {
+    let out = scan("debian-12", &["--quiet", "--refresh"]);
+    assert_eq!(out.status.code(), Some(1));
+    assert!(out.stdout.is_empty());
+    assert!(out.stderr.is_empty());
+    let loud = scan("debian-12", &["--refresh"]);
+    assert!(!loud.stderr.is_empty());
+}
+
+#[test]
 fn exit_codes() {
     let cases = [
         ("no-updates", 0),

@@ -103,27 +103,22 @@ fn init_logging(verbose: u8) {
 async fn scan(args: &ScanArgs) -> u8 {
     let (host, apt, in_container) = match setup(args) {
         Ok(setup) => setup,
-        Err(msg) => {
-            eprintln!("error: {msg}");
-            return EXIT_PROVIDER_FAILED;
-        }
+        Err(msg) => return fail(args, &msg),
     };
 
     if args.refresh {
         if in_fixture_mode(args) {
-            eprintln!("error: --refresh cannot be replayed from fixtures");
-            return EXIT_PROVIDER_FAILED;
+            return fail(args, "--refresh cannot be replayed from fixtures");
         }
         if !host::is_root() {
-            eprintln!(
-                "error: --refresh runs `apt-get update`, which needs root; run `sudo patchd scan --refresh`"
+            return fail(
+                args,
+                "--refresh runs `apt-get update`, which needs root; run `sudo patchd scan --refresh`",
             );
-            return EXIT_PROVIDER_FAILED;
         }
         if apt.detect(&host).await {
             if let Err(e) = apt.refresh().await {
-                eprintln!("error: refreshing package lists failed: {e}");
-                return EXIT_PROVIDER_FAILED;
+                return fail(args, &format!("refreshing package lists failed: {e}"));
             }
         }
     }
@@ -159,6 +154,14 @@ async fn scan(args: &ScanArgs) -> u8 {
         }
     }
     code
+}
+
+/// Reports an error that stops the scan; `--quiet` means nothing is printed, ever.
+fn fail(args: &ScanArgs, msg: &str) -> u8 {
+    if !args.quiet {
+        eprintln!("error: {msg}");
+    }
+    EXIT_PROVIDER_FAILED
 }
 
 /// The host, the apt provider, and whether we run in a container.
