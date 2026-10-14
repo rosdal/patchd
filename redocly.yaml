@@ -1,0 +1,6 @@
+extends:
+  - recommended
+
+rules:
+  # Patchd is self-hosted, so the server URL is per deployment and not part of the spec.
+  no-empty-servers: off

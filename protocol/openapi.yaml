@@ -1,0 +1,31 @@
+openapi: 3.1.0
+info:
+  title: Patchd agent protocol
+  version: 0.1.0
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Liveness check
+      security: []
+      responses:
+        "200":
+          description: Server is up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status, version]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        version:
+          type: string
