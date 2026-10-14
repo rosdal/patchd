@@ -1,6 +1,6 @@
 # 0004. Monorepo layout with a single protocol definition
 
-Status: Accepted · 2026-10-14
+Status: Accepted · 2026-10-14 · Amended by [0007](0007-agent-reported-schemas-rust-first.md): types the agent produces are generated from Rust
 
 ## Context
 

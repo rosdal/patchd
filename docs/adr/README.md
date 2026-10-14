@@ -37,4 +37,7 @@ The other options and why they lost.
 | [0001](0001-rust-agent-ts-server.md) | Rust for the agent, TypeScript for the server | Accepted |
 | [0002](0002-providers-wrap-native-tools.md) | Providers wrap native update tools | Accepted |
 | [0003](0003-licence.md) | Licence: Apache-2.0 agent, AGPL-3.0 server | Accepted |
-| [0004](0004-monorepo-layout.md) | Monorepo layout with a single protocol definition | Accepted |
+| [0004](0004-monorepo-layout.md) | Monorepo layout with a single protocol definition | Accepted, amended by 0007 |
+| [0005](0005-async-providers.md) | Async providers on tokio | Accepted |
+| [0006](0006-apt-get-dist-upgrade-simulation.md) | apt updates come from an `apt-get -s dist-upgrade` simulation | Accepted |
+| [0007](0007-agent-reported-schemas-rust-first.md) | Agent-reported schemas are generated from Rust types | Accepted |
