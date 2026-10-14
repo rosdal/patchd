@@ -107,10 +107,22 @@ pub fn lock_path(root: &Root) -> PathBuf {
     root.join(LOCK_PATH)
 }
 
-/// For tests and `status`: whether some process holds the lock right now.
+/// For tests: whether some process holds the lock right now. It takes the lock for an
+/// instant to find out, so never call it where a run could be starting; use [`holder`].
 #[must_use]
 pub fn is_held(path: &Path) -> bool {
     File::open(path).is_ok_and(|f| matches!(try_lock(&f), Ok(false)))
+}
+
+/// The run ID in the lock file, when the process that wrote it is still a running
+/// patchd. Reads only: it never touches the lock, so `status` cannot get in the way of
+/// a run that is starting. The file outlives its holder, hence the process check.
+#[must_use]
+pub fn holder(root: &Root) -> Option<String> {
+    let text = std::fs::read_to_string(lock_path(root)).ok()?;
+    let (pid, run_id) = parse_holder(&text);
+    let comm = std::fs::read_to_string(root.join(format!("/proc/{}/comm", pid?))).ok()?;
+    (comm.trim() == "patchd").then_some(run_id).flatten()
 }
 
 #[cfg(all(test, unix))]
@@ -140,6 +152,21 @@ mod tests {
         let _again = RunLock::acquire(&root, "run-3").unwrap();
         let text = std::fs::read_to_string(lock_path(&root)).unwrap();
         assert!(text.ends_with("\nrun-3\n"), "{text:?}");
+    }
+
+    #[test]
+    fn holder_needs_a_live_patchd_process() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = Root::at(dir.path());
+        assert_eq!(holder(&root), None);
+        std::fs::create_dir_all(root.join("/run/patchd")).unwrap();
+        std::fs::write(lock_path(&root), "4242\nrun-7\n").unwrap();
+        assert_eq!(holder(&root), None, "no such process");
+        std::fs::create_dir_all(root.join("/proc/4242")).unwrap();
+        std::fs::write(root.join("/proc/4242/comm"), "bash\n").unwrap();
+        assert_eq!(holder(&root), None, "the PID was reused by something else");
+        std::fs::write(root.join("/proc/4242/comm"), "patchd\n").unwrap();
+        assert_eq!(holder(&root).as_deref(), Some("run-7"));
     }
 
     #[test]

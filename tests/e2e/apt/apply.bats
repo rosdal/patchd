@@ -8,7 +8,6 @@
 # removed, so the order of the tests does not matter.
 
 PATCHD=${PATCHD:-patchd}
-# A hung prompt must fail the test, not the CI job.
 APPLY_TIMEOUT=300
 
 setup() {
@@ -39,8 +38,19 @@ install_v1() {
 }
 
 # apply [args…]: runs patchd apply with the test config; sets $status and $output.
+#
+# A hang must fail the test, not the CI job. `timeout` alone cannot do that: its SIGTERM
+# only asks patchd to stop, and patchd never kills a running install. So a watchdog
+# kills the package manager, and then patchd, once the time is up.
 apply() {
-  run timeout "$APPLY_TIMEOUT" "$PATCHD" --config "$config" apply --yes "$@"
+  (
+    sleep "$APPLY_TIMEOUT"
+    for p in apt-get dpkg; do pkill -KILL -x "$p"; done
+    pkill -KILL -x patchd
+  ) >/dev/null 2>&1 3>&- &
+  local watchdog=$!
+  run timeout -k 30 "$APPLY_TIMEOUT" "$PATCHD" --config "$config" apply --yes "$@"
+  kill "$watchdog" 2>/dev/null || true
 }
 
 version_of() {

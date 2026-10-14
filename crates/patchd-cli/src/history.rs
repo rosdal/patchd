@@ -37,13 +37,8 @@ pub fn run(args: &HistoryArgs) -> u8 {
     let root = args.root.clone().map_or_else(Root::system, Root::at);
     let dir = runlog::runs_dir(&root);
     let result = match &args.run_id {
-        Some(id) => detail(&dir, id, args.json),
-        None => list(
-            &dir,
-            args.limit,
-            args.json,
-            lock::is_held(&lock::lock_path(&root)),
-        ),
+        Some(id) => detail(&dir, id, args.json, lock::holder(&root).as_deref()),
+        None => list(&dir, args.limit, args.json, lock::holder(&root).as_deref()),
     };
     match result {
         Ok(text) => {
@@ -68,9 +63,9 @@ fn access_hint(dir: &Path, e: &std::io::Error) -> String {
     }
 }
 
-fn list(dir: &Path, limit: usize, json: bool, running: bool) -> Result<String, String> {
+fn list(dir: &Path, limit: usize, json: bool, holder: Option<&str>) -> Result<String, String> {
     let mut runs = runlog::history(dir, limit).map_err(|e| access_hint(dir, &e))?;
-    runlog::mark_running(&mut runs, running);
+    runlog::mark_running(&mut runs, holder);
     if json {
         return Ok(format!(
             "{}\n",
@@ -127,7 +122,7 @@ pub fn duration(ms: u64) -> String {
     }
 }
 
-fn detail(dir: &Path, id: &str, json: bool) -> Result<String, String> {
+fn detail(dir: &Path, id: &str, json: bool, holder: Option<&str>) -> Result<String, String> {
     let path = runlog::find_run(dir, id)
         .map_err(|e| access_hint(dir, &e))?
         .ok_or_else(|| format!("no run with an ID starting {id:?}"))?;
@@ -138,14 +133,20 @@ fn detail(dir: &Path, id: &str, json: bool) -> Result<String, String> {
             serde_json::to_string_pretty(&records).expect("serialize run")
         ));
     }
-    Ok(render_detail(&path, &records))
+    Ok(render_detail(&path, &records, holder))
 }
 
 /// One run, step by step, with the tail of each step's output.
 #[allow(clippy::too_many_lines)] // one arm per event type
-pub fn render_detail(path: &Path, records: &[Record]) -> String {
+pub fn render_detail(path: &Path, records: &[Record], holder: Option<&str>) -> String {
     let mut out = String::new();
-    if let Some(s) = runlog::summarize(path, records) {
+    let summary = runlog::summarize(path, records).map(|s| {
+        let mut one = [s];
+        runlog::mark_running(&mut one, holder);
+        let [s] = one;
+        s
+    });
+    if let Some(s) = summary {
         let _ = writeln!(out, "run      {}", s.run_id);
         let _ = writeln!(
             out,

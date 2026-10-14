@@ -35,8 +35,7 @@ pub async fn run(args: &StatusArgs) -> u8 {
     let root = Root::system();
     let (last_run, last_run_error) = match runlog::history(&runlog::runs_dir(&root), 1) {
         Ok(mut runs) => {
-            let held = patchd_core::lock::is_held(&patchd_core::lock::lock_path(&root));
-            runlog::mark_running(&mut runs, held);
+            runlog::mark_running(&mut runs, patchd_core::lock::holder(&root).as_deref());
             (runs.pop(), None)
         }
         Err(e) => (None, Some(e.to_string())),

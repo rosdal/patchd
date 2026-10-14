@@ -157,9 +157,15 @@ fn separate_fs(_path: &Path, _parent: &Path) -> bool {
     false
 }
 
-/// Warns when unattended-upgrades will also run: `APT::Periodic::Unattended-Upgrade`
-/// set to a non-zero value in `/etc/apt/apt.conf.d` (the last file to set it wins, as in
-/// apt), or `apt-daily-upgrade.timer` enabled. ADR 0010: warn, don't abort.
+/// Files in `apt.conf.d` that apt itself skips (`Dir::Ignore-Files-Silently`).
+const APT_IGNORED_SUFFIXES: [&str; 6] =
+    ["~", ".disabled", ".bak", ".save", ".orig", ".distUpgrade"];
+
+/// Warns when unattended-upgrades will also install updates (ADR 0010: warn, don't
+/// abort). That takes all three: the program installed, `apt-daily-upgrade.timer`
+/// enabled, and `APT::Periodic::Unattended-Upgrade` non-zero. The timer alone is not
+/// enough, because apt enables it on every install; with the setting at its default of
+/// `0` it installs nothing.
 #[must_use]
 pub fn unattended_upgrades_check(root: &Root) -> Option<Check> {
     let dir = root.join("/etc/apt/apt.conf.d");
@@ -167,48 +173,62 @@ pub fn unattended_upgrades_check(root: &Root) -> Option<Check> {
         // Not an apt system.
         return None;
     };
-    let mut files: Vec<_> = entries.filter_map(Result::ok).map(|e| e.path()).collect();
+    let mut files: Vec<_> = entries
+        .filter_map(Result::ok)
+        .map(|e| e.path())
+        .filter(|p| {
+            let name = p
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            !APT_IGNORED_SUFFIXES.iter().any(|s| name.ends_with(s))
+                && !name.contains(".dpkg-")
+                && !name.contains(".ucf-")
+        })
+        .collect();
     files.sort();
-    let mut setting = None;
-    for file in files {
-        if let Ok(text) = std::fs::read_to_string(&file) {
-            for line in text.lines() {
-                if let Some(v) = periodic_unattended(line) {
-                    setting = Some(v.to_owned());
-                }
-            }
-        }
-    }
+    // The last file to set it wins, as in apt.
+    let setting = files
+        .iter()
+        .filter_map(|f| std::fs::read_to_string(f).ok())
+        .filter_map(|text| periodic_unattended(&text))
+        .next_back();
+    let installed = root.join("/usr/bin/unattended-upgrade").is_file();
     let timer = root
         .join("/etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer")
         .exists();
-    let periodic = setting.is_some_and(|v| v != "0");
-    let mut why = Vec::new();
-    if periodic {
-        why.push("APT::Periodic::Unattended-Upgrade is enabled");
-    }
-    if timer {
-        why.push("apt-daily-upgrade.timer is enabled");
-    }
-    Some(if why.is_empty() {
-        Check::pass("unattended-upgrades", "not active")
-    } else {
+    let enabled = setting.as_deref().is_some_and(|v| v != "0");
+    Some(if installed && timer && enabled {
         Check::warn(
             "unattended-upgrades",
-            format!(
-                "{}; it competes with Patchd for the dpkg lock, so disable it (ADR 0010)",
-                why.join(" and ")
-            ),
+            "unattended-upgrades is installed and enabled (APT::Periodic::Unattended-Upgrade and apt-daily-upgrade.timer); it competes with Patchd for the dpkg lock, so disable it (ADR 0010)",
         )
+    } else {
+        Check::pass("unattended-upgrades", "not active")
     })
 }
 
-/// The value in `APT::Periodic::Unattended-Upgrade "1";`, ignoring `//` comments.
-fn periodic_unattended(line: &str) -> Option<&str> {
-    let line = line.split("//").next()?.trim();
-    let rest = line.strip_prefix("APT::Periodic::Unattended-Upgrade")?;
-    let value = rest.trim().strip_prefix('"')?;
-    value.split('"').next()
+/// The last value of `APT::Periodic::Unattended-Upgrade` in one apt.conf file, in
+/// either syntax: `APT::Periodic::Unattended-Upgrade "1";` or
+/// `APT::Periodic { Unattended-Upgrade "1"; };`.
+fn periodic_unattended(text: &str) -> Option<String> {
+    static FLAT: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r#"APT::Periodic::Unattended-Upgrade\s+"([^"]*)""#).unwrap()
+    });
+    static BLOCK: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r#"APT::Periodic\s*\{[^}]*?\bUnattended-Upgrade\s+"([^"]*)""#).unwrap()
+    });
+    let text: String = text
+        .lines()
+        .map(|l| l.split("//").next().unwrap_or(""))
+        .filter(|l| !l.trim_start().starts_with('#'))
+        .collect::<Vec<_>>()
+        .join("\n");
+    FLAT.captures_iter(&text)
+        .chain(BLOCK.captures_iter(&text))
+        .map(|c| (c.get(1).map_or(0, |m| m.start()), c[1].to_owned()))
+        .max_by_key(|(pos, _)| *pos)
+        .map(|(_, v)| v)
 }
 
 #[cfg(test)]
@@ -261,55 +281,85 @@ mod tests {
         let (_dir, root) = fake_root();
         assert_eq!(unattended_upgrades_check(&root), None, "no apt, no check");
 
+        // Stock Debian: the timer is enabled by apt, but nothing is installed.
         write(
             &root,
             "/etc/apt/apt.conf.d/10periodic",
             "APT::Periodic::Update-Package-Lists \"1\";\n",
         );
-        assert_eq!(
-            unattended_upgrades_check(&root).unwrap().status,
-            CheckStatus::Pass
-        );
-
-        write(
-            &root,
-            "/etc/apt/apt.conf.d/20auto-upgrades",
-            "APT::Periodic::Update-Package-Lists \"1\";\nAPT::Periodic::Unattended-Upgrade \"1\";\n",
-        );
-        let c = unattended_upgrades_check(&root).unwrap();
-        assert_eq!(c.status, CheckStatus::Warn);
-        assert!(c.detail.contains("Unattended-Upgrade"), "{}", c.detail);
-
-        // A later file turning it off wins, as in apt.
-        write(
-            &root,
-            "/etc/apt/apt.conf.d/99patchd",
-            "APT::Periodic::Unattended-Upgrade \"0\"; // off\n",
-        );
-        assert_eq!(
-            unattended_upgrades_check(&root).unwrap().status,
-            CheckStatus::Pass
-        );
-
         write(
             &root,
             "/etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer",
             "",
         );
-        let c = unattended_upgrades_check(&root).unwrap();
-        assert_eq!(c.status, CheckStatus::Warn);
-        assert!(c.detail.contains("apt-daily-upgrade.timer"), "{}", c.detail);
+        assert_eq!(
+            unattended_upgrades_check(&root).unwrap().status,
+            CheckStatus::Pass
+        );
+
+        write(&root, "/usr/bin/unattended-upgrade", "");
+        write(
+            &root,
+            "/etc/apt/apt.conf.d/20auto-upgrades",
+            "APT::Periodic::Unattended-Upgrade \"1\";\n",
+        );
+        assert_eq!(
+            unattended_upgrades_check(&root).unwrap().status,
+            CheckStatus::Warn
+        );
+
+        // A later file turning it off wins, as in apt; files apt ignores do not count.
+        write(
+            &root,
+            "/etc/apt/apt.conf.d/99patchd",
+            "APT::Periodic::Unattended-Upgrade \"0\"; // off\n",
+        );
+        write(
+            &root,
+            "/etc/apt/apt.conf.d/99zz.dpkg-old",
+            "APT::Periodic::Unattended-Upgrade \"1\";\n",
+        );
+        assert_eq!(
+            unattended_upgrades_check(&root).unwrap().status,
+            CheckStatus::Pass
+        );
+
+        // Disabling the timer is enough too.
+        std::fs::remove_file(root.join("/etc/apt/apt.conf.d/99patchd")).unwrap();
+        std::fs::remove_file(
+            root.join("/etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer"),
+        )
+        .unwrap();
+        assert_eq!(
+            unattended_upgrades_check(&root).unwrap().status,
+            CheckStatus::Pass
+        );
     }
 
     #[test]
-    fn commented_setting_is_ignored() {
+    fn periodic_setting_syntaxes() {
+        assert_eq!(
+            periodic_unattended("APT::Periodic::Unattended-Upgrade \"1\";").as_deref(),
+            Some("1")
+        );
         assert_eq!(
             periodic_unattended("// APT::Periodic::Unattended-Upgrade \"1\";"),
             None
         );
         assert_eq!(
-            periodic_unattended("APT::Periodic::Unattended-Upgrade \"1\";"),
+            periodic_unattended(
+                "APT::Periodic {\n  Update-Package-Lists \"1\";\n  Unattended-Upgrade \"1\";\n};"
+            )
+            .as_deref(),
             Some("1")
+        );
+        assert_eq!(
+            periodic_unattended(
+                "APT::Periodic::Unattended-Upgrade \"1\";\nAPT::Periodic::Unattended-Upgrade \"0\";"
+            )
+            .as_deref(),
+            Some("0"),
+            "the last one in a file wins"
         );
         assert_eq!(
             periodic_unattended("APT::Periodic::Unattended-Upgrade-Foo \"1\";"),

@@ -10,7 +10,7 @@ Debian and Ubuntu install `unattended-upgrades` by default on many images, trigg
 
 Patchd replaces unattended-upgrades on hosts where `patchd-apply.timer` is enabled; it never runs alongside it.
 
-- `patchd apply` detects it, through `APT::Periodic::Unattended-Upgrade "1"` in `/etc/apt/apt.conf.d/*` or an enabled `apt-daily-upgrade.timer`, and logs a warning. It does not abort: the run still works, because apt waits for the lock (`DPkg::Lock::Timeout=600`).
+- `patchd apply` detects it and logs a warning when all three hold: unattended-upgrades is installed, `apt-daily-upgrade.timer` is enabled, and `APT::Periodic::Unattended-Upgrade` is non-zero in `/etc/apt/apt.conf.d` (read as apt reads it: last setting wins, ignored file names skipped, both syntaxes). The timer alone is not enough: apt enables it everywhere, and with the setting at its default of `0` it installs nothing. The warning never aborts the run, which still works because apt waits for the lock (`DPkg::Lock::Timeout=600`).
 - The Ansible role disables `apt-daily-upgrade.timer` and sets `APT::Periodic::Unattended-Upgrade "0"`.
 - `apt-daily.timer`, which only refreshes package lists, stays enabled. It is harmless and keeps `patchd scan` fresh.
 

@@ -422,12 +422,13 @@ pub fn history(dir: &Path, limit: usize) -> io::Result<Vec<RunSummary>> {
         .collect())
 }
 
-/// Marks the newest run `running` instead of `crashed` when a run holds the lock: its log
-/// lacks `run_finished` because it has not finished yet.
-pub fn mark_running(runs: &mut [RunSummary], lock_held: bool) {
-    if let Some(newest) = runs.first_mut() {
-        if lock_held && newest.result == RunResult::Crashed {
-            newest.result = RunResult::Running;
+/// Marks a run `running` instead of `crashed` when it is the run holding the lock
+/// ([`crate::lock::holder`]): its log lacks `run_finished` because it has not finished.
+/// Matching the run ID matters: `scan --refresh` takes the same lock and writes no log.
+pub fn mark_running(runs: &mut [RunSummary], holder: Option<&str>) {
+    for run in runs {
+        if run.result == RunResult::Crashed && holder == Some(run.run_id.to_string().as_str()) {
+            run.result = RunResult::Running;
         }
     }
 }
@@ -543,11 +544,16 @@ mod tests {
         assert_eq!(runs[0].result, RunResult::Crashed);
         assert_eq!(runs[0].duration_ms, None);
 
+        let id = runs[0].run_id.to_string();
         let mut live = runs.clone();
-        mark_running(&mut live, true);
+        mark_running(&mut live, Some(&id));
         assert_eq!(live[0].result, RunResult::Running);
+        // Another holder, such as `scan --refresh`, says nothing about this run.
+        let mut other = runs.clone();
+        mark_running(&mut other, Some("scan --refresh"));
+        assert_eq!(other[0].result, RunResult::Crashed);
         let mut done = runs;
-        mark_running(&mut done, false);
+        mark_running(&mut done, None);
         assert_eq!(done[0].result, RunResult::Crashed);
     }
 

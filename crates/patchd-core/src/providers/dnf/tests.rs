@@ -157,12 +157,14 @@ Removing:
  kernel                x86_64    6.12.0-40.el10          @baseos           0
  kernel-core           x86_64    6.12.0-40.el10          @baseos          66 M
  unrelated             noarch    1.0-1.el10              @baseos          10 k
+ kernel-core           i686      6.12.0-40.el10          @baseos          60 M
 
 Transaction Summary
 ";
     let tx = parse::parse_transaction(out);
     assert_eq!(tx.changes.len(), 2);
-    assert_eq!(tx.removals, ["unrelated"]);
+    // A different arch is not the same package being rotated.
+    assert_eq!(tx.removals, ["unrelated", "kernel-core"]);
 }
 
 #[test]

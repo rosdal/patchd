@@ -207,6 +207,7 @@ fn section(header: &str) -> Section {
 /// onto its own line, with the other columns on the next.
 pub(super) fn parse_transaction(out: &str) -> Transaction {
     let mut tx = Transaction::default();
+    let mut removed: Vec<(String, String)> = Vec::new();
     let mut current = Section::Other;
     let mut wrapped: Option<String> = None;
     for line in out.lines() {
@@ -252,7 +253,7 @@ pub(super) fn parse_transaction(out: &str) -> Transaction {
             format!("0:{version}")
         };
         match current {
-            Section::Remove => tx.removals.push(name.to_owned()),
+            Section::Remove => removed.push((name.to_owned(), arch.to_owned())),
             Section::Upgrade | Section::Install => tx.changes.push(TxPackage {
                 name: name.to_owned(),
                 arch: arch.to_owned(),
@@ -262,12 +263,16 @@ pub(super) fn parse_transaction(out: &str) -> Transaction {
             Section::Other => {}
         }
     }
-    let rotated: Vec<String> = tx
-        .changes
-        .iter()
-        .filter(|p| p.new)
-        .map(|p| p.name.clone())
+    // Same name and arch removed and newly installed: an install-only package (a kernel)
+    // rotated out by installonly_limit. Anything else removed is a real removal.
+    tx.removals = removed
+        .into_iter()
+        .filter(|(name, arch)| {
+            !tx.changes
+                .iter()
+                .any(|p| p.new && p.name == *name && p.arch == *arch)
+        })
+        .map(|(name, _)| name)
         .collect();
-    tx.removals.retain(|name| !rotated.contains(name));
     tx
 }
