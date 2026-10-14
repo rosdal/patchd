@@ -38,8 +38,7 @@ workspace = true
 # architecture installs on every Debian, Ubuntu, Proxmox VE and Raspberry Pi OS release.
 [package.metadata.deb]
 name = "patchd"
-# TODO before the v0.3.0 release: the real maintainer address.
-maintainer = "Rosdal <security@rosdal.invalid>"
+maintainer = "Rosdal <214983662+m-de-graaff@users.noreply.github.com>"
 copyright = "Rosdal"
 license-file = ["../../LICENSE-APACHE", "0"]
 section = "admin"
