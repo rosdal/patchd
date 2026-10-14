@@ -573,6 +573,11 @@
           "description": "Never written. `patchd history` reports it for a log that ends without\n`run_finished`.",
           "type": "string",
           "const": "crashed"
+        },
+        {
+          "description": "Never written. `patchd history` and `status` report it for the newest log while a\nrun holds the lock, instead of `crashed`.",
+          "type": "string",
+          "const": "running"
         }
       ]
     },
