@@ -213,6 +213,9 @@ pub(super) async fn preflight(
     ctx: &ApplyCtx<'_>,
 ) -> Vec<Check> {
     let mut checks = vec![dpkg_health(runner, ctx).await];
+    if plan.updates.is_empty() {
+        return checks;
+    }
 
     // Pass 1: simulate the exact command.
     let mode = Mode::for_plan(ctx.filter, plan);

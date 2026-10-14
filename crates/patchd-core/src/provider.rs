@@ -44,8 +44,10 @@ pub trait Provider: Send + Sync {
     }
 
     /// Provider-specific pre-flight checks, run just before [`Provider::apply`]: package
-    /// database health and a simulation of the exact install. Nothing here may change
-    /// installed packages, except the repair the config explicitly allows.
+    /// database health and a simulation of the exact install. Runs even when the plan is
+    /// empty, so a broken package database never looks like a quiet success. Nothing
+    /// here may change installed packages, except the repair the config explicitly
+    /// allows.
     async fn preflight(&self, _plan: &ProviderPlan, _ctx: &ApplyCtx<'_>) -> Vec<Check> {
         Vec::new()
     }

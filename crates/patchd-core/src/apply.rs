@@ -339,11 +339,11 @@ pub async fn run(
             root,
             plan.updates().any(|u| touches_boot(&u.name)),
         ));
-        for (p, pp) in providers.iter().zip(&plan.providers) {
-            if !pp.updates.is_empty() {
-                checks.extend(p.preflight(pp, &ctx).await);
-            }
-        }
+    }
+    // Even with nothing to install: a half-configured package from last night must
+    // show up as a failed run, not as a quiet success.
+    for (p, pp) in providers.iter().zip(&plan.providers) {
+        checks.extend(p.preflight(pp, &ctx).await);
     }
     let failed: Vec<String> = checks
         .iter()

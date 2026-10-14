@@ -514,3 +514,19 @@ async fn security_plan_adds_new_dependencies_from_a_simulation() {
         .unwrap();
     assert_eq!(all.updates.len(), 4);
 }
+
+/// A half-configured package from last night must fail the run even when there is
+/// nothing new to install.
+#[tokio::test]
+async fn empty_plan_still_audits_dpkg() {
+    let p = plan(Vec::new());
+    let runner = FixtureRunner::new().with(
+        audit_cmd().command_line(),
+        CmdOutput::ok("The following packages are only half configured:\n pt-fail    dummy\n"),
+    );
+    let h = Harness::new();
+    let checks = preflight(&runner, &p, &h.ctx(Filter::All)).await;
+    assert_eq!(checks.len(), 1);
+    assert!(checks[0].failed());
+    assert_eq!(runner.seen(), ["dpkg --audit"]);
+}
