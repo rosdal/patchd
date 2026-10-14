@@ -150,6 +150,29 @@ pub enum RunError {
     Io(#[from] std::io::Error),
 }
 
+impl RunError {
+    /// One line for a run log message: a failed command's last stderr line, which is
+    /// where apt and dnf put the actual error. The full output is in the step log.
+    #[must_use]
+    pub fn brief(&self) -> String {
+        match self {
+            Self::Failed {
+                program,
+                code,
+                stderr,
+            } => {
+                let last = stderr
+                    .lines()
+                    .rev()
+                    .find(|l| !l.trim().is_empty())
+                    .unwrap_or("");
+                format!("{program} exited {code}: {last}")
+            }
+            other => other.to_string(),
+        }
+    }
+}
+
 /// Fails with [`RunError::Failed`] unless the exit code is one the caller expects.
 fn check_status(cmd: &Cmd, out: CmdOutput) -> Result<CmdOutput, RunError> {
     if cmd.ok_codes.contains(&out.status) {

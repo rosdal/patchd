@@ -221,19 +221,12 @@ pub async fn step(
 }
 
 fn result_error(result: &Result<CmdOutput, RunError>) -> String {
-    match result {
-        Ok(_) => String::new(),
-        // stderr is already in the step output; keep the summary to its last line.
-        Err(RunError::Failed {
-            program,
-            code,
-            stderr,
-        }) => {
-            let last = stderr.lines().last().unwrap_or("");
-            format!("{program} exited {code}: {last}")
-        }
-        Err(e) => e.to_string(),
-    }
+    // stderr is already in the step output.
+    result
+        .as_ref()
+        .err()
+        .map(RunError::brief)
+        .unwrap_or_default()
 }
 
 /// What `run` was asked to do.

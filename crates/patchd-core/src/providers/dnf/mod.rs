@@ -341,7 +341,7 @@ impl Provider for DnfProvider {
             Err(e) => {
                 checks.push(Check::fail(
                     "simulate",
-                    format!("the simulation failed: {e}"),
+                    format!("the simulation failed: {}", e.brief()),
                 ));
                 return checks;
             }
@@ -386,7 +386,7 @@ impl Provider for DnfProvider {
 
         if let Err(e) = step(events, runner, "download", &download_cmd(&plan.updates)).await {
             report.result = RunResult::Failed;
-            report.message = Some(format!("download failed, nothing installed: {e}"));
+            report.message = Some(format!("download failed, nothing installed: {}", e.brief()));
             return Ok(report);
         }
         if ctx.is_interrupted() {
@@ -398,7 +398,15 @@ impl Provider for DnfProvider {
         if ctx.inhibit {
             install = inhibited(install);
         }
-        let install_error = step(events, runner, "install", &install).await.err();
+        let install = step(events, runner, "install", &install).await;
+        // dnf4 treats a failed scriptlet as a warning and exits 0; dnf5 fails the
+        // transaction. Either way the package may not be set up, so it is not a success.
+        let scriptlet_errors = match &install {
+            Ok(out) => scriptlet_failures(&out.stdout, &out.stderr),
+            Err(crate::runner::RunError::Failed { stderr, .. }) => scriptlet_failures("", stderr),
+            Err(_) => Vec::new(),
+        };
+        let install_error = install.err();
 
         let missing: Vec<String> =
             match step(events, runner, "verify", &verify_cmd(&plan.updates)).await {
@@ -411,7 +419,7 @@ impl Provider for DnfProvider {
                     })
                     .map(str::to_owned)
                     .collect(),
-                Err(e) => vec![format!("rpm -q failed: {e}")],
+                Err(e) => vec![format!("rpm -q failed: {}", e.brief())],
             };
         for u in &plan.updates {
             let change = Change {
@@ -442,11 +450,17 @@ impl Provider for DnfProvider {
         if ctx.is_interrupted() {
             report.result = RunResult::Interrupted;
             report.message = Some("interrupted; the install was allowed to finish".to_owned());
-        } else if install_error.is_some() || !report.failed.is_empty() {
+        } else if install_error.is_some()
+            || !report.failed.is_empty()
+            || !scriptlet_errors.is_empty()
+        {
             report.result = RunResult::Partial;
             let mut why = Vec::new();
             if let Some(e) = install_error {
-                why.push(format!("install failed: {e}"));
+                why.push(format!("install failed: {}", e.brief()));
+            }
+            if !scriptlet_errors.is_empty() {
+                why.push(scriptlet_errors.join("; "));
             }
             if !report.failed.is_empty() {
                 why.push(format!(
@@ -484,6 +498,27 @@ impl Provider for DnfProvider {
             _ => Ok(reboot::kernel_check(&self.root)),
         }
     }
+}
+
+/// `%post(pt-fail-2-1.noarch) scriptlet failed, exit status 1`, from rpm in both dnf
+/// generations' output, deduplicated.
+fn scriptlet_failures(stdout: &str, stderr: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for line in stdout.lines().chain(stderr.lines()) {
+        // rpm: `%post(pt-fail-2-1.noarch) scriptlet failed, exit status 1`; dnf4 with
+        // `-q`: `Error in POSTIN scriptlet in rpm package pt-fail`.
+        let msg = match line.find('%') {
+            Some(i) if line.contains("scriptlet failed") => line[i..].trim(),
+            _ if line.starts_with("Error in ") && line.contains(" scriptlet in rpm package ") => {
+                line.trim()
+            }
+            _ => continue,
+        };
+        if !out.iter().any(|m| m == msg) {
+            out.push(msg.to_owned());
+        }
+    }
+    out
 }
 
 fn on_path(program: &str) -> bool {

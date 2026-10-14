@@ -295,3 +295,21 @@ async fn reboot_detection() {
         DnfProvider::with_runner(std::sync::Arc::new(missing)).with_root(Root::at("/nonexistent"));
     assert!(!p.reboot_required().await.unwrap().required);
 }
+
+#[test]
+fn scriptlet_failures_in_both_generations() {
+    // dnf4 with -q (AlmaLinux 10), which exits 0. Captured from the e2e pt-fail package.
+    let dnf4 =
+        "Error in POSTIN scriptlet in rpm package pt-fail\n\nUpgraded:\n  pt-fail-2-1.noarch\n";
+    assert_eq!(
+        scriptlet_failures(dnf4, ""),
+        ["Error in POSTIN scriptlet in rpm package pt-fail"]
+    );
+    // dnf5 (Fedora 44), which fails the transaction.
+    let dnf5 = ">>> [RPM] %post(pt-fail-2-1.noarch) scriptlet failed, exit status 1\n";
+    assert_eq!(
+        scriptlet_failures(dnf5, dnf5),
+        ["%post(pt-fail-2-1.noarch) scriptlet failed, exit status 1"]
+    );
+    assert!(scriptlet_failures("Upgrading pt-sec 100%", "").is_empty());
+}

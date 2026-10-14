@@ -221,7 +221,7 @@ pub(super) async fn preflight(
     let mode = Mode::for_plan(ctx.filter, plan);
     let cmd = simulate_install_cmd(mode, &plan.updates);
     let sim = match step(ctx.events, runner, "simulate", &cmd).await {
-        Err(e) => Err(format!("the simulation failed: {e}")),
+        Err(e) => Err(format!("the simulation failed: {}", e.brief())),
         Ok(out) => {
             parse_simulation(&out.stdout).map_err(|e| format!("cannot read the simulation: {e}"))
         }
@@ -305,7 +305,7 @@ async fn dpkg_health(runner: &dyn Runner, ctx: &ApplyCtx<'_>) -> Check {
                 summarize(&audit_problems(&out.stdout))
             ),
         ),
-        Err(e) => Check::fail("dpkg-audit", format!("dpkg --audit failed: {e}")),
+        Err(e) => Check::fail("dpkg-audit", format!("dpkg --audit failed: {}", e.brief())),
     }
 }
 
@@ -343,7 +343,7 @@ pub(super) async fn apply(
         {
             Ok(out) => Some(out.stdout.split_whitespace().map(str::to_owned).collect()),
             Err(e) => {
-                report.message = Some(format!("apt-mark showauto failed: {e}"));
+                report.message = Some(format!("apt-mark showauto failed: {}", e.brief()));
                 report.result = RunResult::Failed;
                 return report;
             }
@@ -357,7 +357,7 @@ pub(super) async fn apply(
         .timeout(DOWNLOAD_TIMEOUT);
     if let Err(e) = step(events, runner, "download", &download).await {
         report.result = RunResult::Failed;
-        report.message = Some(format!("download failed, nothing installed: {e}"));
+        report.message = Some(format!("download failed, nothing installed: {}", e.brief()));
         return report;
     }
     if ctx.is_interrupted() {
@@ -388,9 +388,10 @@ pub(super) async fn apply(
                 std::iter::once("auto".to_owned()).chain(restore),
             );
             if let Err(e) = step(events, runner, "apt-mark-auto", &cmd).await {
-                report
-                    .warnings
-                    .push(format!("restoring automatic-install marks failed: {e}"));
+                report.warnings.push(format!(
+                    "restoring automatic-install marks failed: {}",
+                    e.brief()
+                ));
             }
         }
     }
@@ -421,7 +422,7 @@ pub(super) async fn apply(
         Err(e) => {
             report
                 .warnings
-                .push(format!("verification query failed: {e}"));
+                .push(format!("verification query failed: {}", e.brief()));
             missed = plan
                 .updates
                 .iter()
@@ -435,7 +436,7 @@ pub(super) async fn apply(
     }
     let audit = match step(events, runner, "dpkg-audit", &audit_cmd()).await {
         Ok(out) => audit_problems(&out.stdout),
-        Err(e) => vec![format!("dpkg --audit failed: {e}")],
+        Err(e) => vec![format!("dpkg --audit failed: {}", e.brief())],
     };
     let verified = missed.is_empty() && audit.is_empty();
     events.emit(Event::Verify {
@@ -455,14 +456,14 @@ pub(super) async fn apply(
     if let Err(e) = step(events, runner, "autoclean", &apt_get(["autoclean"])).await {
         report
             .warnings
-            .push(format!("apt-get autoclean failed: {e}"));
+            .push(format!("apt-get autoclean failed: {}", e.brief()));
     }
 
     if !verified || install_error.is_some() {
         report.result = RunResult::Partial;
         let mut why = Vec::new();
         if let Some(e) = install_error {
-            why.push(format!("install failed: {e}"));
+            why.push(format!("install failed: {}", e.brief()));
         }
         if !report.failed.is_empty() {
             why.push(format!(
