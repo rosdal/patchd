@@ -145,7 +145,7 @@ impl Provider for AptProvider {
         let mut warnings = Vec::new();
         if !sim.removals.is_empty() {
             warnings.push(format!(
-                "dist-upgrade would remove {} package(s): {}; on Proxmox VE this usually means a broken repository setup",
+                "dist-upgrade would remove {} package(s): {}; check the repository setup before upgrading (on Proxmox VE this often means a missing or wrong repository)",
                 sim.removals.len(),
                 inventory::name_list(&sim.removals)
             ));

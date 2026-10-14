@@ -3,4 +3,4 @@ source: crates/patchd-cli/tests/scan.rs
 expression: "String::from_utf8(out.stderr).unwrap()"
 ---
 warning: apt: dpkg reports 1 package(s) half-installed or in an error state: pve-manager; fix with `dpkg --configure -a` before applying updates
-warning: apt: dist-upgrade would remove 1 package(s): pve-firmware-legacy; on Proxmox VE this usually means a broken repository setup
+warning: apt: dist-upgrade would remove 1 package(s): pve-firmware-legacy; check the repository setup before upgrading (on Proxmox VE this often means a missing or wrong repository)

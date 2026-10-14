@@ -208,7 +208,7 @@ expression: stable_json(&out)
       ],
       "warnings": [
         "dpkg reports 1 package(s) half-installed or in an error state: pve-manager; fix with `dpkg --configure -a` before applying updates",
-        "dist-upgrade would remove 1 package(s): pve-firmware-legacy; on Proxmox VE this usually means a broken repository setup"
+        "dist-upgrade would remove 1 package(s): pve-firmware-legacy; check the repository setup before upgrading (on Proxmox VE this often means a missing or wrong repository)"
       ]
     }
   ],
