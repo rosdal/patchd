@@ -13,3 +13,8 @@ indent_size = 4
 [*.{yml,yaml,json,md,toml}]
 indent_style = space
 indent_size = 2
+
+# Recorded tool output: dpkg-query lines end in a significant space.
+[crates/patchd-core/tests/fixtures/**]
+trim_trailing_whitespace = false
+insert_final_newline = unset

@@ -1,0 +1,573 @@
+---
+source: crates/patchd-core/src/providers/apt/tests.rs
+expression: report
+---
+{
+  "id": "apt",
+  "packages": [
+    {
+      "provider": "apt",
+      "name": "apt",
+      "version": "3.0.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "base-files",
+      "version": "13.8+deb13u7",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "base-passwd",
+      "version": "3.6.7",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "bash",
+      "version": "5.2.37-2+b10",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "bsdutils",
+      "version": "1:2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "coreutils",
+      "version": "9.7-3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "dash",
+      "version": "0.5.12-12",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "debconf",
+      "version": "1.5.91",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "debian-archive-keyring",
+      "version": "2025.1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "debianutils",
+      "version": "5.23.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "diffutils",
+      "version": "1:3.10-4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "dpkg",
+      "version": "1.22.22",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "findutils",
+      "version": "4.10.0-3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "gcc-14-base",
+      "version": "14.2.0-19",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "grep",
+      "version": "3.11-4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "gzip",
+      "version": "1.13-1+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "hostname",
+      "version": "3.25",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "init-system-helpers",
+      "version": "1.69~deb13u1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libacl1",
+      "version": "2.3.2-2+b1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libapt-pkg7.0",
+      "version": "3.0.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libattr1",
+      "version": "1:2.5.2-3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libaudit-common",
+      "version": "1:4.0.2-2+deb13u1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libaudit1",
+      "version": "1:4.0.2-2+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libblkid1",
+      "version": "2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libbsd0",
+      "version": "0.12.2-2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libbz2-1.0",
+      "version": "1.0.8-6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libc-bin",
+      "version": "2.41-12+deb13u4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libc6",
+      "version": "2.41-12+deb13u4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libcap-ng0",
+      "version": "0.8.5-4+b1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libcap2",
+      "version": "1:2.75-10+deb13u1+b3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libcrypt1",
+      "version": "1:4.4.38-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libdb5.3t64",
+      "version": "5.3.28+dfsg2-9",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libdebconfclient0",
+      "version": "0.280",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libgcc-s1",
+      "version": "14.2.0-19",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libgmp10",
+      "version": "2:6.3.0+dfsg-3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libhogweed6t64",
+      "version": "3.10.1-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "liblastlog2-2",
+      "version": "2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "liblz4-1",
+      "version": "1.10.0-4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "liblzma5",
+      "version": "5.8.1-1+deb13u1",
+      "arch": "amd64",
+      "held": true
+    },
+    {
+      "provider": "apt",
+      "name": "libmd0",
+      "version": "1.1.0-2+b1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libmount1",
+      "version": "2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libnettle8t64",
+      "version": "3.10.1-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam-modules",
+      "version": "1.7.0-5",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam-modules-bin",
+      "version": "1.7.0-5",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam-runtime",
+      "version": "1.7.0-5",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam0g",
+      "version": "1.7.0-5",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpcre2-8-0",
+      "version": "10.46-1~deb13u3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libseccomp2",
+      "version": "2.6.0-2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libselinux1",
+      "version": "3.8.1-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsemanage-common",
+      "version": "3.8.1-1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsemanage2",
+      "version": "3.8.1-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsepol2",
+      "version": "3.8.1-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsmartcols1",
+      "version": "2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libssl3t64",
+      "version": "3.5.7-1~deb13u3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libstdc++6",
+      "version": "14.2.0-19",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsystemd0",
+      "version": "257.13-1~deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libtinfo6",
+      "version": "6.5+20250216-2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libudev1",
+      "version": "257.13-1~deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libuuid1",
+      "version": "2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libxxhash0",
+      "version": "0.8.3-2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libzstd1",
+      "version": "1.5.7+dfsg-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "login",
+      "version": "1:4.16.0-2+really2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "login.defs",
+      "version": "1:4.17.4-2",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "mawk",
+      "version": "1.3.4.20250131-1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "mount",
+      "version": "2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "ncurses-base",
+      "version": "6.5+20250216-2",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "ncurses-bin",
+      "version": "6.5+20250216-2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "openssl-provider-legacy",
+      "version": "3.5.7-1~deb13u3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "passwd",
+      "version": "1:4.17.4-2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "perl-base",
+      "version": "5.40.1-6+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "sed",
+      "version": "4.9-2+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "sqv",
+      "version": "1.3.0-3+b2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "sysvinit-utils",
+      "version": "3.14-4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "tar",
+      "version": "1.35+dfsg-3.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "tzdata",
+      "version": "2026c-0+deb13u1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "util-linux",
+      "version": "2.41.5-0+deb13u1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "zlib1g",
+      "version": "1:1.3.dfsg+really1.3.1-1+b1",
+      "arch": "amd64",
+      "held": false
+    }
+  ],
+  "updates": [
+    {
+      "provider": "apt",
+      "name": "liblzma5",
+      "arch": null,
+      "from_version": "5.8.1-1+deb13u1",
+      "to_version": "5.8.1-1+deb13u2",
+      "kind": "security",
+      "origins": [
+        "http://deb.debian.org/debian-security trixie-security/main"
+      ],
+      "held": true
+    }
+  ],
+  "removals": [],
+  "index_age_secs": null,
+  "warnings": [],
+  "error": null
+}

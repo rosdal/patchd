@@ -47,12 +47,10 @@ trap 'rm -rf "$tmp"' EXIT
 
 case $target in
   *:*)
-    printf '%s
-' "$remote" | docker run --rm -i -e PATCHD_REFRESH=1 "$target" sh -s | tar -C "$tmp" -xf -
+    printf '%s\n' "$remote" | docker run --rm -i -e PATCHD_REFRESH=1 "$target" sh -s | tar -C "$tmp" -xf -
     ;;
   *)
-    printf '%s
-' "$remote" | ssh "$target" sh -s | tar -C "$tmp" -xf -
+    printf '%s\n' "$remote" | ssh "$target" sh -s | tar -C "$tmp" -xf -
     host=$(cat "$tmp/.hostname")
     if [ -n "$host" ]; then
       for f in "$tmp"/*; do
