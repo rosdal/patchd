@@ -1,0 +1,40 @@
+# Architecture decision records
+
+An architecture decision record (ADR) captures one significant decision: the situation that forced it, what was decided, and what follows from it. They exist so that later contributors can find out *why* something is the way it is without asking.
+
+ADRs are numbered and never rewritten. To change a decision, write a new ADR that supersedes the old one and update the old one's status line.
+
+## Template
+
+Keep each ADR to about one page.
+
+```markdown
+# NNNN. Title
+
+Status: Accepted · YYYY-MM-DD
+
+## Context
+
+What situation or constraint forces a decision?
+
+## Decision
+
+What we decided, stated plainly.
+
+## Consequences
+
+What becomes easier, what becomes harder, and what we now have to live with.
+
+## Alternatives considered
+
+The other options and why they lost.
+```
+
+## Index
+
+| ADR | Title | Status |
+| --- | --- | --- |
+| [0001](0001-rust-agent-ts-server.md) | Rust for the agent, TypeScript for the server | Accepted |
+| [0002](0002-providers-wrap-native-tools.md) | Providers wrap native update tools | Accepted |
+| [0003](0003-licence.md) | Licence: Apache-2.0 agent, AGPL-3.0 server | Accepted |
+| [0004](0004-monorepo-layout.md) | Monorepo layout with a single protocol definition | Accepted |
