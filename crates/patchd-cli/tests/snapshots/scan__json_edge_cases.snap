@@ -1,0 +1,218 @@
+---
+source: crates/patchd-cli/tests/scan.rs
+expression: stable_json(&out)
+---
+{
+  "agent_version": "[agent_version]",
+  "host": {
+    "arch": "x86_64",
+    "hostname": "example",
+    "kernel": null,
+    "os": {
+      "codename": "bookworm",
+      "id": "debian",
+      "id_like": [],
+      "pretty_name": "Debian GNU/Linux 12 (bookworm)",
+      "version_id": "12"
+    }
+  },
+  "providers": [
+    {
+      "error": null,
+      "id": "apt",
+      "index_age_secs": null,
+      "packages": [
+        {
+          "arch": "amd64",
+          "held": false,
+          "name": "base-files",
+          "provider": "apt",
+          "version": "12.4+deb12u7"
+        },
+        {
+          "arch": "amd64",
+          "held": false,
+          "name": "dpkg",
+          "provider": "apt",
+          "version": "1.21.22"
+        },
+        {
+          "arch": "amd64",
+          "held": false,
+          "name": "htop",
+          "provider": "apt",
+          "version": "3.2.2-2"
+        },
+        {
+          "arch": "amd64",
+          "held": false,
+          "name": "libaudit1",
+          "provider": "apt",
+          "version": "1:3.0.9-1"
+        },
+        {
+          "arch": "amd64",
+          "held": false,
+          "name": "libc6",
+          "provider": "apt",
+          "version": "2.36-9+deb12u8"
+        },
+        {
+          "arch": "i386",
+          "held": false,
+          "name": "libc6:i386",
+          "provider": "apt",
+          "version": "2.36-9+deb12u8"
+        },
+        {
+          "arch": "amd64",
+          "held": false,
+          "name": "libgnutls30",
+          "provider": "apt",
+          "version": "3.7.9-2+deb12u3"
+        },
+        {
+          "arch": "all",
+          "held": false,
+          "name": "proxmox-kernel-6.8",
+          "provider": "apt",
+          "version": "6.8.12-3"
+        },
+        {
+          "arch": "all",
+          "held": false,
+          "name": "pve-firmware-legacy",
+          "provider": "apt",
+          "version": "3.13-2"
+        },
+        {
+          "arch": "amd64",
+          "held": true,
+          "name": "zfsutils-linux",
+          "provider": "apt",
+          "version": "2.2.6-pve1"
+        }
+      ],
+      "removals": [
+        "pve-firmware-legacy"
+      ],
+      "updates": [
+        {
+          "arch": "amd64",
+          "from_version": "3.7.9-2+deb12u3",
+          "held": false,
+          "kind": "security",
+          "name": "libgnutls30",
+          "origins": [
+            "Debian-Security:12/stable-security"
+          ],
+          "provider": "apt",
+          "to_version": "3.7.9-2+deb12u4"
+        },
+        {
+          "arch": "amd64",
+          "from_version": "12.4+deb12u7",
+          "held": false,
+          "kind": "minor",
+          "name": "base-files",
+          "origins": [
+            "Debian:12.8/stable"
+          ],
+          "provider": "apt",
+          "to_version": "12.4+deb12u8"
+        },
+        {
+          "arch": "amd64",
+          "from_version": "1:3.0.9-1",
+          "held": false,
+          "kind": "minor",
+          "name": "libaudit1",
+          "origins": [
+            "Debian:12.8/stable"
+          ],
+          "provider": "apt",
+          "to_version": "1:3.0.9-1+deb12u1"
+        },
+        {
+          "arch": "amd64",
+          "from_version": "2.36-9+deb12u8",
+          "held": false,
+          "kind": "minor",
+          "name": "libc6",
+          "origins": [
+            "Debian:12.8/stable"
+          ],
+          "provider": "apt",
+          "to_version": "2.36-9+deb12u9"
+        },
+        {
+          "arch": "i386",
+          "from_version": "2.36-9+deb12u8",
+          "held": false,
+          "kind": "minor",
+          "name": "libc6:i386",
+          "origins": [
+            "Debian:12.8/stable"
+          ],
+          "provider": "apt",
+          "to_version": "2.36-9+deb12u9"
+        },
+        {
+          "arch": "amd64",
+          "from_version": "3.2.2-2",
+          "held": false,
+          "kind": "major",
+          "name": "htop",
+          "origins": [
+            "Debian Backports:bookworm-backports"
+          ],
+          "provider": "apt",
+          "to_version": "4.0.1-1~bpo12+1"
+        },
+        {
+          "arch": "amd64",
+          "from_version": null,
+          "held": false,
+          "kind": "minor",
+          "name": "proxmox-kernel-6.8.12-4-pve-signed",
+          "origins": [
+            "Proxmox:bookworm/pve-no-subscription"
+          ],
+          "provider": "apt",
+          "to_version": "6.8.12-4"
+        },
+        {
+          "arch": "all",
+          "from_version": "6.8.12-3",
+          "held": false,
+          "kind": "minor",
+          "name": "proxmox-kernel-6.8",
+          "origins": [
+            "Proxmox:bookworm/pve-no-subscription"
+          ],
+          "provider": "apt",
+          "to_version": "6.8.12-4"
+        },
+        {
+          "arch": null,
+          "from_version": "2.2.6-pve1",
+          "held": true,
+          "kind": "minor",
+          "name": "zfsutils-linux",
+          "origins": [
+            "http://download.proxmox.com/debian/pve bookworm/pve-no-subscription"
+          ],
+          "provider": "apt",
+          "to_version": "2.2.7-pve1"
+        }
+      ],
+      "warnings": [
+        "dpkg reports 1 package(s) half-installed or in an error state: pve-manager; fix with `dpkg --configure -a` before applying updates",
+        "dist-upgrade would remove 1 package(s): pve-firmware-legacy; on Proxmox VE this usually means a broken repository setup"
+      ]
+    }
+  ],
+  "scanned_at": "[scanned_at]",
+  "schema_version": 1,
+  "warnings": []
+}

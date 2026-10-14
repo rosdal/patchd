@@ -73,7 +73,7 @@ pub async fn provider_report(provider: &dyn Provider) -> ProviderReport {
         Err(e) => errors.push(format!("available updates: {e}")),
     }
     if !errors.is_empty() {
-        tracing::warn!(provider = %report.id, errors = ?errors, "provider failed");
+        tracing::debug!(provider = %report.id, errors = ?errors, "provider failed");
         report.error = Some(errors.join("; "));
     }
     report
