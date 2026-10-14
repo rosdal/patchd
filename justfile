@@ -1,4 +1,4 @@
-ci: fmt lint test deny openapi
+ci: fmt lint test schema deny openapi
 
 fmt:
     cargo fmt --all --check
@@ -14,3 +14,7 @@ deny:
 
 openapi:
     pnpm --package=@redocly/cli@2.63.0 dlx redocly lint protocol/openapi.yaml
+
+schema:
+    cargo xtask schema
+    git diff --exit-code protocol/

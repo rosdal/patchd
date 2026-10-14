@@ -1,0 +1,698 @@
+---
+source: crates/patchd-core/src/providers/apt/tests.rs
+expression: report
+---
+{
+  "id": "apt",
+  "packages": [
+    {
+      "provider": "apt",
+      "name": "apt",
+      "version": "2.8.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "base-files",
+      "version": "13ubuntu10.5",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "base-passwd",
+      "version": "3.6.3build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "bash",
+      "version": "5.2.21-2ubuntu4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "bsdutils",
+      "version": "1:2.39.3-9ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "coreutils",
+      "version": "9.4-3ubuntu6.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "dash",
+      "version": "0.5.12-6ubuntu5",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "debconf",
+      "version": "1.5.86ubuntu1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "debianutils",
+      "version": "5.17build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "diffutils",
+      "version": "1:3.10-1ubuntu0.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "dpkg",
+      "version": "1.22.6ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "e2fsprogs",
+      "version": "1.47.0-2.4~exp1ubuntu4.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "findutils",
+      "version": "4.9.0-5build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "gcc-14-base",
+      "version": "14.2.0-4ubuntu2~24.04.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "gpgv",
+      "version": "2.4.4-2ubuntu17.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "grep",
+      "version": "3.11-4build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "gzip",
+      "version": "1.12-1ubuntu3.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "hostname",
+      "version": "3.23+nmu2ubuntu2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "init-system-helpers",
+      "version": "1.66ubuntu1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libacl1",
+      "version": "2.3.2-1build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libapt-pkg6.0t64",
+      "version": "2.8.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libassuan0",
+      "version": "2.5.6-1build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libattr1",
+      "version": "1:2.5.2-1ubuntu0.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libaudit-common",
+      "version": "1:3.1.2-2.1build1.1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libaudit1",
+      "version": "1:3.1.2-2.1build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libblkid1",
+      "version": "2.39.3-9ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libbz2-1.0",
+      "version": "1.0.8-5.1ubuntu0.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libc-bin",
+      "version": "2.39-0ubuntu8.9",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libc6",
+      "version": "2.39-0ubuntu8.9",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libcap-ng0",
+      "version": "0.8.4-2build2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libcap2",
+      "version": "1:2.66-5ubuntu2.4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libcom-err2",
+      "version": "1.47.0-2.4~exp1ubuntu4.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libcrypt1",
+      "version": "1:4.4.36-4build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libdb5.3t64",
+      "version": "5.3.28+dfsg2-7",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libdebconfclient0",
+      "version": "0.271ubuntu3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libext2fs2t64",
+      "version": "1.47.0-2.4~exp1ubuntu4.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libffi8",
+      "version": "3.4.6-1build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libgcc-s1",
+      "version": "14.2.0-4ubuntu2~24.04.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libgcrypt20",
+      "version": "1.10.3-2ubuntu0.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libgmp10",
+      "version": "2:6.3.0+dfsg-2ubuntu6.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libgnutls30t64",
+      "version": "3.8.3-1.1ubuntu3.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libgpg-error0",
+      "version": "1.47-3build2.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libhogweed6t64",
+      "version": "3.9.1-2.2build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libidn2-0",
+      "version": "2.3.7-2build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "liblz4-1",
+      "version": "1.9.4-1build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "liblzma5",
+      "version": "5.6.1+really5.4.5-1ubuntu0.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libmd0",
+      "version": "1.1.0-2build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libmount1",
+      "version": "2.39.3-9ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libncursesw6",
+      "version": "6.4+20240113-1ubuntu2.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libnettle8t64",
+      "version": "3.9.1-2.2build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libnpth0t64",
+      "version": "1.6-3.1build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libp11-kit0",
+      "version": "0.25.3-4ubuntu2.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam-modules",
+      "version": "1.5.3-5ubuntu5.7",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam-modules-bin",
+      "version": "1.5.3-5ubuntu5.7",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam-runtime",
+      "version": "1.5.3-5ubuntu5.7",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpam0g",
+      "version": "1.5.3-5ubuntu5.7",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libpcre2-8-0",
+      "version": "10.42-4ubuntu2.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libproc2-0",
+      "version": "2:4.0.4-4ubuntu3.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libseccomp2",
+      "version": "2.5.5-1ubuntu3.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libselinux1",
+      "version": "3.5-2ubuntu2.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsemanage-common",
+      "version": "3.5-1build5",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsemanage2",
+      "version": "3.5-1build5",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsepol2",
+      "version": "3.5-2build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsmartcols1",
+      "version": "2.39.3-9ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libss2",
+      "version": "1.47.0-2.4~exp1ubuntu4.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libssl3t64",
+      "version": "3.0.13-0ubuntu3.15",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libstdc++6",
+      "version": "14.2.0-4ubuntu2~24.04.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libsystemd0",
+      "version": "255.4-1ubuntu8.17",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libtasn1-6",
+      "version": "4.19.0-3ubuntu0.24.04.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libtinfo6",
+      "version": "6.4+20240113-1ubuntu2.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libudev1",
+      "version": "255.4-1ubuntu8.17",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libunistring5",
+      "version": "1.1-2build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libuuid1",
+      "version": "2.39.3-9ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libxxhash0",
+      "version": "0.8.2-2build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libzstd1",
+      "version": "1.5.5+dfsg2-2build1.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "login",
+      "version": "1:4.13+dfsg1-4ubuntu3.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "logsave",
+      "version": "1.47.0-2.4~exp1ubuntu4.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "mawk",
+      "version": "1.3.4.20240123-1build1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "mount",
+      "version": "2.39.3-9ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "ncurses-base",
+      "version": "6.4+20240113-1ubuntu2.2",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "ncurses-bin",
+      "version": "6.4+20240113-1ubuntu2.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "passwd",
+      "version": "1:4.13+dfsg1-4ubuntu3.2",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "perl-base",
+      "version": "5.38.2-3.2ubuntu0.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "procps",
+      "version": "2:4.0.4-4ubuntu3.3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "sed",
+      "version": "4.9-2ubuntu0.24.04.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "sensible-utils",
+      "version": "0.0.22",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "sysvinit-utils",
+      "version": "3.08-6ubuntu3",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "tar",
+      "version": "1.35+dfsg-3ubuntu0.4",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "ubuntu-keyring",
+      "version": "2023.11.28.1",
+      "arch": "all",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "unminimize",
+      "version": "0.2.1",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "util-linux",
+      "version": "2.39.3-9ubuntu6.6",
+      "arch": "amd64",
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "zlib1g",
+      "version": "1:1.3.dfsg-3.1ubuntu2.2",
+      "arch": "amd64",
+      "held": false
+    }
+  ],
+  "updates": [
+    {
+      "provider": "apt",
+      "name": "libaudit-common",
+      "arch": "all",
+      "from_version": "1:3.1.2-2.1build1.1",
+      "to_version": "1:3.1.2-2.1ubuntu0.1",
+      "kind": "minor",
+      "origins": [
+        "Ubuntu:24.04/noble-updates"
+      ],
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libaudit1",
+      "arch": "amd64",
+      "from_version": "1:3.1.2-2.1build1.1",
+      "to_version": "1:3.1.2-2.1ubuntu0.1",
+      "kind": "minor",
+      "origins": [
+        "Ubuntu:24.04/noble-updates"
+      ],
+      "held": false
+    },
+    {
+      "provider": "apt",
+      "name": "libssl3t64",
+      "arch": "amd64",
+      "from_version": "3.0.13-0ubuntu3.15",
+      "to_version": "3.0.13-0ubuntu3.16",
+      "kind": "security",
+      "origins": [
+        "Ubuntu:24.04/noble-updates",
+        "Ubuntu:24.04/noble-security"
+      ],
+      "held": false
+    }
+  ],
+  "removals": [],
+  "index_age_secs": null,
+  "warnings": [
+    "2 update(s) deferred by Ubuntu's phased rollout: libsystemd0, systemd"
+  ],
+  "error": null
+}

@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScanReport",
+  "description": "One scan of one host.",
+  "type": "object",
+  "properties": {
+    "agent_version": {
+      "description": "The `patchd` build that produced the report.",
+      "type": "string"
+    },
+    "host": {
+      "$ref": "#/$defs/HostInfo"
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ProviderReport"
+      }
+    },
+    "scanned_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schema_version": {
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    },
+    "warnings": {
+      "description": "Host-level warnings, such as running inside a container.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "agent_version",
+    "scanned_at",
+    "host",
+    "warnings",
+    "providers"
+  ],
+  "$defs": {
+    "HostInfo": {
+      "type": "object",
+      "properties": {
+        "arch": {
+          "description": "The machine architecture, such as `x86_64` or `aarch64`.",
+          "type": "string"
+        },
+        "hostname": {
+          "type": "string"
+        },
+        "kernel": {
+          "description": "Kernel release, such as `6.8.0-49-generic`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "os": {
+          "$ref": "#/$defs/OsInfo"
+        }
+      },
+      "required": [
+        "hostname",
+        "os",
+        "arch"
+      ]
+    },
+    "OsInfo": {
+      "description": "From `os-release(5)`.",
+      "type": "object",
+      "properties": {
+        "codename": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "`ID`, such as `ubuntu` or `debian`. Proxmox VE reports `debian`.",
+          "type": "string"
+        },
+        "id_like": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pretty_name": {
+          "type": "string"
+        },
+        "version_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "id_like",
+        "pretty_name"
+      ]
+    },
+    "Package": {
+      "description": "An installed package.",
+      "type": "object",
+      "properties": {
+        "arch": {
+          "description": "`amd64`, `arm64`, `all`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "held": {
+          "description": "Pinned by `apt-mark hold`.",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Package name; multi-arch copies keep their suffix (`libc6:i386`).",
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderId"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "name",
+        "version",
+        "held"
+      ]
+    },
+    "ProviderId": {
+      "description": "Identifies a provider, serialized as a plain string such as `\"apt\"`.",
+      "type": "string"
+    },
+    "ProviderReport": {
+      "description": "What one provider found.",
+      "type": "object",
+      "properties": {
+        "error": {
+          "description": "Set when the provider failed; the other providers still report.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/ProviderId"
+        },
+        "index_age_secs": {
+          "description": "Seconds since the package lists were last refreshed.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Package"
+          }
+        },
+        "removals": {
+          "description": "Packages the upgrade would remove.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "updates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Update"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "packages",
+        "updates",
+        "removals",
+        "warnings"
+      ]
+    },
+    "Update": {
+      "description": "An update the provider can install.",
+      "type": "object",
+      "properties": {
+        "arch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "from_version": {
+          "description": "`None` when the update pulls in a new package, typically a new kernel.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "held": {
+          "description": "Available, but pinned by `apt-mark hold`, so an upgrade will skip it.",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/UpdateKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "origins": {
+          "description": "Where the new version comes from, such as `Ubuntu:24.04/noble-security`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderId"
+        },
+        "to_version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "name",
+        "to_version",
+        "kind",
+        "origins",
+        "held"
+      ]
+    },
+    "UpdateKind": {
+      "type": "string",
+      "enum": [
+        "security",
+        "minor",
+        "major"
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+zfsutils-linux:
+  Installed: 2.2.6-pve1
+  Candidate: 2.2.7-pve1
+  Version table:
+     2.2.7-pve1 500
+        500 http://download.proxmox.com/debian/pve bookworm/pve-no-subscription amd64 Packages
+ *** 2.2.6-pve1 100
+        100 /var/lib/dpkg/status

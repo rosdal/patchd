@@ -29,3 +29,6 @@ components:
           enum: [ok]
         version:
           type: string
+    ScanReport:
+      # Generated from the Rust types by `cargo xtask schema` (ADR 0007). Do not edit.
+      $ref: "./schemas/scan-report.json"

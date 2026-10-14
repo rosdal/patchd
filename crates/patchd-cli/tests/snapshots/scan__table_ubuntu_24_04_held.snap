@@ -1,0 +1,12 @@
+---
+source: crates/patchd-cli/tests/scan.rs
+expression: stdout(&out)
+---
+host  example · Ubuntu 24.04.5 LTS · x86_64
+
+KIND   PACKAGE          FROM                 TO                    ORIGIN
+minor  libaudit-common  1:3.1.2-2.1build1.1  1:3.1.2-2.1ubuntu0.1  Ubuntu:24.04/noble-updates
+minor  libaudit1        1:3.1.2-2.1build1.1  1:3.1.2-2.1ubuntu0.1  Ubuntu:24.04/noble-updates
+held   libssl3t64       3.0.13-0ubuntu3.15   3.0.13-0ubuntu3.16    http://security.ubuntu.com/ubuntu noble-security/main
+
+2 updates (0 security) · 1 held · 0 removals
