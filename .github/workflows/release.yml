@@ -52,10 +52,9 @@ jobs:
           mkdir "$name"
           cp "$bin/patchd$ext" "$bin/patchd-agent$ext" LICENSE-APACHE README.md "$name/"
           if [ "$RUNNER_OS" = "Windows" ]; then 7z a "$name.zip" "$name"; else tar czf "$name.tar.gz" "$name"; fi
-      - if: runner.os == 'Linux'
-        uses: taiki-e/install-action@83ac0ad63c0167e6f06796fab0fce28db1bf3db0 # v2.87.22
-        with:
-          tool: cargo-deb,cargo-generate-rpm
+      - name: Install cargo-deb and cargo-generate-rpm
+        if: runner.os == 'Linux'
+        run: cargo install --locked cargo-deb@3.8.0 cargo-generate-rpm@0.21.0
       - name: Build .deb and .rpm from the same binary
         if: runner.os == 'Linux'
         env:
