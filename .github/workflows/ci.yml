@@ -77,6 +77,61 @@ jobs:
             target/${{ matrix.target }}/release/patchd.exe
             target/${{ matrix.target }}/release/patchd-agent.exe
 
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        with:
+          rustflags: ""
+      - run: cargo xtask schema
+      - name: Check the schema is up to date
+        run: |
+          if ! git diff --exit-code protocol/; then
+            echo "::error::protocol/schemas is out of date; run cargo xtask schema and commit the result"
+            exit 1
+          fi
+
+  # Runs the release-mode musl binary against real apt and checks its count matches
+  # apt's own. The image list is what v0.2 supports.
+  scan-integration:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["ubuntu:22.04", "ubuntu:24.04", "ubuntu:26.04", "debian:12", "debian:13"]
+    container: ${{ matrix.image }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: patchd-x86_64-unknown-linux-musl
+          path: bin
+      - run: chmod +x bin/patchd
+      - run: apt-get update -q && apt-get install -y -q jq
+      - name: Scan
+        run: |
+          set +e
+          bin/patchd scan
+          bin/patchd scan --json > report.json
+          code=$?
+          echo "exit code $code"
+          [ "$code" -eq 0 ] || [ "$code" -ge 10 ]
+      - name: Compare with apt
+        run: |
+          ours=$(jq '[.providers[] | select(.id=="apt") | .updates[] | select(.from_version != null and (.held | not))] | length' report.json)
+          theirs=$(apt-get -s -q dist-upgrade | grep -cE '^Inst [^ ]+ \[' || true)
+          echo "patchd=$ours apt=$theirs"
+          [ "$ours" -eq "$theirs" ]
+
   deny:
     runs-on: ubuntu-latest
     steps:
