@@ -1,0 +1,706 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Record",
+  "description": "One line of a run log.",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "agent_version": {
+          "description": "The `patchd` build.",
+          "type": "string"
+        },
+        "command": {
+          "description": "What started the run: `apply`.",
+          "type": "string"
+        },
+        "event": {
+          "type": "string",
+          "const": "run_started"
+        },
+        "filter": {
+          "$ref": "#/$defs/Filter"
+        },
+        "host": {
+          "$ref": "#/$defs/HostInfo"
+        }
+      },
+      "required": [
+        "event",
+        "agent_version",
+        "host",
+        "filter",
+        "command"
+      ]
+    },
+    {
+      "description": "Every pre-flight check result, passed or not.",
+      "type": "object",
+      "properties": {
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Check"
+          }
+        },
+        "event": {
+          "type": "string",
+          "const": "preflight"
+        }
+      },
+      "required": [
+        "event",
+        "checks"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "plan"
+        },
+        "plan": {
+          "$ref": "#/$defs/Plan"
+        }
+      },
+      "required": [
+        "event",
+        "plan"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "event": {
+          "type": "string",
+          "const": "step_started"
+        },
+        "step": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "event",
+        "step",
+        "command"
+      ]
+    },
+    {
+      "description": "Output lines, batched.",
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "step_output"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "step": {
+          "type": "string"
+        },
+        "stream": {
+          "$ref": "#/$defs/OutputStream"
+        }
+      },
+      "required": [
+        "event",
+        "step",
+        "stream",
+        "lines"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "event": {
+          "type": "string",
+          "const": "step_finished"
+        },
+        "exit_code": {
+          "description": "`None` when the command could not run or timed out.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "step": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "event",
+        "step",
+        "command",
+        "duration_ms"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "audit": {
+          "description": "Lines from `dpkg --audit` (or the dnf equivalent) after the install.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "event": {
+          "type": "string",
+          "const": "verify"
+        },
+        "missed": {
+          "description": "Planned packages not at their planned version afterwards.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Change"
+          }
+        },
+        "ok": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event",
+        "ok",
+        "missed",
+        "audit"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "reboot_status"
+        },
+        "status": {
+          "$ref": "#/$defs/RebootStatus"
+        }
+      },
+      "required": [
+        "event",
+        "status"
+      ]
+    },
+    {
+      "description": "Something worth knowing that is not a check result.",
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "warning"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "event",
+        "message"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "duration_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "event": {
+          "type": "string",
+          "const": "run_finished"
+        },
+        "failed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Change"
+          }
+        },
+        "installed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Change"
+          }
+        },
+        "message": {
+          "description": "Why a run did not succeed, in one line.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reboot_required": {
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/$defs/RunResult"
+        }
+      },
+      "required": [
+        "event",
+        "result",
+        "installed",
+        "failed",
+        "reboot_required",
+        "duration_ms"
+      ]
+    }
+  ],
+  "required": [
+    "run_id",
+    "ts"
+  ],
+  "$defs": {
+    "Change": {
+      "description": "A package that changed, or was meant to.",
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "`None` for a newly installed package.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "to"
+      ]
+    },
+    "Check": {
+      "description": "The result of one check. Every check result goes to the run log.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CheckStatus"
+        }
+      },
+      "required": [
+        "name",
+        "status",
+        "detail"
+      ]
+    },
+    "CheckStatus": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "pass"
+          ]
+        },
+        {
+          "description": "Worth reporting, but the run goes ahead.",
+          "type": "string",
+          "const": "warn"
+        },
+        {
+          "description": "Aborts the run.",
+          "type": "string",
+          "const": "fail"
+        }
+      ]
+    },
+    "Filter": {
+      "description": "Which updates a plan selects.",
+      "oneOf": [
+        {
+          "description": "Security updates, plus the new packages they pull in.",
+          "type": "string",
+          "const": "security"
+        },
+        {
+          "description": "Every pending update.",
+          "type": "string",
+          "const": "all"
+        }
+      ]
+    },
+    "HostInfo": {
+      "type": "object",
+      "properties": {
+        "arch": {
+          "description": "The machine architecture, such as `x86_64` or `aarch64`.",
+          "type": "string"
+        },
+        "hostname": {
+          "type": "string"
+        },
+        "kernel": {
+          "description": "Kernel release, such as `6.8.0-49-generic`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "os": {
+          "$ref": "#/$defs/OsInfo"
+        }
+      },
+      "required": [
+        "hostname",
+        "os",
+        "arch"
+      ]
+    },
+    "OsInfo": {
+      "description": "From `os-release(5)`.",
+      "type": "object",
+      "properties": {
+        "codename": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "`ID`, such as `ubuntu` or `debian`. Proxmox VE reports `debian`.",
+          "type": "string"
+        },
+        "id_like": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pretty_name": {
+          "type": "string"
+        },
+        "version_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "id_like",
+        "pretty_name"
+      ]
+    },
+    "OutputStream": {
+      "type": "string",
+      "enum": [
+        "stdout",
+        "stderr"
+      ]
+    },
+    "Plan": {
+      "description": "What `apply` will install, across providers.",
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "filter": {
+          "$ref": "#/$defs/Filter"
+        },
+        "id": {
+          "description": "A `UUIDv7`, so plan IDs sort by creation time.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "providers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProviderPlan"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "filter",
+        "providers"
+      ]
+    },
+    "ProviderId": {
+      "description": "Identifies a provider, serialized as a plain string such as `\"apt\"`.",
+      "type": "string"
+    },
+    "ProviderPlan": {
+      "description": "One provider's part of a plan.",
+      "type": "object",
+      "properties": {
+        "held_skipped": {
+          "description": "Updates the filter selected but the plan leaves out: held or excluded.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkippedUpdate"
+          }
+        },
+        "id": {
+          "$ref": "#/$defs/ProviderId"
+        },
+        "removals": {
+          "description": "Packages installing the plan would remove. `apply` refuses unless\n`allow_removals` is set.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "updates": {
+          "description": "Each pinned to its `to_version`.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Update"
+          }
+        },
+        "warnings": {
+          "description": "Anything that will make `apply` abort or behave unexpectedly.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "updates",
+        "held_skipped",
+        "removals",
+        "warnings"
+      ]
+    },
+    "RebootStatus": {
+      "type": "object",
+      "properties": {
+        "reasons": {
+          "description": "Why, in words: `kernel 6.8.12-5-pve installed, 6.8.12-4-pve running`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "services_to_restart": {
+          "description": "Services running outdated libraries, from needrestart. They need a restart, not a\nreboot.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "required",
+        "reasons",
+        "services_to_restart"
+      ]
+    },
+    "RunResult": {
+      "description": "How a run ended.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "success",
+            "success_reboot_required"
+          ]
+        },
+        {
+          "description": "The install ran, but not every planned package reached its planned version.",
+          "type": "string",
+          "const": "partial"
+        },
+        {
+          "description": "A step failed before the install started, such as the download; dpkg untouched.",
+          "type": "string",
+          "const": "failed"
+        },
+        {
+          "description": "A pre-flight check refused the run; dpkg untouched.",
+          "type": "string",
+          "const": "aborted_preflight"
+        },
+        {
+          "description": "Stopped by SIGTERM or Ctrl-C. A running install was allowed to finish.",
+          "type": "string",
+          "const": "interrupted"
+        },
+        {
+          "description": "Never written. `patchd history` reports it for a log that ends without\n`run_finished`.",
+          "type": "string",
+          "const": "crashed"
+        }
+      ]
+    },
+    "SkipReason": {
+      "oneOf": [
+        {
+          "description": "Pinned with `apt-mark hold` or `dnf versionlock`.",
+          "type": "string",
+          "const": "held"
+        },
+        {
+          "description": "Matched an `apply.exclude` glob.",
+          "type": "string",
+          "const": "excluded"
+        }
+      ]
+    },
+    "SkippedUpdate": {
+      "description": "An update the provider can install.",
+      "type": "object",
+      "properties": {
+        "arch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "from_version": {
+          "description": "`None` when the update pulls in a new package, typically a new kernel.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "held": {
+          "description": "Available, but pinned by `apt-mark hold`, so an upgrade will skip it.",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/UpdateKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "origins": {
+          "description": "Where the new version comes from, such as `Ubuntu:24.04/noble-security`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderId"
+        },
+        "reason": {
+          "$ref": "#/$defs/SkipReason"
+        },
+        "to_version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "name",
+        "to_version",
+        "kind",
+        "origins",
+        "held",
+        "reason"
+      ]
+    },
+    "Update": {
+      "description": "An update the provider can install.",
+      "type": "object",
+      "properties": {
+        "arch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "from_version": {
+          "description": "`None` when the update pulls in a new package, typically a new kernel.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "held": {
+          "description": "Available, but pinned by `apt-mark hold`, so an upgrade will skip it.",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/UpdateKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "origins": {
+          "description": "Where the new version comes from, such as `Ubuntu:24.04/noble-security`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderId"
+        },
+        "to_version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "name",
+        "to_version",
+        "kind",
+        "origins",
+        "held"
+      ]
+    },
+    "UpdateKind": {
+      "type": "string",
+      "enum": [
+        "security",
+        "minor",
+        "major"
+      ]
+    }
+  }
+}
