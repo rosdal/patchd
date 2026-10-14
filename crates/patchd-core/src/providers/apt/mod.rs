@@ -16,7 +16,7 @@ use async_trait::async_trait;
 pub use available::classify;
 
 use crate::host::HostInfo;
-use crate::model::ProviderId;
+use crate::model::{ProviderId, Update};
 use crate::provider::{Available, Inventory, Provider, ProviderError};
 use crate::runner::{Cmd, CmdOutput, FixtureRunner, RESOLVE_TIMEOUT, Runner};
 
@@ -85,10 +85,22 @@ impl AptProvider {
         Ok(())
     }
 
-    async fn held(&self) -> Result<Vec<String>, ProviderError> {
-        let out = self.runner.run(&showhold_cmd()).await?;
-        Ok(out.stdout.split_whitespace().map(str::to_owned).collect())
+    /// Held packages that have a newer candidate, as `held: true` updates, plus the
+    /// names of everything held.
+    async fn held_updates(&self) -> Result<(Vec<String>, Vec<Update>), ProviderError> {
+        let held = parse_held(&self.runner.run(&showhold_cmd()).await?.stdout);
+        if held.is_empty() {
+            return Ok((held, Vec::new()));
+        }
+        let policy = self.runner.run(&policy_cmd(&held)).await?;
+        let updates = available::held_updates(available::parse_policy(&policy.stdout));
+        Ok((held, updates))
     }
+}
+
+/// `apt-mark showhold` prints one package per line.
+fn parse_held(stdout: &str) -> Vec<String> {
+    stdout.split_whitespace().map(str::to_owned).collect()
 }
 
 fn dpkg_query_cmd() -> Cmd {
@@ -128,21 +140,29 @@ impl Provider for AptProvider {
     }
 
     async fn available(&self) -> Result<Available, ProviderError> {
-        let out = self.runner.run(&simulate_cmd()).await?;
-        let sim = available::parse_simulation(&out.stdout)?;
-
-        let held = self.held().await?;
-        let mut updates = sim.updates;
-        if !held.is_empty() {
-            let policy = self.runner.run(&policy_cmd(&held)).await?;
-            for u in available::held_updates(available::parse_policy(&policy.stdout)) {
-                if !updates.iter().any(|x| x.name == u.name) {
-                    updates.push(u);
-                }
-            }
-        }
+        let simulate = simulate_cmd();
+        let (sim, held) = tokio::join!(self.runner.run(&simulate), self.held_updates());
+        let sim = available::parse_simulation(&sim?.stdout)?;
 
         let mut warnings = Vec::new();
+        let mut updates = sim.updates;
+        // Held packages only add to the count, so failing to list them is a warning, not a
+        // reason to throw away the simulation.
+        let held = match held {
+            Ok((held, held_updates)) => {
+                for u in held_updates {
+                    if !updates.iter().any(|x| x.name == u.name) {
+                        updates.push(u);
+                    }
+                }
+                held
+            }
+            Err(e) => {
+                warnings.push(format!("could not check held packages: {e}"));
+                Vec::new()
+            }
+        };
+
         if !sim.removals.is_empty() {
             warnings.push(format!(
                 "dist-upgrade would remove {} package(s): {}; check the repository setup before upgrading (on Proxmox VE this often means a missing or wrong repository)",
@@ -232,7 +252,7 @@ fn fixture_runner(dir: &Path) -> std::io::Result<FixtureRunner> {
     };
 
     let held_out = optional("apt-mark-showhold.txt")?;
-    let held: Vec<String> = held_out.split_whitespace().map(str::to_owned).collect();
+    let held = parse_held(&held_out);
     let mut runner = FixtureRunner::new()
         .with(
             dpkg_query_cmd().command_line(),

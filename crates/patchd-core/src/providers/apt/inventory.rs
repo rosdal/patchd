@@ -78,10 +78,13 @@ pub(super) fn parse(output: &str) -> Result<Inventory, ProviderError> {
                 .unwrap_or(row.name),
             None => row.name,
         };
-        if row.error != ' ' || (row.desired == 'i' && matches!(row.status, 'U' | 'F' | 'H')) {
+        // Unpacked, half-configured or half-installed, whatever the selection (`iF`, `hF`),
+        // or installed with triggers still to run (`iW`, `it`).
+        if row.error != ' ' || matches!(row.status, 'U' | 'F' | 'H' | 'W' | 't') {
             broken.push(name.to_owned());
         }
-        if row.status != 'i' {
+        // Trigger states are installed packages whose triggers have not run yet.
+        if !matches!(row.status, 'i' | 'W' | 't') {
             continue;
         }
         packages.push(Package {
@@ -148,16 +151,24 @@ mod tests {
         let out = "dpkg\t1.22.6\tamd64\tii \n\
                    a\t1\tamd64\tiU \n\
                    b\t1\tamd64\tiF \n\
-                   c\t1\tamd64\tiiR\n";
+                   c\t1\tamd64\tiiR\n\
+                   d\t1\tamd64\thF \n\
+                   e\t1\tamd64\tiW \n\
+                   f\t1\tamd64\tit \n";
         let inv = parse(out).unwrap();
-        assert_eq!(inv.packages.len(), 2, "only fully installed packages count");
+        let names: Vec<_> = inv.packages.iter().map(|p| p.name.as_str()).collect();
+        assert_eq!(
+            names,
+            ["dpkg", "c", "e", "f"],
+            "trigger states count as installed"
+        );
         assert_eq!(inv.warnings.len(), 1);
         assert!(
-            inv.warnings[0].contains("3 package(s)"),
+            inv.warnings[0].contains("6 package(s)"),
             "{}",
             inv.warnings[0]
         );
-        assert!(inv.warnings[0].contains("a, b, c"));
+        assert!(inv.warnings[0].contains("a, b, c, d, e, f"));
     }
 
     #[test]

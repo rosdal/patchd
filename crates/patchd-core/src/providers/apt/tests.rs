@@ -162,3 +162,43 @@ fn lists_age_reads_newest_packages_file() {
     assert!(lists_age(&dir).unwrap() < Duration::from_secs(60));
     std::fs::remove_dir_all(&dir).unwrap();
 }
+
+#[tokio::test]
+async fn failing_held_lookup_is_a_warning_not_an_error() {
+    let dir = fixture_dir("debian-12");
+    let read = |f: &str| std::fs::read_to_string(dir.join(f)).unwrap();
+    let runner = Arc::new(
+        FixtureRunner::new()
+            .with(
+                dpkg_query_cmd().command_line(),
+                CmdOutput::ok(read("dpkg-query.txt")),
+            )
+            .with(
+                simulate_cmd().command_line(),
+                CmdOutput::ok(read("apt-get-s-dist-upgrade.txt")),
+            )
+            .with(
+                showhold_cmd().command_line(),
+                CmdOutput {
+                    status: 1,
+                    stdout: String::new(),
+                    stderr: "E: boom".into(),
+                },
+            ),
+    );
+    let provider = AptProvider {
+        runner,
+        lists_dir: None,
+        check_binaries: false,
+        ubuntu: false,
+    };
+    let report = provider_report(&provider).await;
+    assert_eq!(report.error, None);
+    assert_eq!(report.updates.len(), 1);
+    assert_eq!(report.warnings.len(), 1);
+    assert!(
+        report.warnings[0].contains("could not check held packages"),
+        "{:?}",
+        report.warnings
+    );
+}

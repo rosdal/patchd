@@ -12,16 +12,21 @@ use crate::version::DebVersion;
 /// `[old]` is absent for a new dependency.
 static INST: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
-        r"^Inst (?<name>\S+)(?: \[(?<old>[^\]]*)\])? \((?<new>\S+)(?: (?<origins>.*?))?(?: \[(?<arch>[^\]]+)\])?\)(?: \[[^\]]*\])*\s*$",
+        r"^Inst (?<name>\S+)(?: \[(?<old>[^\]]*)\])? \((?<new>\S+)(?: (?<origins>[^\[].*?))?(?: \[(?<arch>[^\]]+)\])?\)(?: \[[^\]]*\])*\s*$",
     )
     .unwrap()
 });
 
 static REMV: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^Remv (?<name>\S+)").unwrap());
 
-/// A version line in `apt-cache policy`'s version table: ` *** 1.0-1 500`.
+/// A version line in `apt-cache policy`'s version table: ` *** 1.0-1 500`, or on Ubuntu
+/// `     1.0-2 500 (phased 10%)`.
 static POLICY_VERSION: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^ (?:\*\*\*| {3}) (?<version>\S+) -?\d+$").unwrap());
+    LazyLock::new(|| Regex::new(r"^ (?:\*\*\*| {3}) (?<version>\S+) -?\d+(?: .*)?$").unwrap());
+
+/// Upstream majors this large are dates (`20240203`), where every release changes the
+/// "major", so they never make an update `Major`.
+const DATE_LIKE_MAJOR: u64 = 1000;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub(super) struct Simulation {
@@ -123,15 +128,18 @@ fn inst_origin_is_security(origin: &str) -> bool {
 }
 
 /// The apt `UpdateKind` rule: security if any origin is a security suite, major if the
-/// upstream major version changes, minor otherwise.
+/// upstream major version changes, minor otherwise. Date-versioned packages
+/// (`ca-certificates 20240203`) are never major.
 #[must_use]
 pub fn classify(from: Option<&str>, to: &str, security: bool) -> UpdateKind {
     if security {
         return UpdateKind::Security;
     }
     let major = |v: &str| DebVersion::parse(v).ok().and_then(|v| v.upstream_major());
-    match from {
-        Some(from) if major(from).is_some() && major(from) != major(to) => UpdateKind::Major,
+    match (from.and_then(major), major(to)) {
+        (Some(a), Some(b)) if a != b && a < DATE_LIKE_MAJOR && b < DATE_LIKE_MAJOR => {
+            UpdateKind::Major
+        }
         _ => UpdateKind::Minor,
     }
 }
@@ -281,6 +289,45 @@ mod tests {
         let u = inst("Inst libc6:i386 [1:2.36-9] (1:2.36-9+deb12u9 Debian:12.9/stable [i386])");
         assert_eq!(u.name, "libc6:i386");
         assert_eq!(u.arch.as_deref(), Some("i386"));
+    }
+
+    #[test]
+    fn arch_without_origin() {
+        let u = inst("Inst foo [1.0] (1.1 [amd64])");
+        assert!(u.origins.is_empty());
+        assert_eq!(u.arch.as_deref(), Some("amd64"));
+    }
+
+    #[test]
+    fn date_versions_are_not_major() {
+        assert_eq!(
+            classify(Some("20230311"), "20240203", false),
+            UpdateKind::Minor
+        );
+        assert_eq!(
+            classify(Some("2024a-0+deb12u1"), "2025b-0+deb12u1", false),
+            UpdateKind::Minor
+        );
+    }
+
+    #[test]
+    fn policy_phased_candidate_keeps_its_origins() {
+        let out = "\
+libfoo:
+  Installed: 1.0-1
+  Candidate: 1.0-2
+  Version table:
+     1.0-2 500 (phased 10%)
+        500 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages
+ *** 1.0-1 100
+        100 /var/lib/dpkg/status
+";
+        let p = &parse_policy(out)[0];
+        assert!(p.candidate_security);
+        assert_eq!(
+            p.candidate_origins,
+            ["http://security.ubuntu.com/ubuntu noble-security/main"]
+        );
     }
 
     #[test]
