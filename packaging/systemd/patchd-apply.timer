@@ -1,0 +1,14 @@
+[Unit]
+Description=Patchd: nightly updates
+Documentation=https://github.com/rosdal/patchd
+
+[Timer]
+# Per-host schedule: a drop-in, /etc/systemd/system/patchd-apply.timer.d/schedule.conf,
+# with an empty `OnCalendar=` (to reset this one) followed by the new value.
+OnCalendar=*-*-* 03:30
+RandomizedDelaySec=30min
+# Catch up on a run missed while the machine was off.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

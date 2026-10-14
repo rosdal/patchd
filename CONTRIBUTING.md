@@ -17,6 +17,24 @@ The apt parser is tested against real command output recorded under `crates/patc
 
 A fixture is most useful when it has something to parse: at least one pending update, and ideally a held package (`apt-mark hold <pkg>` before capturing).
 
+For dnf, `scripts/capture-dnf-fixtures.sh fedora:latest fedora-44` does the same in a container and writes `crates/patchd-core/tests/fixtures/dnf/<name>/`, including the `--assumeno` transaction table.
+
+## End-to-end tests
+
+`patchd apply` changes systems, so it is tested against fake repositories of tiny packages, each with one failure mode (a changed conffile, a debconf question, a conflict, a failing or slow postinst). They run as root in a throwaway container, never on your machine:
+
+```sh
+# apt: debian:12, debian:13, ubuntu:24.04
+docker run --rm -v "$PWD:/src:ro" -v "$PWD/target:/target:ro" debian:13 bash -c \
+  'bash /src/tests/e2e/apt/setup-container.sh && PATCHD=/target/x86_64-unknown-linux-musl/release/patchd bats /src/tests/e2e/apt'
+
+# dnf: fedora:latest, almalinux:10
+docker run --rm -v "$PWD:/src:ro" -v "$PWD/target:/target:ro" fedora:latest bash -c \
+  'bash /src/tests/e2e/dnf/setup-container.sh && PATCHD=/target/x86_64-unknown-linux-musl/release/patchd bats /src/tests/e2e/dnf'
+```
+
+Build the binary first with `cargo build --release --target x86_64-unknown-linux-musl -p patchd-cli`.
+
 ## Security
 
 Security issues go through [SECURITY.md](SECURITY.md), never a public issue.

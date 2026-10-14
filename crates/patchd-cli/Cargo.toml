@@ -1,5 +1,6 @@
 [package]
 name = "patchd-cli"
+description = "Self-hosted patch management for Linux and Windows"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -15,15 +16,60 @@ path = "src/main.rs"
 patchd-core.workspace = true
 clap.workspace = true
 comfy-table.workspace = true
+jiff.workspace = true
+serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+uuid.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
 jsonschema.workspace = true
 serde_json.workspace = true
+tempfile.workspace = true
 
 [lints]
 workspace = true
+
+# .deb, built in CI with `cargo deb -p patchd-cli --target <musl target> --no-build`.
+# The binary is static musl, so the package has no library dependencies and one .deb per
+# architecture installs on every Debian, Ubuntu, Proxmox VE and Raspberry Pi OS release.
+[package.metadata.deb]
+name = "patchd"
+maintainer = "Rosdal <214983662+m-de-graaff@users.noreply.github.com>"
+copyright = "Rosdal"
+license-file = ["../../LICENSE-APACHE", "0"]
+section = "admin"
+priority = "optional"
+extended-description = "Self-hosted patch management agent for Linux and Windows."
+assets = [
+  ["target/release/patchd", "usr/bin/", "755"],
+  ["../../packaging/config.toml", "etc/patchd/config.toml", "644"],
+  ["../../README.md", "usr/share/doc/patchd/README.md", "644"],
+]
+conf-files = ["/etc/patchd/config.toml"]
+maintainer-scripts = "../../packaging/debian"
+# patchd drives these; everything else is in the static binary.
+depends = "dpkg, apt"
+# Installed, never enabled or started: enabling the timer is a deliberate step (ADR 0008).
+# Never restarted on upgrade either: when patchd upgrades itself during a nightly run,
+# a restart from its postinst would wait on the very service that is running dpkg.
+systemd-units = { unit-name = "patchd-apply", unit-scripts = "../../packaging/systemd", enable = false, start = false, restart-after-upgrade = false }
+
+# .rpm, built in CI with `cargo generate-rpm -p crates/patchd-cli --target <musl target>`.
+[package.metadata.generate-rpm]
+name = "patchd"
+assets = [
+  { source = "target/release/patchd", dest = "/usr/bin/patchd", mode = "755" },
+  { source = "../../packaging/config.toml", dest = "/etc/patchd/config.toml", mode = "644", config = "noreplace" },
+  { source = "../../packaging/systemd/patchd-apply.service", dest = "/usr/lib/systemd/system/patchd-apply.service", mode = "644" },
+  { source = "../../packaging/systemd/patchd-apply.timer", dest = "/usr/lib/systemd/system/patchd-apply.timer", mode = "644" },
+  { source = "../../README.md", dest = "/usr/share/doc/patchd/README.md", mode = "644", doc = true },
+]
+post_install_script = "systemctl daemon-reload || :"
+# rpm runs uninstall scripts on upgrades too; $1 is 0 only on a real removal. Without the
+# guard every upgrade would silently disable the timer.
+pre_uninstall_script = "if [ $1 -eq 0 ]; then systemctl disable --now patchd-apply.timer || :; fi"
+post_uninstall_script = "systemctl daemon-reload || :"

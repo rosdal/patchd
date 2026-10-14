@@ -19,15 +19,20 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tokio = { version = "1", features = ["rt", "macros", "process", "time"] }
+tokio = { version = "1", features = ["rt", "macros", "process", "time", "io-util", "signal", "sync"] }
 async-trait = "0.1"
-schemars = { version = "1", features = ["derive"] }
+schemars = { version = "1", features = ["derive", "uuid1"] }
 jiff = { version = "0.2", features = ["serde"] }
 gethostname = "1"
 regex = "1"
 comfy-table = "8"
 insta = { version = "1", features = ["json"] }
 jsonschema = { version = "0.58", default-features = false }
+globset = "0.4"
+toml = "0.9"
+uuid = { version = "1", features = ["v7", "serde"] }
+rustix = { version = "1", features = ["fs", "process"] }
+tempfile = "3"
 
 [workspace.lints.rust]
 unsafe_code = "deny"     # Windows COM will need explicit #[allow] later

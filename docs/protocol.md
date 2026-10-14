@@ -19,7 +19,7 @@ The JSON that `patchd scan --json` prints is the scan report. From v0.6 the agen
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `id` | string | `apt` |
+| `id` | string | `apt` or `dnf` |
 | `packages` | Package[] | Everything installed |
 | `updates` | Update[] | Everything that can be updated, held packages included |
 | `removals` | string[] | Packages the upgrade would remove |
@@ -34,3 +34,37 @@ The JSON that `patchd scan --json` prints is the scan report. From v0.6 the agen
 ## Compatibility rule
 
 Within one `schema_version`, a change may only **add** fields, and every added field must be optional, so a consumer built against an older report keeps working. Renaming a field, removing one, changing its type or meaning, or making an optional field required all mean `schema_version: 2`. Consumers must ignore fields they do not know.
+
+## Plan
+
+`patchd plan --json` prints a plan, and every run log records the plan it applied. Schema: [`protocol/schemas/plan.json`](../protocol/schemas/plan.json). v0.7's signed jobs will carry exactly this document.
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` | string | A UUIDv7, so IDs sort by creation time |
+| `created_at` | string | RFC 3339 timestamp, UTC |
+| `filter` | string | `security` or `all` |
+| `providers` | ProviderPlan[] | One per provider that applies to the host |
+
+**ProviderPlan:** `id`, `updates` (Update[], each pinned to its `to_version`), `held_skipped` (each an Update plus `reason`: `held` or `excluded`), `removals` (packages the install would remove), `warnings`.
+
+## Run log
+
+Each run writes one JSON-lines file, `/var/log/patchd/runs/<started_at>_<run_id>.jsonl`. Every line is an object with `run_id`, `ts` (RFC 3339) and `event`; the other fields depend on the event. Schema: [`protocol/schemas/run-event.json`](../protocol/schemas/run-event.json). The v0.6 agent will upload these events unchanged, so the compatibility rule above applies to them too.
+
+| `event` | Fields |
+| --- | --- |
+| `run_started` | `agent_version`, `host`, `filter`, `command` |
+| `preflight` | `checks`, each with `name`, `status` (`pass`, `warn` or `fail`) and `detail` |
+| `plan` | `plan` |
+| `step_started` | `step`, `command` |
+| `step_output` | `step`, `stream` (`stdout` or `stderr`), `lines` (batched) |
+| `step_finished` | `step`, `command`, `exit_code`, `duration_ms`, `error` |
+| `verify` | `ok`, `missed` (Change[]), `audit` (lines from `dpkg --audit`) |
+| `reboot_status` | `status`: `required`, `reasons`, `services_to_restart` |
+| `warning` | `message` |
+| `run_finished` | `result`, `installed` and `failed` (Change[]), `reboot_required`, `duration_ms`, `message` |
+
+**Change:** `name`, `from` (`null` for a new package), `to`.
+
+A file is written with `O_APPEND` and flushed after every event, so a crash leaves a readable file that ends without `run_finished`; `patchd history` shows such a run as `crashed`.

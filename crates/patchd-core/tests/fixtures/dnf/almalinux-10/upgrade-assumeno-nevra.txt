@@ -1,0 +1,17 @@
+Last metadata expiration check: 0:00:03 ago on Wed Oct 14 14:37:19 2026.
+Dependencies resolved.
+================================================================================
+ Package                   Arch      Version                    Repo       Size
+================================================================================
+Upgrading:
+ curl                      x86_64    8.12.1-4.el10_2.7          baseos    218 k
+ glibc                     x86_64    2.39-142.el10_2.alma.1     baseos    2.1 M
+ glibc-common              x86_64    2.39-142.el10_2.alma.1     baseos    316 k
+ glibc-minimal-langpack    x86_64    2.39-142.el10_2.alma.1     baseos     28 k
+ libcurl-minimal           x86_64    8.12.1-4.el10_2.7          baseos    297 k
+
+Transaction Summary
+================================================================================
+Upgrade  5 Packages
+
+Total download size: 2.9 M

@@ -52,15 +52,36 @@ jobs:
           mkdir "$name"
           cp "$bin/patchd$ext" "$bin/patchd-agent$ext" LICENSE-APACHE README.md "$name/"
           if [ "$RUNNER_OS" = "Windows" ]; then 7z a "$name.zip" "$name"; else tar czf "$name.tar.gz" "$name"; fi
-      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      - name: Install cargo-deb and cargo-generate-rpm
+        if: runner.os == 'Linux'
+        run: cargo install --locked cargo-deb@3.8.0 cargo-generate-rpm@0.21.0
+      - name: Build .deb and .rpm from the same binary
+        if: runner.os == 'Linux'
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          cargo deb -p patchd-cli --target "$TARGET" --no-build
+          cargo generate-rpm -p crates/patchd-cli --target "$TARGET"
+          cp target/"$TARGET"/debian/*.deb target/"$TARGET"/generate-rpm/*.rpm .
+      - if: runner.os == 'Linux'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: ${{ runner.os == 'Windows' && 'patchd-*.zip' || 'patchd-*.tar.gz' }}
+          subject-path: |
+            patchd-*.tar.gz
+            patchd_*.deb
+            patchd-*.rpm
+      - if: runner.os == 'Windows'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: patchd-*.zip
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist-${{ matrix.target }}
           path: |
             patchd-*.tar.gz
             patchd-*.zip
+            patchd_*.deb
+            patchd-*.rpm
 
   publish:
     needs: build

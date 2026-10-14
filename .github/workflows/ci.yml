@@ -60,9 +60,15 @@ jobs:
           rustflags: ""
           target: ${{ matrix.target }}
       - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y musl-tools
+        # rpm runs tests/rpm_cross_check.rs against rpm's own version comparison.
+        run: sudo apt-get update && sudo apt-get install -y musl-tools rpm
       - run: cargo test --workspace --locked --target ${{ matrix.target }}
       - run: cargo build --workspace --release --locked --target ${{ matrix.target }}
+      - name: Verify the systemd units
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: |
+          sudo install -m 755 target/${{ matrix.target }}/release/patchd /usr/bin/patchd
+          systemd-analyze verify packaging/systemd/patchd-apply.service packaging/systemd/patchd-apply.timer
       - name: Smoke test
         shell: bash
         run: |
@@ -89,8 +95,10 @@ jobs:
       - run: cargo xtask schema
       - name: Check the schema is up to date
         run: |
-          if ! git diff --exit-code protocol/; then
-            echo "::error::protocol/schemas is out of date; run cargo xtask schema and commit the result"
+          if [ -n "$(git status --porcelain protocol/ docs/config.md)" ]; then
+            git status --porcelain protocol/ docs/config.md
+            git diff protocol/ docs/config.md
+            echo "::error::protocol/schemas or docs/config.md is out of date; run cargo xtask schema and commit the result"
             exit 1
           fi
 
@@ -131,6 +139,90 @@ jobs:
           theirs=$(apt-get -s -q dist-upgrade | grep -cE '^Inst [^ ]+ \[' || true)
           echo "patchd=$ours apt=$theirs"
           [ "$ours" -eq "$theirs" ]
+
+  # Runs `patchd apply` for real, as root, against fake repositories of tiny packages with
+  # one failure mode each (tests/e2e). The images are the ones v0.3 supports.
+  e2e:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "debian:12",     suite: apt }
+          - { image: "debian:13",     suite: apt }
+          - { image: "ubuntu:24.04",  suite: apt }
+          - { image: "fedora:latest", suite: dnf }
+          - { image: "almalinux:10",  suite: dnf }
+    container: ${{ matrix.image }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: patchd-x86_64-unknown-linux-musl
+          path: bin
+      - run: chmod +x bin/patchd
+      - run: bash tests/e2e/${{ matrix.suite }}/setup-container.sh
+      - run: PATCHD="$PWD/bin/patchd" bats tests/e2e/${{ matrix.suite }}
+
+  # Builds the .deb and .rpm from the tested musl binary, as the release does.
+  packages:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      TARGET: x86_64-unknown-linux-musl
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        with:
+          rustflags: ""
+          target: x86_64-unknown-linux-musl
+          cache: false
+      # Pinned; installed with cargo because only selected third-party actions may run here.
+      - run: cargo install --locked cargo-deb@3.8.0 cargo-generate-rpm@0.21.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: patchd-x86_64-unknown-linux-musl
+          path: target/x86_64-unknown-linux-musl/release
+      - run: chmod +x target/$TARGET/release/patchd
+      - run: cargo deb -p patchd-cli --target $TARGET --no-build
+      - run: cargo generate-rpm -p crates/patchd-cli --target $TARGET
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: packages
+          path: |
+            target/x86_64-unknown-linux-musl/debian/*.deb
+            target/x86_64-unknown-linux-musl/generate-rpm/*.rpm
+
+  # Installs each package on every supported distribution and checks what landed where.
+  install:
+    needs: packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["debian:12", "debian:13", "ubuntu:24.04", "fedora:latest", "almalinux:10"]
+    container: ${{ matrix.image }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: packages
+          path: pkg
+      - run: bash tests/install/check-package.sh pkg
 
   deny:
     runs-on: ubuntu-latest

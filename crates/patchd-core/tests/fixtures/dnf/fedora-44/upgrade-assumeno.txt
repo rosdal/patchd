@@ -1,0 +1,74 @@
+Package                                  Arch   Version                     Repository                            Size
+Upgrading:
+ ca-certificates                         noarch 0:2026.2.90_v9.0.317-1.fc44 updates                            2.7 MiB
+   replacing ca-certificates             noarch 0:2025.2.80_v9.0.304-7.fc44 0eae96ab45874228a86a12a132e699ed   2.7 MiB
+ curl                                    x86_64 0:8.18.0-14.fc44            updates                          480.0 KiB
+   replacing curl                        x86_64 0:8.18.0-8.fc44             0eae96ab45874228a86a12a132e699ed 480.0 KiB
+ dnf5                                    x86_64 0:5.4.6.0-1.fc44            updates                            3.4 MiB
+   replacing dnf5                        x86_64 0:5.4.3.0-2.fc44            0eae96ab45874228a86a12a132e699ed   3.3 MiB
+ dnf5-plugins                            x86_64 0:5.4.6.0-1.fc44            updates                            1.6 MiB
+   replacing dnf5-plugins                x86_64 0:5.4.3.0-2.fc44            0eae96ab45874228a86a12a132e699ed   1.6 MiB
+ elfutils-default-yama-scope             noarch 0:0.196-1.fc44              updates                            1.8 KiB
+   replacing elfutils-default-yama-scope noarch 0:0.195-1.fc44              0eae96ab45874228a86a12a132e699ed   1.8 KiB
+ elfutils-libelf                         x86_64 0:0.196-1.fc44              updates                            1.4 MiB
+   replacing elfutils-libelf             x86_64 0:0.195-1.fc44              0eae96ab45874228a86a12a132e699ed   1.2 MiB
+ elfutils-libs                           x86_64 0:0.196-1.fc44              updates                          715.4 KiB
+   replacing elfutils-libs               x86_64 0:0.195-1.fc44              0eae96ab45874228a86a12a132e699ed 715.3 KiB
+ fedora-gpg-keys                         noarch 0:44-2                      updates                          257.6 KiB
+   replacing fedora-gpg-keys             noarch 0:44-1                      97840e1176ff4d8b98a420e1faba3487 133.4 KiB
+ fedora-repos                            noarch 0:44-2                      updates                            4.9 KiB
+   replacing fedora-repos                noarch 0:44-1                      97840e1176ff4d8b98a420e1faba3487   4.9 KiB
+ glib2                                   x86_64 0:2.88.4-1.fc44             updates                           15.4 MiB
+   replacing glib2                       x86_64 0:2.88.3-1.fc44             0eae96ab45874228a86a12a132e699ed  15.3 MiB
+ glibc                                   x86_64 0:2.43-9.fc44               updates                            6.9 MiB
+   replacing glibc                       x86_64 0:2.43-8.fc44               0eae96ab45874228a86a12a132e699ed   6.9 MiB
+ glibc-common                            x86_64 0:2.43-9.fc44               updates                            1.0 MiB
+   replacing glibc-common                x86_64 0:2.43-8.fc44               0eae96ab45874228a86a12a132e699ed   1.0 MiB
+ glibc-minimal-langpack                  x86_64 0:2.43-9.fc44               updates                            0.0   B
+   replacing glibc-minimal-langpack      x86_64 0:2.43-8.fc44               0eae96ab45874228a86a12a132e699ed   0.0   B
+ libcap-ng                               x86_64 0:0.9.6-1.fc44              updates                           68.8 KiB
+   replacing libcap-ng                   x86_64 0:0.9.5-1.fc44              0eae96ab45874228a86a12a132e699ed  68.8 KiB
+ libcurl                                 x86_64 0:8.18.0-14.fc44            updates                            1.0 MiB
+   replacing libcurl                     x86_64 0:8.18.0-8.fc44             0eae96ab45874228a86a12a132e699ed   1.0 MiB
+ libdnf5                                 x86_64 0:5.4.6.0-1.fc44            updates                            4.8 MiB
+   replacing libdnf5                     x86_64 0:5.4.3.0-2.fc44            0eae96ab45874228a86a12a132e699ed   4.4 MiB
+ libdnf5-cli                             x86_64 0:5.4.6.0-1.fc44            updates                            1.1 MiB
+   replacing libdnf5-cli                 x86_64 0:5.4.3.0-2.fc44            0eae96ab45874228a86a12a132e699ed   1.0 MiB
+ libevent                                x86_64 0:2.1.13-1.fc44             updates                          980.7 KiB
+   replacing libevent                    x86_64 0:2.1.12-17.fc44            97840e1176ff4d8b98a420e1faba3487 978.7 KiB
+ librepo                                 x86_64 0:1.21.2-1.fc44             updates                          253.1 KiB
+   replacing librepo                     x86_64 0:1.20.0-5.fc44             97840e1176ff4d8b98a420e1faba3487 253.0 KiB
+ libselinux                              x86_64 0:3.11-2.fc44               updates                          205.2 KiB
+   replacing libselinux                  x86_64 0:3.11-1.fc44               0eae96ab45874228a86a12a132e699ed 205.2 KiB
+ libsolv                                 x86_64 0:0.7.40-1.fc44             updates                          977.2 KiB
+   replacing libsolv                     x86_64 0:0.7.39-1.fc44             0eae96ab45874228a86a12a132e699ed   1.0 MiB
+ libtirpc                                x86_64 0:1.3.8-0.fc44              updates                          208.3 KiB
+   replacing libtirpc                    x86_64 0:1.3.7-2.fc44              97840e1176ff4d8b98a420e1faba3487 204.3 KiB
+ openldap                                x86_64 0:2.6.15-1.fc44             updates                          671.3 KiB
+   replacing openldap                    x86_64 0:2.6.13-1.fc44             97840e1176ff4d8b98a420e1faba3487 669.9 KiB
+ openssl-libs                            x86_64 1:3.5.9-1.fc44              updates                            9.2 MiB
+   replacing openssl-libs                x86_64 1:3.5.7-2.fc44              0eae96ab45874228a86a12a132e699ed   9.2 MiB
+ rpm-sequoia                             x86_64 0:1.10.3-1.fc44             updates                            2.4 MiB
+   replacing rpm-sequoia                 x86_64 0:1.10.2-4.fc44             0eae96ab45874228a86a12a132e699ed   2.4 MiB
+ sudo                                    x86_64 0:1.9.17-10.p2.fc44         updates                            5.0 MiB
+   replacing sudo                        x86_64 0:1.9.17-8.p2.fc44          0eae96ab45874228a86a12a132e699ed   5.1 MiB
+ systemd-libs                            x86_64 0:259.9-1.fc44              updates                            2.4 MiB
+   replacing systemd-libs                x86_64 0:259.8-1.fc44              0eae96ab45874228a86a12a132e699ed   2.4 MiB
+ systemd-standalone-sysusers             x86_64 0:259.9-1.fc44              updates                          305.7 KiB
+   replacing systemd-standalone-sysusers x86_64 0:259.8-1.fc44              0eae96ab45874228a86a12a132e699ed 305.7 KiB
+ tar                                     x86_64 2:1.35-9.fc44               updates                            3.0 MiB
+   replacing tar                         x86_64 2:1.35-8.fc44               97840e1176ff4d8b98a420e1faba3487   3.0 MiB
+ tzdata                                  noarch 0:2026e-1.fc44              updates                            1.3 MiB
+   replacing tzdata                      noarch 0:2026c-1.fc44              0eae96ab45874228a86a12a132e699ed   1.2 MiB
+ vim-data                                noarch 2:9.2.1129-1.fc44           updates                           10.2 KiB
+   replacing vim-data                    noarch 2:9.2.967-1.fc44            0eae96ab45874228a86a12a132e699ed  10.2 KiB
+ vim-minimal                             x86_64 2:9.2.1129-1.fc44           updates                            1.8 MiB
+   replacing vim-minimal                 x86_64 2:9.2.967-1.fc44            0eae96ab45874228a86a12a132e699ed   1.8 MiB
+Installing weak dependencies:
+ libdnf5-plugin-expired-pgp-keys         x86_64 0:5.4.6.0-1.fc44            updates                           94.7 KiB
+
+Transaction Summary:
+ Installing:         1 package
+ Upgrading:         32 packages
+ Replacing:         32 packages
+

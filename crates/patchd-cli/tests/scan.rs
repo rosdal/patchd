@@ -144,7 +144,7 @@ fn exit_codes() {
 fn usage_errors_exit_2() {
     assert_eq!(scan("debian-12", &["--bogus"]).status.code(), Some(2));
     assert_eq!(
-        scan("debian-12", &["--provider", "dnf"]).status.code(),
+        scan("debian-12", &["--provider", "yum"]).status.code(),
         Some(2)
     );
     assert_eq!(
@@ -158,6 +158,34 @@ fn provider_filter() {
     assert_eq!(
         scan("debian-12", &["--provider", "apt"]).status.code(),
         Some(11)
+    );
+    // A provider that does not apply to the host is a failed scan, not a clean one.
+    assert_eq!(
+        scan("debian-12", &["--provider", "dnf"]).status.code(),
+        Some(1)
+    );
+}
+
+#[test]
+fn dnf_fixture() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../patchd-core/tests/fixtures/dnf/almalinux-10");
+    let out = Command::new(env!("CARGO_BIN_EXE_patchd"))
+        .args(["scan", "--json", "--fixtures"])
+        .arg(dir)
+        .output()
+        .unwrap();
+    assert_eq!(
+        out.status.code(),
+        Some(11),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(json["providers"][0]["id"], "dnf");
+    assert_eq!(
+        json["providers"][0]["updates"].as_array().unwrap().len(),
+        16
     );
 }
 

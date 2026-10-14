@@ -1,0 +1,46 @@
+[Unit]
+Description=Patchd: install updates
+Documentation=https://github.com/rosdal/patchd
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# patchd itself is the main process, so it gets the SIGTERM when the unit stops. It
+# wraps only the install step in systemd-inhibit (ADR 0008), so shutdown and sleep wait
+# for dpkg and for nothing else.
+ExecStart=/usr/bin/patchd apply --yes
+# 20: success, but a reboot is required to finish.
+SuccessExitStatus=20
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStartSec=2h
+# On stop: SIGTERM to patchd only; it lets dpkg finish (dpkg runs in its own process
+# group), then exits. Whatever is left after TimeoutStopSec gets SIGKILL, dpkg included,
+# so it matches TimeoutStartSec: a stop never cuts short an install a start would allow.
+KillMode=mixed
+TimeoutStopSec=2h
+# /var/log/patchd for the run logs, /run/patchd for the run lock.
+LogsDirectory=patchd
+LogsDirectoryMode=0750
+RuntimeDirectory=patchd
+RuntimeDirectoryMode=0750
+# Never delete /run/patchd at stop: a manual `sudo patchd apply` may hold the lock in it,
+# and a recreated lock file would let a second run start beside it.
+RuntimeDirectoryPreserve=yes
+
+# Light hardening that maintainer scripts tolerate.
+#
+# Deliberately absent, because each one breaks a real update path:
+#   ProtectSystem        grub and kernel postinsts write to /boot, packages to /usr and /etc
+#   NoNewPrivileges      some postinst scripts call setuid helpers
+#   PrivateDevices       initramfs generation needs the real block devices
+#   ProtectKernelModules DKMS builds and loads modules
+# Don't "improve" this block without a kernel update test on a VM (docs/v0.3 §10).
+PrivateTmp=true
+ProtectHome=read-only
+ProtectClock=true
+ProtectHostname=true
+RestrictRealtime=true
+LockPersonality=true

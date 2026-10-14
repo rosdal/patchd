@@ -1,0 +1,17 @@
+Last metadata expiration check: 0:00:03 ago on Wed Oct 14 14:37:29 2026.
+Dependencies resolved.
+================================================================================
+ Package                    Arch       Version                 Repository  Size
+================================================================================
+Upgrading:
+ curl-minimal               x86_64     7.76.1-40.el9_8.8       baseos     127 k
+ glibc                      x86_64     2.34-283.el9_8          baseos     2.0 M
+ glibc-common               x86_64     2.34-283.el9_8          baseos     299 k
+ glibc-minimal-langpack     x86_64     2.34-283.el9_8          baseos      27 k
+ libcurl-minimal            x86_64     7.76.1-40.el9_8.8       baseos     226 k
+
+Transaction Summary
+================================================================================
+Upgrade  5 Packages
+
+Total download size: 2.6 M
