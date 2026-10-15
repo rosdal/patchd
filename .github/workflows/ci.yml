@@ -201,6 +201,51 @@ jobs:
           path: |
             target/x86_64-unknown-linux-musl/debian/*.deb
             target/x86_64-unknown-linux-musl/generate-rpm/*.rpm
+      # For the upgrade test: the same build with a version above the last release, which
+      # main usually carries unchanged until the next release bump.
+      - name: Build packages one version up
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "patchd-cli") | .version')
+          mkdir -p next
+          cargo deb -p patchd-cli --target $TARGET --no-build --deb-version "$version+ci${{ github.run_number }}-1" -o next/
+          cargo generate-rpm -p crates/patchd-cli --target $TARGET -s 'release = "2.ci${{ github.run_number }}"' -o next/
+      - name: Download the previous release's packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Releases are pre-releases until v0.5, which `gh release download` skips by default.
+          tag=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1 --json tagName --jq '.[0].tagName')
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern '*amd64.deb' --pattern '*x86_64.rpm' --dir previous
+          ls previous next
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: packages-upgrade
+          path: |
+            previous
+            next
+
+  # Upgrades from the previous release's package and checks that a local config edit and
+  # the enabled timer survive.
+  upgrade:
+    needs: packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["debian:12", "fedora:latest"]
+    container: ${{ matrix.image }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: packages-upgrade
+          path: pkg
+      - run: bash tests/install/upgrade-package.sh pkg/previous pkg/next
 
   # Installs each package on every supported distribution and checks what landed where.
   install:
