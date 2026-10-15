@@ -826,7 +826,7 @@ dependencies = [
 
 [[package]]
 name = "patchd-agent"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "clap",
  "patchd-core",
@@ -836,7 +836,7 @@ dependencies = [
 
 [[package]]
 name = "patchd-cli"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "clap",
  "comfy-table",
@@ -855,7 +855,7 @@ dependencies = [
 
 [[package]]
 name = "patchd-core"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "async-trait",
  "gethostname",

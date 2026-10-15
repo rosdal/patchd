@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here.
 
+## [0.3.0] - 2026-10-14
+
+### Features
+
+- Linux apply with plan, run log, dnf and packages (v0.3) (#8)
+
+### Other
+
+- *(core)* Add a Raspberry Pi OS fixture captured from the real image (#7)
+
 ## [0.2.1] - 2026-10-14
 
 ### Fixes
