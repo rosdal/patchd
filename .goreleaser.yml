@@ -31,7 +31,14 @@ signs:
   - cmd: cosign
     signature: "${artifact}.sig"
     certificate: "${artifact}.pem"
-    args: [sign-blob, "--output-signature=${signature}", "--output-certificate=${certificate}", "${artifact}", --yes]
+    args:
+      [
+        sign-blob,
+        "--output-signature=${signature}",
+        "--output-certificate=${certificate}",
+        "${artifact}",
+        --yes,
+      ]
     artifacts: checksum
 
 docker_signs:

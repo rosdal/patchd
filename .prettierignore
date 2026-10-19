@@ -1,0 +1,13 @@
+pnpm-lock.yaml
+bin/
+dist/
+web/dist/
+ide/vscode/out/
+store/gen/
+api/gen/
+engine/testdata/
+**/*.go
+# exported from the design docs; edited at the source, not here
+docs/ROADMAP.md
+docs/TECHNICAL_DESIGN.md
+docs/todo/

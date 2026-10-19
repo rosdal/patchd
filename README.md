@@ -8,16 +8,16 @@ Status: pre-alpha.
 
 ## Layout
 
-| Path | Contents |
-| --- | --- |
-| `cmd/patchd` | The single binary: server, workers, sandbox manager, local CLI, LSP, MCP |
-| `engine/` | Analysis: tsbridge, IR, call graph, dataflow, taint, framework models, rules |
-| `review/`, `agents/`, `trust/` | Review pipeline, agent loop, filters that decide what gets posted |
-| `patches/`, `sandbox/` | Patch verification and delivery; isolated execution |
-| `scm/`, `kb/`, `supplychain/`, `compliance/` | GitHub integration, code knowledge base, dependencies, CRA |
-| `store/`, `jobs/`, `api/` | Postgres, River jobs, Connect API |
-| `web/`, `ide/vscode/` | Web app and VS Code extension |
-| `eval/` | Gold sets and the scoring harness |
+| Path                                         | Contents                                                                     |
+| -------------------------------------------- | ---------------------------------------------------------------------------- |
+| `cmd/patchd`                                 | The single binary: server, workers, sandbox manager, local CLI, LSP, MCP     |
+| `engine/`                                    | Analysis: tsbridge, IR, call graph, dataflow, taint, framework models, rules |
+| `review/`, `agents/`, `trust/`               | Review pipeline, agent loop, filters that decide what gets posted            |
+| `patches/`, `sandbox/`                       | Patch verification and delivery; isolated execution                          |
+| `scm/`, `kb/`, `supplychain/`, `compliance/` | GitHub integration, code knowledge base, dependencies, CRA                   |
+| `store/`, `jobs/`, `api/`                    | Postgres, River jobs, Connect API                                            |
+| `web/`, `ide/vscode/`                        | Web app and VS Code extension                                                |
+| `eval/`                                      | Gold sets and the scoring harness                                            |
 
 ## Development
 

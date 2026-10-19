@@ -18,7 +18,7 @@
     "test:ts": "pnpm -r test",
     "lint": "run-s lint:go lint:ts format:check",
     "lint:go": "golangci-lint run",
-    "lint:ts": "oxlint . && pnpm -r typecheck",
+    "lint:ts": "oxlint --deny-warnings . && pnpm -r typecheck",
     "format": "gofumpt -w . && prettier --write .",
     "format:check": "prettier --check .",
     "gen": "node tools/scripts/gen.mjs",
