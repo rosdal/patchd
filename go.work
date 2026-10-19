@@ -1,5 +1,0 @@
-// Only needed once the tsbridge shim points at a local typescript-go checkout:
-//   use ../typescript-go
-go 1.27.0
-
-use .
