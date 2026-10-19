@@ -1,0 +1,31 @@
+name: False positive
+description: Patchd reported a finding that isn't a real problem.
+labels: [false-positive, engine]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Rule
+      description: The rule ID on the finding, e.g. sql-injection.
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Minimal code
+      description: The smallest TypeScript or JavaScript that still triggers the finding. It becomes an engine fixture.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it is safe
+      description: For example, the input is validated, sanitized, or never user-controlled.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `patchd version`.
