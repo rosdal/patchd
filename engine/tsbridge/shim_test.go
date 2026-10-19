@@ -31,8 +31,11 @@ func TestShimTypeChecksProject(t *testing.T) {
 	fs := bundled.WrapFS(cachedvfs.From(osvfs.FS()))
 	host := compiler.NewCompilerHost(root, fs, bundled.LibPath(), nil, nil)
 	config, diags := tsoptions.GetParsedCommandLineOfConfigFile(configPath, &core.CompilerOptions{}, nil, host, nil)
-	if config == nil || len(diags)+len(config.Errors) > 0 {
-		t.Fatalf("parse tsconfig: %d diagnostics", len(diags))
+	if config == nil {
+		t.Fatalf("parse tsconfig: no config, %d diagnostics", len(diags))
+	}
+	if errs := append(diags, config.Errors...); len(errs) > 0 {
+		t.Fatalf("parse tsconfig: %d problems, first: %s", len(errs), errs[0].String())
 	}
 	program := compiler.NewProgram(compiler.ProgramOptions{Config: config, Host: host})
 	program.BindSourceFiles()

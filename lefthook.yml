@@ -3,8 +3,6 @@ pre-commit:
   commands:
     gofumpt:
       glob: "*.go"
-      exclude:
-        - "engine/tsbridge/shim/**/shim.go" # generated; see engine/tsbridge/shim/gen
       run: gofumpt -l -w {staged_files}
       stage_fixed: true
     prettier:

@@ -8,6 +8,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"go/format"
 	"go/types"
 	"log"
 	"maps"
@@ -75,26 +76,28 @@ func main() {
 		packagesToShimFullNames[i] = tsgoInternalPrefix + pkg
 	}
 
-	packages, err := packages.Load(&packages.Config{
+	pkgs, err := packages.Load(&packages.Config{
 		Dir:  "./compiler",
 		Mode: packages.LoadSyntax,
 	}, packagesToShimFullNames...)
 	if err != nil {
 		log.Fatalf("Error loading package: %v", err)
 	}
+	if packages.PrintErrors(pkgs) > 0 {
+		log.Fatal("packages failed to load; shims not written")
+	}
 
 	var shimHeaderBuilder strings.Builder
 	var shimBuilder strings.Builder
 	var tempBuffer bytes.Buffer
 
-	for _, pkg := range packages {
+	for _, pkg := range pkgs {
 		shimDirPath := path.Join(".", strings.TrimPrefix(pkg.PkgPath, tsgoInternalPrefix))
 		var extraShim ExtraShim
 		extraShimFilePath := path.Join(shimDirPath, "extra-shim.json")
 		if data, err := os.ReadFile(extraShimFilePath); err == nil {
 			if err := json.Unmarshal(data, &extraShim); err != nil {
-				fmt.Printf("error parsing %v: %v", extraShimFilePath, err)
-				return
+				log.Fatalf("error parsing %v: %v", extraShimFilePath, err)
 			}
 		}
 		if extraShim.ExtraMethods == nil {
@@ -287,9 +290,6 @@ func main() {
 					importPackage("unsafe", true)
 
 					matchedExtraFields[name] = true
-					if err != nil {
-						log.Fatalf("error formatting %v struct body: %v", name, err)
-					}
 					mirrorStructName := "extra_" + name
 
 					var emitExtraStruct func(name string, s *types.Struct)
@@ -406,6 +406,13 @@ func main() {
 				exit = true
 			}
 		}
+		for name, found := range matchedExtraFields {
+			if found {
+				continue
+			}
+			fmt.Printf("ERROR: couldn't find %v type for extra fields\n", name)
+			exit = true
+		}
 		if exit {
 			os.Exit(1)
 		}
@@ -429,12 +436,14 @@ func main() {
 		shimHeaderBuilder.WriteString("\n")
 
 		shimGoPath := path.Join(shimDirPath, "shim.go")
-		file, err := os.Create(shimGoPath)
+		// gofmt the output so formatters and hooks leave generated files alone.
+		src, err := format.Source([]byte(shimHeaderBuilder.String() + shimBuilder.String()))
 		if err != nil {
-			log.Fatalf("error opening shim file for writing: %v", err)
+			log.Fatalf("error formatting %v: %v", shimGoPath, err)
 		}
-		file.WriteString(shimHeaderBuilder.String())
-		file.WriteString(shimBuilder.String())
+		if err := os.WriteFile(shimGoPath, src, 0o644); err != nil {
+			log.Fatalf("error writing %v: %v", shimGoPath, err)
+		}
 
 		shimHeaderBuilder.Reset()
 		shimBuilder.Reset()
