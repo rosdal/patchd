@@ -1,23 +1,38 @@
 {
   "name": "patchd-vscode",
   "displayName": "Patchd",
+  "description": "Patchd Code findings in VS Code",
+  "publisher": "patchd",
   "private": true,
   "version": "0.0.0",
-  "engines": { "vscode": "^1.100.0" },
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
   "main": "./out/extension.js",
-  "activationEvents": ["onLanguage:typescript", "onLanguage:typescriptreact"],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "patchd.hello",
+        "title": "Patchd: Hello"
+      }
+    ]
+  },
   "scripts": {
     "build": "tsc -p .",
     "typecheck": "tsc -p . --noEmit",
     "test": "echo \"no tests yet\""
   },
-  "dependencies": {
-    "vscode-languageclient": "^9.0.1"
-  },
   "devDependencies": {
-    "@types/node": "^24.0.0",
-    "@types/vscode": "^1.100.0",
-    "@vscode/vsce": "^3.6.0",
-    "typescript": "^5.9.0"
+    "@types/node": "24.19.2",
+    "@types/vscode": "1.100.0",
+    "@vscode/vsce": "4.0.0",
+    "typescript": "5.9.3"
   }
 }

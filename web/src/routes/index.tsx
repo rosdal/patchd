@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Placeholder } from "../components/placeholder";
 
 export const Route = createFileRoute("/")({
-  component: Inbox,
+  component: () => <Placeholder version={__PATCHD_VERSION__} />,
 });
-
-function Inbox() {
-  return <h1>Inbox</h1>;
-}

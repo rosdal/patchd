@@ -1,20 +1,15 @@
-import type { ExtensionContext } from "vscode";
-import { LanguageClient, type ServerOptions } from "vscode-languageclient/node";
+import * as vscode from "vscode";
 
-let client: LanguageClient | undefined;
-
-export async function activate(context: ExtensionContext): Promise<void> {
-  const serverOptions: ServerOptions = { command: "patchd", args: ["lsp"] };
-  client = new LanguageClient("patchd", "Patchd", serverOptions, {
-    documentSelector: [
-      { scheme: "file", language: "typescript" },
-      { scheme: "file", language: "typescriptreact" },
-    ],
-  });
-  context.subscriptions.push(client);
-  await client.start();
+// Later: spawn `patchd lsp` and connect a language client to it.
+export function activate(context: vscode.ExtensionContext): void {
+  const log = vscode.window.createOutputChannel("Patchd");
+  context.subscriptions.push(
+    log,
+    vscode.commands.registerCommand("patchd.hello", () => {
+      void vscode.window.showInformationMessage("Hello from Patchd");
+    }),
+  );
+  log.appendLine("Patchd activated");
 }
 
-export async function deactivate(): Promise<void> {
-  await client?.stop();
-}
+export function deactivate(): void {}

@@ -7,7 +7,7 @@
     "build": "tsr generate && tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsr generate && tsc",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
     "@connectrpc/connect": "^2.0.0",
