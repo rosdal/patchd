@@ -1,0 +1,31 @@
+name: scorecard
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions: read-all
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
+        with:
+          results_file: scorecard.sarif
+          results_format: sarif
+          # The repo is private: results can't go to the public Scorecard API, and
+          # code-scanning upload needs GitHub Advanced Security. Keep the SARIF as an artifact.
+          publish_results: false
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scorecard
+          path: scorecard.sarif
+          retention-days: 30
