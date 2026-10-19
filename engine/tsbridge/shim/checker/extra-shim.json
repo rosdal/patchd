@@ -56,7 +56,6 @@
     "Type": ["alias", "flags", "symbol", "objectFlags"],
     "TupleType": ["combinedFlags", "minLength", "readonly"],
     "Signature": ["parameters", "declaration", "resolvedTypePredicate"],
-    "Checker": ["numberType", "stringType", "booleanType", "globalRegExpType"],
     "InterfaceType": ["thisType"],
     "TypePredicate": ["kind", "t", "parameterIndex"],
     "IndexedAccessType": ["objectType", "indexType"],

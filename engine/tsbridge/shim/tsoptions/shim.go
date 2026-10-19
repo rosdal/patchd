@@ -8,6 +8,7 @@ import (
 
 	"github.com/microsoft/typescript-go/internal/ast"
 	"github.com/microsoft/typescript-go/internal/collections"
+	"github.com/microsoft/typescript-go/internal/contentmapper"
 	"github.com/microsoft/typescript-go/internal/core"
 	"github.com/microsoft/typescript-go/internal/diagnostics"
 	"github.com/microsoft/typescript-go/internal/tsoptions"
@@ -72,7 +73,6 @@ type (
 	DidYouMeanOptionsDiagnostics = tsoptions.DidYouMeanOptionsDiagnostics
 	ExtendedConfigCache          = tsoptions.ExtendedConfigCache
 	ExtendedConfigCacheEntry     = tsoptions.ExtendedConfigCacheEntry
-	FileExtensionInfo            = tsoptions.FileExtensionInfo
 )
 
 //go:linkname ForEachCompilerOptionValue github.com/microsoft/typescript-go/internal/tsoptions.ForEachCompilerOptionValue
@@ -80,6 +80,9 @@ func ForEachCompilerOptionValue(options *core.CompilerOptions, declFilter func(*
 
 //go:linkname GetCallbackForFindingPropertyAssignmentByValue github.com/microsoft/typescript-go/internal/tsoptions.GetCallbackForFindingPropertyAssignmentByValue
 func GetCallbackForFindingPropertyAssignmentByValue(value string) func(property *ast.PropertyAssignment) *ast.Node
+
+//go:linkname GetContentMapperOptionDiagnosticLocation github.com/microsoft/typescript-go/internal/tsoptions.GetContentMapperOptionDiagnosticLocation
+func GetContentMapperOptionDiagnosticLocation(config *tsoptions.ParsedCommandLine, mapper *contentmapper.Mapper, path []contentmapper.OptionPathSegment) (*ast.SourceFile, core.TextRange)
 
 //go:linkname GetDefaultLibFileName github.com/microsoft/typescript-go/internal/tsoptions.GetDefaultLibFileName
 func GetDefaultLibFileName(options *core.CompilerOptions) string
@@ -168,6 +171,7 @@ func ParseWatchOptions(key string, value any, allOptions *core.WatchOptions) []*
 type (
 	ParsedBuildCommandLine          = tsoptions.ParsedBuildCommandLine
 	ParsedCommandLine               = tsoptions.ParsedCommandLine
+	ParsedOptions                   = tsoptions.ParsedOptions
 	SourceOutputAndProjectReference = tsoptions.SourceOutputAndProjectReference
 	TSConfig                        = tsoptions.TSConfig
 )

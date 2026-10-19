@@ -227,8 +227,9 @@ type (
 func ContainsObjectRestOrSpread(node *ast.Node) bool
 
 type (
-	ContinueStatement     = ast.ContinueStatement
-	ContinueStatementNode = ast.ContinueStatementNode
+	ContentMapperSourceFileInfo = ast.ContentMapperSourceFileInfo
+	ContinueStatement           = ast.ContinueStatement
+	ContinueStatementNode       = ast.ContinueStatementNode
 )
 
 //go:linkname CreateModifiersFromModifierFlags github.com/microsoft/typescript-go/internal/ast.CreateModifiersFromModifierFlags
@@ -374,6 +375,9 @@ func FindConstructorDeclaration(node *ast.ClassLikeDeclaration) *ast.Node
 //go:linkname FindLastVisibleNode github.com/microsoft/typescript-go/internal/ast.FindLastVisibleNode
 func FindLastVisibleNode(nodes []*ast.Node) *ast.Node
 
+//go:linkname FindManyAncestors github.com/microsoft/typescript-go/internal/ast.FindManyAncestors
+func FindManyAncestors(node *ast.Node, callbacks ...func(*ast.Node) bool) []*ast.Node
+
 type FlowFlags = ast.FlowFlags
 
 const (
@@ -511,11 +515,8 @@ func GetExports(symbol *ast.Symbol) ast.SymbolTable
 //go:linkname GetExpressionPrecedence github.com/microsoft/typescript-go/internal/ast.GetExpressionPrecedence
 func GetExpressionPrecedence(expression *ast.Expression) ast.OperatorPrecedence
 
-//go:linkname GetExtendsHeritageClauseElement github.com/microsoft/typescript-go/internal/ast.GetExtendsHeritageClauseElement
-func GetExtendsHeritageClauseElement(node *ast.Node) *ast.ExpressionWithTypeArgumentsNode
-
 //go:linkname GetExtendsHeritageClauseElements github.com/microsoft/typescript-go/internal/ast.GetExtendsHeritageClauseElements
-func GetExtendsHeritageClauseElements(node *ast.Node) []*ast.ExpressionWithTypeArgumentsNode
+func GetExtendsHeritageClauseElements(node *ast.Node) []*ast.HeritageClauseElement
 
 //go:linkname GetExternalModuleImportEqualsDeclarationExpression github.com/microsoft/typescript-go/internal/ast.GetExternalModuleImportEqualsDeclarationExpression
 func GetExternalModuleImportEqualsDeclarationExpression(node *ast.Node) *ast.Node
@@ -538,8 +539,11 @@ func GetFunctionFlags(node *ast.Node) ast.FunctionFlags
 //go:linkname GetHeritageClause github.com/microsoft/typescript-go/internal/ast.GetHeritageClause
 func GetHeritageClause(node *ast.Node, kind ast.Kind) *ast.Node
 
+//go:linkname GetHeritageClauseElementName github.com/microsoft/typescript-go/internal/ast.GetHeritageClauseElementName
+func GetHeritageClauseElementName(node *ast.HeritageClauseElement) *ast.Node
+
 //go:linkname GetHeritageElements github.com/microsoft/typescript-go/internal/ast.GetHeritageElements
-func GetHeritageElements(node *ast.Node, kind ast.Kind) []*ast.Node
+func GetHeritageElements(node *ast.Node, kind ast.Kind) []*ast.HeritageClauseElement
 
 //go:linkname GetHostSignatureFromJSDoc github.com/microsoft/typescript-go/internal/ast.GetHostSignatureFromJSDoc
 func GetHostSignatureFromJSDoc(node *ast.Node) *ast.Node
@@ -548,10 +552,7 @@ func GetHostSignatureFromJSDoc(node *ast.Node) *ast.Node
 func GetImmediatelyInvokedFunctionExpression(fn *ast.Node) *ast.Node
 
 //go:linkname GetImplementsHeritageClauseElements github.com/microsoft/typescript-go/internal/ast.GetImplementsHeritageClauseElements
-func GetImplementsHeritageClauseElements(node *ast.Node) []*ast.ExpressionWithTypeArgumentsNode
-
-//go:linkname GetImplementsTypeNodes github.com/microsoft/typescript-go/internal/ast.GetImplementsTypeNodes
-func GetImplementsTypeNodes(node *ast.Node) []*ast.ExpressionWithTypeArgumentsNode
+func GetImplementsHeritageClauseElements(node *ast.Node) []*ast.HeritageClauseElement
 
 //go:linkname GetImpliedNodeFormatForEmitWorker github.com/microsoft/typescript-go/internal/ast.GetImpliedNodeFormatForEmitWorker
 func GetImpliedNodeFormatForEmitWorker(fileName string, emitModuleKind core.ModuleKind, sourceFileMetaData ast.SourceFileMetaData) core.ResolutionMode
@@ -740,6 +741,8 @@ func HasTypeArguments(node *ast.Node) bool
 
 type (
 	HeritageClause               = ast.HeritageClause
+	HeritageClauseElement        = ast.HeritageClauseElement
+	HeritageClauseElementList    = ast.HeritageClauseElementList
 	HeritageClauseList           = ast.HeritageClauseList
 	HeritageClauseNode           = ast.HeritageClauseNode
 	Identifier                   = ast.Identifier
@@ -1721,6 +1724,9 @@ func IsMultiplicativeOperator(kind ast.Kind) bool
 
 //go:linkname IsMultiplicativeOperatorOrHigher github.com/microsoft/typescript-go/internal/ast.IsMultiplicativeOperatorOrHigher
 func IsMultiplicativeOperatorOrHigher(kind ast.Kind) bool
+
+//go:linkname IsNameOfHeritageClauseTypeReference github.com/microsoft/typescript-go/internal/ast.IsNameOfHeritageClauseTypeReference
+func IsNameOfHeritageClauseTypeReference(node *ast.Node) bool
 
 //go:linkname IsNamedEvaluationSource github.com/microsoft/typescript-go/internal/ast.IsNamedEvaluationSource
 func IsNamedEvaluationSource(node *ast.Node) bool
@@ -2779,21 +2785,31 @@ type (
 	LogicalOperator                       = ast.LogicalOperator
 	LogicalOperatorOrHigher               = ast.LogicalOperatorOrHigher
 	LogicalOrCoalescingAssignmentOperator = ast.LogicalOrCoalescingAssignmentOperator
-	MappedTypeNode                        = ast.MappedTypeNode
-	MappedTypeNodeNode                    = ast.MappedTypeNodeNode
-	MemberExpressionBase                  = ast.MemberExpressionBase
-	MemberName                            = ast.MemberName
-	MetaProperty                          = ast.MetaProperty
-	MetaPropertyNode                      = ast.MetaPropertyNode
-	MethodDeclaration                     = ast.MethodDeclaration
-	MethodDeclarationNode                 = ast.MethodDeclarationNode
-	MethodSignatureDeclaration            = ast.MethodSignatureDeclaration
-	MethodSignatureDeclarationNode        = ast.MethodSignatureDeclarationNode
-	MinusToken                            = ast.MinusToken
-	MissingDeclaration                    = ast.MissingDeclaration
-	MissingDeclarationNode                = ast.MissingDeclarationNode
-	Modifier                              = ast.Modifier
-	ModifierFlags                         = ast.ModifierFlags
+	MappedDiagnosticDirective             = ast.MappedDiagnosticDirective
+	MappedDiagnosticDirectivePolicy       = ast.MappedDiagnosticDirectivePolicy
+)
+
+const (
+	MappedDiagnosticDirectivePolicyExpect = ast.MappedDiagnosticDirectivePolicyExpect
+	MappedDiagnosticDirectivePolicyIgnore = ast.MappedDiagnosticDirectivePolicyIgnore
+)
+
+type (
+	MappedTypeNode                 = ast.MappedTypeNode
+	MappedTypeNodeNode             = ast.MappedTypeNodeNode
+	MemberExpressionBase           = ast.MemberExpressionBase
+	MemberName                     = ast.MemberName
+	MetaProperty                   = ast.MetaProperty
+	MetaPropertyNode               = ast.MetaPropertyNode
+	MethodDeclaration              = ast.MethodDeclaration
+	MethodDeclarationNode          = ast.MethodDeclarationNode
+	MethodSignatureDeclaration     = ast.MethodSignatureDeclaration
+	MethodSignatureDeclarationNode = ast.MethodSignatureDeclarationNode
+	MinusToken                     = ast.MinusToken
+	MissingDeclaration             = ast.MissingDeclaration
+	MissingDeclarationNode         = ast.MissingDeclarationNode
+	Modifier                       = ast.Modifier
+	ModifierFlags                  = ast.ModifierFlags
 )
 
 const (
@@ -2914,6 +2930,9 @@ type (
 	NewExpression     = ast.NewExpression
 	NewExpressionNode = ast.NewExpressionNode
 )
+
+//go:linkname NewExternalDiagnostic github.com/microsoft/typescript-go/internal/ast.NewExternalDiagnostic
+func NewExternalDiagnostic(file *ast.SourceFile, loc core.TextRange, source string, category diagnostics.Category, code int32, messageText string) *ast.Diagnostic
 
 //go:linkname NewFlowReduceLabelData github.com/microsoft/typescript-go/internal/ast.NewFlowReduceLabelData
 func NewFlowReduceLabelData(target *ast.FlowLabel, antecedents *ast.FlowList) *ast.Node
@@ -3382,7 +3401,6 @@ const (
 	SymbolFlagsClass                               = ast.SymbolFlagsClass
 	SymbolFlagsClassExcludes                       = ast.SymbolFlagsClassExcludes
 	SymbolFlagsClassMember                         = ast.SymbolFlagsClassMember
-	SymbolFlagsClassifiable                        = ast.SymbolFlagsClassifiable
 	SymbolFlagsConstEnum                           = ast.SymbolFlagsConstEnum
 	SymbolFlagsConstEnumExcludes                   = ast.SymbolFlagsConstEnumExcludes
 	SymbolFlagsConstEnumOnlyModule                 = ast.SymbolFlagsConstEnumOnlyModule
@@ -3538,8 +3556,8 @@ type (
 //go:linkname TryGetClassExtendingExpressionWithTypeArguments github.com/microsoft/typescript-go/internal/ast.TryGetClassExtendingExpressionWithTypeArguments
 func TryGetClassExtendingExpressionWithTypeArguments(node *ast.Node) *ast.ClassLikeDeclaration
 
-//go:linkname TryGetClassImplementingOrExtendingExpressionWithTypeArguments github.com/microsoft/typescript-go/internal/ast.TryGetClassImplementingOrExtendingExpressionWithTypeArguments
-func TryGetClassImplementingOrExtendingExpressionWithTypeArguments(node *ast.Node) (class *ast.ClassLikeDeclaration, isImplements bool)
+//go:linkname TryGetClassImplementingOrExtendingHeritageClauseElement github.com/microsoft/typescript-go/internal/ast.TryGetClassImplementingOrExtendingHeritageClauseElement
+func TryGetClassImplementingOrExtendingHeritageClauseElement(node *ast.Node) (class *ast.ClassLikeDeclaration, isImplements bool)
 
 //go:linkname TryGetImportFromModuleSpecifier github.com/microsoft/typescript-go/internal/ast.TryGetImportFromModuleSpecifier
 func TryGetImportFromModuleSpecifier(node *ast.StringLiteralLike) *ast.Node

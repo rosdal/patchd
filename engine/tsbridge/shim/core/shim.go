@@ -51,13 +51,18 @@ func ComputeECMALineStartsSeq(text string) iter.Seq[core.TextPos]
 
 type ECMALineStarts = core.ECMALineStarts
 
-var (
-	EmptyCompilerOptions               = core.EmptyCompilerOptions
-	ExclusivelyPrefixedNodeCoreModules = core.ExclusivelyPrefixedNodeCoreModules
-)
+var EmptyCompilerOptions = core.EmptyCompilerOptions
+
+//go:linkname EnsureScriptKindFromFileName github.com/microsoft/typescript-go/internal/core.EnsureScriptKindFromFileName
+func EnsureScriptKindFromFileName(fileName string) core.ScriptKind
+
+var ExclusivelyPrefixedNodeCoreModules = core.ExclusivelyPrefixedNodeCoreModules
 
 //go:linkname GetCheckerLifetime github.com/microsoft/typescript-go/internal/core.GetCheckerLifetime
 func GetCheckerLifetime(ctx context.Context) core.CheckerLifetime
+
+//go:linkname GetDefaultExtensionForScriptKind github.com/microsoft/typescript-go/internal/core.GetDefaultExtensionForScriptKind
+func GetDefaultExtensionForScriptKind(scriptKind core.ScriptKind) string
 
 //go:linkname GetNewLineKind github.com/microsoft/typescript-go/internal/core.GetNewLineKind
 func GetNewLineKind(s string) core.NewLineKind
@@ -164,9 +169,9 @@ var NodeCoreModules = core.NodeCoreModules
 func NonRelativeModuleNameForTypingCache(moduleName string) string
 
 type (
-	ParsedOptions = core.ParsedOptions
-	Pattern       = core.Pattern
-	PollingKind   = core.PollingKind
+	PagedLinkStore[V any] = core.PagedLinkStore[V]
+	Pattern               = core.Pattern
+	PollingKind           = core.PollingKind
 )
 
 const (
@@ -200,14 +205,12 @@ func ResolveProjectReferencePath(ref *core.ProjectReference) string
 type ScriptKind = core.ScriptKind
 
 const (
-	ScriptKindDeferred = core.ScriptKindDeferred
-	ScriptKindExternal = core.ScriptKindExternal
-	ScriptKindJS       = core.ScriptKindJS
-	ScriptKindJSON     = core.ScriptKindJSON
-	ScriptKindJSX      = core.ScriptKindJSX
-	ScriptKindTS       = core.ScriptKindTS
-	ScriptKindTSX      = core.ScriptKindTSX
-	ScriptKindUnknown  = core.ScriptKindUnknown
+	ScriptKindJS      = core.ScriptKindJS
+	ScriptKindJSON    = core.ScriptKindJSON
+	ScriptKindJSX     = core.ScriptKindJSX
+	ScriptKindTS      = core.ScriptKindTS
+	ScriptKindTSX     = core.ScriptKindTSX
+	ScriptKindUnknown = core.ScriptKindUnknown
 )
 
 type ScriptTarget = core.ScriptTarget

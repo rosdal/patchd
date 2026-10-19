@@ -56,7 +56,7 @@ func SpikeCalls(ctx context.Context, tsconfigPath string, out io.Writer) (*Spike
 
 	start := time.Now()
 	fs := bundled.WrapFS(cachedvfs.From(osvfs.FS()))
-	host := compiler.NewCompilerHost(root, fs, bundled.LibPath(), nil, nil)
+	host := compiler.NewCompilerHost(root, fs, bundled.LibPath(), nil, nil, nil)
 	config, diags := tsoptions.GetParsedCommandLineOfConfigFile(configPath, &core.CompilerOptions{}, nil, host, nil)
 	if config == nil {
 		return nil, fmt.Errorf("parse %s: %d diagnostics", configPath, len(diags))
