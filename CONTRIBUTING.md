@@ -30,7 +30,7 @@ Don't bypass the hooks with `--no-verify`. If a hook fails, fix the cause.
 
 ## Rules of the road
 
-- Only `engine/tsbridge` may import typescript-go; depguard enforces this in `pnpm lint`.
+- Only `engine/tsbridge` may import typescript-go; depguard enforces this in `pnpm lint`. The shims under `engine/tsbridge/shim/` are generated; to expose more of the compiler or move the typescript-go pin, follow [ADR 0007](docs/adr/0007-tsbridge-shim.md#upgrade-cost).
 - Don't edit generated code in `api/gen/`, `store/gen/` or `web/src/api/gen/`; regenerate it with `pnpm gen`.
 - Decisions that are hard to reverse get an ADR in `docs/adr/` (copy `0000-template.md`). Accepted ADRs are never edited, only superseded.
 
