@@ -1,0 +1,42 @@
+version: 2
+
+before:
+  hooks:
+    - pnpm --filter @patchd/web build
+
+builds:
+  - main: ./cmd/patchd
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X github.com/patchd/patchd/internal/buildinfo.Version={{.Version}} -X github.com/patchd/patchd/internal/buildinfo.Commit={{.ShortCommit}} -X github.com/patchd/patchd/internal/buildinfo.Date={{.Date}}
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+sboms:
+  - artifacts: archive
+
+dockers_v2:
+  - images: [ghcr.io/patchd/patchd]
+    tags: ["{{.Version}}", latest]
+    dockerfile: deploy/docker/Dockerfile
+    platforms: [linux/amd64, linux/arm64]
+
+signs:
+  - cmd: cosign
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args: [sign-blob, "--output-signature=${signature}", "--output-certificate=${certificate}", "${artifact}", --yes]
+    artifacts: checksum
+
+docker_signs:
+  - artifacts: images
+    args: [sign, "${artifact}", --yes]
+
+checksum:
+  name_template: checksums.txt

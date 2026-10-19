@@ -1,0 +1,3 @@
+// Installation auth.
+
+package github

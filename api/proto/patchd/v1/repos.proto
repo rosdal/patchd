@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package patchd.v1;
+
+message Repo {
+  int64 id = 1;
+  string full_name = 2;
+}
+
+message ListReposRequest {}
+
+message ListReposResponse {
+  repeated Repo repos = 1;
+}
+
+service RepoService {
+  rpc ListRepos(ListReposRequest) returns (ListReposResponse);
+}

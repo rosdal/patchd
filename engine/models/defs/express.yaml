@@ -1,0 +1,6 @@
+# Framework model: express
+# See docs/writing-models.md for the format.
+name: express
+sources: []
+sinks: []
+sanitizers: []

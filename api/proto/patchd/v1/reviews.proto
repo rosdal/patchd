@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package patchd.v1;
+
+import "patchd/v1/findings.proto";
+
+message Review {
+  int64 id = 1;
+  int64 repo_id = 2;
+  int32 pr_number = 3;
+  string head_sha = 4;
+  string status = 5;
+  repeated Finding findings = 6;
+}
+
+message GetReviewRequest {
+  int64 id = 1;
+}
+
+message GetReviewResponse {
+  Review review = 1;
+}
+
+service ReviewService {
+  rpc GetReview(GetReviewRequest) returns (GetReviewResponse);
+}

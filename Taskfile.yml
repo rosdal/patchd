@@ -1,0 +1,36 @@
+version: "3"
+
+tasks:
+  dev:
+    desc: Run the server with the web app in watch mode
+    deps: [gen]
+    cmds:
+      - pnpm --filter @patchd/web dev &
+      - go run ./cmd/patchd serve
+
+  test:
+    desc: Unit tests and engine fixtures
+    cmds:
+      - go test ./...
+
+  eval:
+    desc: Run the eval harness against the gold sets
+    cmds:
+      - go run ./eval/harness {{.CLI_ARGS}}
+
+  build:
+    desc: Build the web app and the patchd binary
+    deps: [gen]
+    cmds:
+      - pnpm --filter @patchd/web build
+      - go build -o bin/patchd ./cmd/patchd
+
+  gen:
+    desc: Generate protobuf and sqlc code
+    cmds:
+      - buf generate
+      - sqlc generate
+
+  lint:
+    cmds:
+      - golangci-lint run

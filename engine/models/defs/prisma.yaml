@@ -1,0 +1,6 @@
+# Framework model: prisma
+# See docs/writing-models.md for the format.
+name: prisma
+sources: []
+sinks: []
+sanitizers: []

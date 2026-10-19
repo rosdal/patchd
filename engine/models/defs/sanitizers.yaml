@@ -1,0 +1,6 @@
+# Framework model: sanitizers
+# See docs/writing-models.md for the format.
+name: sanitizers
+sources: []
+sinks: []
+sanitizers: []

@@ -1,0 +1,6 @@
+# Framework model: react
+# See docs/writing-models.md for the format.
+name: react
+sources: []
+sinks: []
+sanitizers: []

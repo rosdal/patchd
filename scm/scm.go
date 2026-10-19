@@ -1,0 +1,3 @@
+// Provider interface.
+
+package scm

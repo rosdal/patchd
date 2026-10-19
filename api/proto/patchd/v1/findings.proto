@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package patchd.v1;
+
+message Finding {
+  int64 id = 1;
+  string rule_id = 2;
+  string path = 3;
+  int32 line = 4;
+  string severity = 5;
+}
+
+message GetFindingRequest {
+  int64 id = 1;
+}
+
+message GetFindingResponse {
+  Finding finding = 1;
+}
+
+service FindingService {
+  rpc GetFinding(GetFindingRequest) returns (GetFindingResponse);
+}

@@ -1,0 +1,9 @@
+* text=auto eol=lf
+*.png binary
+*.ico binary
+# generated code: collapse in GitHub diffs
+store/gen/** linguist-generated=true
+api/gen/** linguist-generated=true
+web/src/api/** linguist-generated=true
+# test fixtures are intentionally vulnerable code
+engine/testdata/** linguist-vendored=true

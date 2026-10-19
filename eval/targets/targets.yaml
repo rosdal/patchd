@@ -1,0 +1,11 @@
+# Pinned vulnerable apps used as eval targets.
+targets:
+  - name: juice-shop
+    repo: https://github.com/juice-shop/juice-shop
+    ref: TODO
+  - name: nodegoat
+    repo: https://github.com/OWASP/NodeGoat
+    ref: TODO
+  - name: dvna
+    repo: https://github.com/appsecco/dvna
+    ref: TODO

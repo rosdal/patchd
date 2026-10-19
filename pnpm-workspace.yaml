@@ -1,0 +1,9 @@
+packages:
+  - web
+  - ide/vscode
+
+# Dependency install scripts are part of our supply chain: keep this list short.
+allowBuilds:
+  esbuild: true
+  "@vscode/vsce-sign": false
+  keytar: false

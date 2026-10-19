@@ -1,0 +1,6 @@
+# Framework model: node-core
+# See docs/writing-models.md for the format.
+name: node-core
+sources: []
+sinks: []
+sanitizers: []

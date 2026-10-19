@@ -1,0 +1,6 @@
+# Framework model: drizzle
+# See docs/writing-models.md for the format.
+name: drizzle
+sources: []
+sinks: []
+sanitizers: []

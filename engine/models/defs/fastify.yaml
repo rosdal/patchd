@@ -1,0 +1,6 @@
+# Framework model: fastify
+# See docs/writing-models.md for the format.
+name: fastify
+sources: []
+sinks: []
+sanitizers: []

@@ -1,0 +1,34 @@
+# Self-Hosted: patchd + Postgres
+x-patchd: &patchd
+  build:
+    context: ../..
+    dockerfile: deploy/docker/Dockerfile
+  environment:
+    PATCHD_DATABASE_URL: postgres://patchd:patchd@postgres:5432/patchd?sslmode=disable
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  patchd:
+    <<: *patchd
+    command: serve
+    ports: ["8080:8080"]
+
+  worker:
+    <<: *patchd
+    command: worker
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: patchd
+      POSTGRES_PASSWORD: patchd
+      POSTGRES_DB: patchd
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "patchd"]
+      interval: 5s
+
+volumes:
+  pgdata:

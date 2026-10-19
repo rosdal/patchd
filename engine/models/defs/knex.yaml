@@ -1,0 +1,6 @@
+# Framework model: knex
+# See docs/writing-models.md for the format.
+name: knex
+sources: []
+sinks: []
+sanitizers: []

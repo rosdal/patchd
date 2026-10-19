@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patchd.dev/schema/patchd.schema.json",
+  "title": "patchd.yaml",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version"],
+  "properties": {
+    "version": { "const": 1 },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "include": { "type": "array", "items": { "type": "string" } },
+            "exclude": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "max_comments": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": { "enum": ["on", "off", "warn"] }
+    },
+    "patches": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "delivery": { "enum": ["off", "suggest", "commit", "fixpr"] }
+      }
+    }
+  }
+}

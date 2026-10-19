@@ -1,0 +1,3 @@
+// gitleaks integration.
+
+package supplychain

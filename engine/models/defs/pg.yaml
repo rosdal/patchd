@@ -1,0 +1,6 @@
+# Framework model: pg
+# See docs/writing-models.md for the format.
+name: pg
+sources: []
+sinks: []
+sanitizers: []

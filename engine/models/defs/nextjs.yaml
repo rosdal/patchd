@@ -1,0 +1,6 @@
+# Framework model: nextjs
+# See docs/writing-models.md for the format.
+name: nextjs
+sources: []
+sinks: []
+sanitizers: []

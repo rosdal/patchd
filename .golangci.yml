@@ -1,0 +1,35 @@
+version: "2"
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - revive
+    - errorlint
+    - gosec
+    - bodyclose
+    - misspell
+    - depguard
+  settings:
+    depguard:
+      rules:
+        typescript-go-only-in-tsbridge:
+          files:
+            - "$all"
+            - "!**/engine/tsbridge/**"
+          deny:
+            - pkg: "github.com/microsoft/typescript-go"
+              desc: "only engine/tsbridge may import typescript-go"
+  exclusions:
+    paths:
+      - api/gen
+      - store/gen
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/patchd/patchd

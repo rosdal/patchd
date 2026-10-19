@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=./schema/patchd.schema.json
+# Patchd reviewing itself.
+version: 1
+
+review:
+  paths:
+    include: ["web/src/**", "ide/vscode/src/**"]
+    exclude: ["web/src/api/**", "**/*.gen.ts"]
+  max_comments: 10
+
+rules:
+  security: on
+  correctness: on
+
+patches:
+  delivery: suggest # suggest | commit | fixpr

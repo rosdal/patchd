@@ -1,0 +1,6 @@
+# Framework model: axios-fetch
+# See docs/writing-models.md for the format.
+name: axios-fetch
+sources: []
+sinks: []
+sanitizers: []

@@ -1,0 +1,6 @@
+# Framework model: nestjs
+# See docs/writing-models.md for the format.
+name: nestjs
+sources: []
+sinks: []
+sanitizers: []

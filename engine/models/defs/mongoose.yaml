@@ -1,0 +1,6 @@
+# Framework model: mongoose
+# See docs/writing-models.md for the format.
+name: mongoose
+sources: []
+sinks: []
+sanitizers: []
