@@ -26,49 +26,51 @@ The starting point: no files, no `git init`, nothing installed. The detailed che
 
 **Goal:** a clean, reproducible monorepo that every later version builds on.
 
+**Status (2026-10-20):** tagged `v0.1.0`. Still open: branch protection, required checks and secret scanning on `main` (not available for private repos on the GitHub Free plan), Go tools as `go tool` directives, and the product spec in the repo. `go.mod` pins Go through its `go 1.27.0` line, because Go drops a `toolchain` line that matches it. The large spike repo was microsoft/vscode, a single large program rather than a monorepo (see ADR 0007).
+
 **Toolchain and workspace**
 
 - [ ] Git repo initialised, `main` branch, remote on GitHub (private), branch protection on `main`.
-- [ ] Node.js LTS pinned in `.nvmrc` / `.node-version`; pnpm pinned through the `packageManager` field in the root `package.json`.
-- [ ] pnpm workspace (`pnpm-workspace.yaml`) covering `web/`, `ide/vscode/` and `tools/*`.
-- [ ] Root `package.json` scripts act as the task runner for the whole repo, Go included: `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm gen`, `pnpm eval`.
-- [ ] Go module `github.com/patchd/patchd` with the Go version pinned in `go.mod` (`toolchain` line).
+- [x] Node.js LTS pinned in `.nvmrc` / `.node-version`; pnpm pinned through the `packageManager` field in the root `package.json`.
+- [x] pnpm workspace (`pnpm-workspace.yaml`) covering `web/`, `ide/vscode/` and `tools/*`.
+- [x] Root `package.json` scripts act as the task runner for the whole repo, Go included: `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm gen`, `pnpm eval`.
+- [x] Go module `github.com/patchd/patchd` with the Go version pinned in `go.mod` (`toolchain` line).
 - [ ] Go tools pinned with `go tool` directives in `go.mod` (sqlc, goose, buf plugins, golangci-lint where supported).
 
 **Skeleton code**
 
-- [ ] Folder layout from the technical design created with `doc.go` placeholders so every package compiles.
-- [ ] `cmd/patchd` with Cobra: `version`, plus stub subcommands `serve`, `worker`, `sandboxd`, `scan`, `review`, `fix`, `lsp`, `mcp` that print "not implemented".
-- [ ] Build info (version, commit, date) injected with `-ldflags`.
-- [ ] `web/` scaffolded with Vite + React + TypeScript, rendering a placeholder page.
-- [ ] `ide/vscode/` scaffolded with a minimal extension that activates and logs.
+- [x] Folder layout from the technical design created with `doc.go` placeholders so every package compiles.
+- [x] `cmd/patchd` with Cobra: `version`, plus stub subcommands `serve`, `worker`, `sandboxd`, `scan`, `review`, `fix`, `lsp`, `mcp` that print "not implemented".
+- [x] Build info (version, commit, date) injected with `-ldflags`.
+- [x] `web/` scaffolded with Vite + React + TypeScript, rendering a placeholder page.
+- [x] `ide/vscode/` scaffolded with a minimal extension that activates and logs.
 
 **Quality gates**
 
-- [ ] `golangci-lint` config with `gofumpt`, `govet`, `staticcheck`, `errcheck`, `revive` and a `depguard` rule: only `engine/tsbridge` may import `typescript-go`.
-- [ ] oxlint + Prettier for TypeScript; `tsc --noEmit` (or `tsgo --noEmit`) per TS package.
-- [ ] EditorConfig, `.gitattributes`, `.gitignore`.
-- [ ] Conventional Commits enforced by a commit-msg hook (lefthook) and in CI on PR titles.
-- [ ] Pre-commit hooks (lefthook): format, lint changed files.
+- [x] `golangci-lint` config with `gofumpt`, `govet`, `staticcheck`, `errcheck`, `revive` and a `depguard` rule: only `engine/tsbridge` may import `typescript-go`.
+- [x] oxlint + Prettier for TypeScript; `tsc --noEmit` (or `tsgo --noEmit`) per TS package.
+- [x] EditorConfig, `.gitattributes`, `.gitignore`.
+- [x] Conventional Commits enforced by a commit-msg hook (lefthook) and in CI on PR titles.
+- [x] Pre-commit hooks (lefthook): format, lint changed files.
 
 **CI/CD (GitHub Actions)**
 
-- [ ] `ci.yml`: install pnpm and Go with caches → lint → unit tests → build binary → build web.
-- [ ] Matrix: Linux and macOS (developers' machines); Windows later.
-- [ ] Dependabot or Renovate for Go modules, npm packages and Actions.
+- [x] `ci.yml`: install pnpm and Go with caches → lint → unit tests → build binary → build web.
+- [x] Matrix: Linux and macOS (developers' machines); Windows later.
+- [x] Dependabot or Renovate for Go modules, npm packages and Actions.
 - [ ] OpenSSF Scorecard and secret scanning enabled on the repo.
-- [ ] `release.yml` skeleton with GoReleaser in snapshot mode (no publishing yet).
+- [x] `release.yml` skeleton with GoReleaser in snapshot mode (no publishing yet).
 
 **Docs and governance**
 
-- [ ] `README.md` (what Patchd is, how to build), `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE` (decision: AGPL-3.0 or source-available; see open questions).
-- [ ] `docs/adr/` with the first Architecture Decision Records: Go + typescript-go, Postgres-only, pnpm as task runner, own agent loop.
+- [x] `README.md` (what Patchd is, how to build), `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE` (decision: AGPL-3.0 or source-available; see open questions).
+- [x] `docs/adr/` with the first Architecture Decision Records: Go + typescript-go, Postgres-only, pnpm as task runner, own agent loop.
 - [ ] Product spec and technical design linked from the README.
 
 **Spikes (time-boxed, 1–2 days each)**
 
-- [ ] Import `typescript-go` and type-check one small project from Go, studying how Oxc's tsgolint shims internal packages. Output: an ADR on the shim approach.
-- [ ] Measure memory and time to type-check 3 real repos (small, medium, large monorepo).
+- [x] Import `typescript-go` and type-check one small project from Go, studying how Oxc's tsgolint shims internal packages. Output: an ADR on the shim approach.
+- [x] Measure memory and time to type-check 3 real repos (small, medium, large monorepo).
 
 **Exit criteria for v0.1**
 
