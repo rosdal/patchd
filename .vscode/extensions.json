@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "golang.go",
+    "oxc.oxc-vscode",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig"
+  ]
+}

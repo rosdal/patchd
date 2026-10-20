@@ -1,0 +1,29 @@
+name: False negative
+description: Patchd missed a real problem it should have found.
+labels: [false-negative, engine]
+body:
+  - type: input
+    id: kind
+    attributes:
+      label: Kind of problem
+      description: For example, SSRF via axios, or path traversal in fs.readFile.
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Minimal code
+      description: The smallest TypeScript or JavaScript that shows the problem. Mark the source and the sink. It becomes an engine fixture.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference
+      description: Advisory, CVE or fixing commit, if there is one.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `patchd version`.

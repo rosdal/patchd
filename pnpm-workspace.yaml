@@ -1,9 +1,18 @@
 packages:
   - web
-  - ide/vscode
+  - ide/*
+  - tools/*
+
+# pnpm 11 reads its own settings only from this file, not from .npmrc.
+engineStrict: true
+strictPeerDependencies: false
+autoInstallPeers: true
+saveExact: true
+linkWorkspacePackages: true
 
 # Dependency install scripts are part of our supply chain: keep this list short.
 allowBuilds:
   esbuild: true
   "@vscode/vsce-sign": false
   keytar: false
+  lefthook: false

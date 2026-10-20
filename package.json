@@ -3,5 +3,36 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.10.0",
-  "engines": { "node": ">=24", "pnpm": ">=10" }
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=11"
+  },
+  "scripts": {
+    "build": "run-s build:go build:ts",
+    "build:go": "node tools/scripts/build-go.mjs",
+    "build:ts": "pnpm -r --filter ./web --filter \"./ide/*\" build",
+    "dev": "run-p dev:*",
+    "dev:web": "pnpm --filter ./web dev",
+    "test": "run-s test:go test:ts",
+    "test:go": "go test ./...",
+    "test:ts": "pnpm -r test",
+    "lint": "run-s lint:go lint:ts format:check",
+    "lint:go": "golangci-lint run",
+    "lint:ts": "oxlint --deny-warnings . && pnpm -r typecheck",
+    "format": "gofumpt -w . && prettier --write .",
+    "format:check": "prettier --check .",
+    "gen": "node tools/scripts/gen.mjs",
+    "eval": "node tools/scripts/eval.mjs",
+    "clean": "node tools/scripts/clean.mjs",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
+    "lefthook": "2.2.2",
+    "npm-run-all2": "9.0.3",
+    "oxlint": "1.88.0",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3"
+  }
 }

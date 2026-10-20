@@ -1,0 +1,15 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["--fast-only"],
+  "gopls": {
+    "formatting.gofumpt": true,
+    "formatting.local": "github.com/patchd/patchd"
+  },
+  "oxc.enable": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
