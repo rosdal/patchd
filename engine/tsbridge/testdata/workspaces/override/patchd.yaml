@@ -1,0 +1,3 @@
+typescript:
+  projects: ["app/tsconfig.json"]
+  ignore: ["legacy/**"]

@@ -1,0 +1,37 @@
+{
+  "layouts": [
+    "pnpm",
+    "turbo"
+  ],
+  "packages": [
+    {
+      "name": "@ws/a",
+      "version": "1.0.0",
+      "dir": "packages/a",
+      "config": "packages/a/tsconfig.json"
+    },
+    {
+      "name": "@ws/b",
+      "version": "2.0.0",
+      "dir": "packages/b"
+    }
+  ],
+  "projects": [
+    {
+      "name": "packages/a/tsconfig.json",
+      "files": [
+        "packages/a/src/index.ts"
+      ]
+    },
+    {
+      "name": "synthesised:packages/b",
+      "synthesised": true,
+      "files": [
+        "packages/b/index.js"
+      ]
+    }
+  ],
+  "uncovered": [
+    "packages/b/index.js"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "projects": [
+    {
+      "name": "jsconfig.json",
+      "files": [
+        "src/a.js",
+        "src/b.ts"
+      ]
+    },
+    {
+      "name": "synthesised:.",
+      "synthesised": true,
+      "files": [
+        "tools/c.mjs"
+      ]
+    }
+  ],
+  "uncovered": [
+    "tools/c.mjs"
+  ]
+}

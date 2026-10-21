@@ -1,0 +1,21 @@
+{
+  "projects": [
+    {
+      "name": "tsconfig.json",
+      "files": [
+        "src/index.ts",
+        "src/math.ts"
+      ]
+    },
+    {
+      "name": "synthesised:.",
+      "synthesised": true,
+      "files": [
+        "scripts/build.js"
+      ]
+    }
+  ],
+  "uncovered": [
+    "scripts/build.js"
+  ]
+}
