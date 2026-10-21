@@ -21,6 +21,10 @@ linters:
           deny:
             - pkg: "github.com/microsoft/typescript-go"
               desc: "only engine/tsbridge may import typescript-go"
+            - pkg: "github.com/microsoft/typescript-go/shim"
+              desc: "only engine/tsbridge may import the typescript-go shims"
+            - pkg: "github.com/patchd/patchd/engine/tsbridge/shim"
+              desc: "only engine/tsbridge may import the typescript-go shims"
   exclusions:
     paths:
       - api/gen

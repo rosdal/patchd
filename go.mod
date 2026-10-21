@@ -3,15 +3,21 @@ module github.com/patchd/patchd
 go 1.27.0
 
 require (
+	github.com/goccy/go-yaml v1.19.2
 	github.com/microsoft/typescript-go/shim/ast v0.0.0
 	github.com/microsoft/typescript-go/shim/bundled v0.0.0
+	github.com/microsoft/typescript-go/shim/checker v0.0.0
+	github.com/microsoft/typescript-go/shim/collections v0.0.0
 	github.com/microsoft/typescript-go/shim/compiler v0.0.0
 	github.com/microsoft/typescript-go/shim/core v0.0.0
+	github.com/microsoft/typescript-go/shim/scanner v0.0.0
 	github.com/microsoft/typescript-go/shim/tsoptions v0.0.0
 	github.com/microsoft/typescript-go/shim/tspath v0.0.0
+	github.com/microsoft/typescript-go/shim/vfs v0.0.0
 	github.com/microsoft/typescript-go/shim/vfs/cachedvfs v0.0.0
 	github.com/microsoft/typescript-go/shim/vfs/osvfs v0.0.0
 	github.com/spf13/cobra v1.10.2
+	golang.org/x/sys v0.46.0
 )
 
 require (
@@ -22,7 +28,6 @@ require (
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 )
 
@@ -47,3 +52,5 @@ replace github.com/microsoft/typescript-go/shim/vfs => ./engine/tsbridge/shim/vf
 replace github.com/microsoft/typescript-go/shim/vfs/osvfs => ./engine/tsbridge/shim/vfs/osvfs
 
 replace github.com/microsoft/typescript-go/shim/vfs/cachedvfs => ./engine/tsbridge/shim/vfs/cachedvfs
+
+replace github.com/microsoft/typescript-go/shim/collections => ./engine/tsbridge/shim/collections
