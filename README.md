@@ -47,6 +47,6 @@ pnpm is the only task runner, for Go as well as TypeScript (see [ADR 0003](docs/
 
 - [Technical design](docs/TECHNICAL_DESIGN.md)
 - [Roadmap](docs/ROADMAP.md)
-- Product spec: not yet in the repo
+- [Product spec](docs/PRODUCT_SPEC.md)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to work on Patchd and [SECURITY.md](SECURITY.md) to report a vulnerability.

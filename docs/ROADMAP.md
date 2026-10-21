@@ -65,7 +65,7 @@ The starting point: no files, no `git init`, nothing installed. The detailed che
 
 - [x] `README.md` (what Patchd is, how to build), `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE` (decision: AGPL-3.0 or source-available; see open questions).
 - [x] `docs/adr/` with the first Architecture Decision Records: Go + typescript-go, Postgres-only, pnpm as task runner, own agent loop.
-- [ ] Product spec and technical design linked from the README.
+- [x] Product spec and technical design linked from the README.
 
 **Spikes (time-boxed, 1–2 days each)**
 
