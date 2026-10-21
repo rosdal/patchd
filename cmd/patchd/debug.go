@@ -30,6 +30,8 @@ type debugFlags struct {
 	noCheck   bool
 	root      string
 	verbose   bool
+	checkers  int
+	noCache   bool
 }
 
 func newDebugCmd() *cobra.Command {
@@ -52,6 +54,8 @@ func newDebugCmd() *cobra.Command {
 	pf.IntVar(&f.maxFiles, "max-files", 0, "analyse at most this many files per project (default: no limit)")
 	pf.BoolVar(&f.noCheck, "no-check", false, "parse and bind only; skip type-checking")
 	pf.StringVar(&f.root, "root", "", "workspace root (default: the enclosing git repository)")
+	pf.IntVar(&f.checkers, "checkers", 0, "typescript-go checkers per project (default: typescript-go's 4)")
+	pf.BoolVar(&f.noCache, "no-shared-cache", false, "do not share parsed declaration files between projects")
 	pf.BoolVarP(&f.verbose, "verbose", "v", false, "log debug output, including recovered compiler panics, to stderr")
 	cmd.AddCommand(newDebugProjectCmd(f), newDebugTypesCmd(f), newDebugResolveCmd(f), newDebugStatsCmd(f))
 	return cmd
@@ -65,8 +69,8 @@ func (f *debugFlags) validate() error {
 }
 
 func (f *debugFlags) loadAllOptions() (tsbridge.LoadAllOptions, error) {
-	opts := tsbridge.LoadAllOptions{Jobs: f.jobs}
-	opts.Timeout, opts.MaxFiles, opts.NoCheck = f.timeout, f.maxFiles, f.noCheck
+	opts := tsbridge.LoadAllOptions{Jobs: f.jobs, NoSharedCache: f.noCache}
+	opts.Timeout, opts.MaxFiles, opts.NoCheck, opts.Checkers = f.timeout, f.maxFiles, f.noCheck, f.checkers
 	if f.maxMemory != "" {
 		n, err := parseBytes(f.maxMemory)
 		if err != nil {

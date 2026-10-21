@@ -171,7 +171,7 @@ func TestCompilerPanicIsRecovered(t *testing.T) { // TSB007
 	testHookAfterParse = func() { once.Do(func() { panic("only once") }) }
 	var mu sync.Mutex
 	var failed, loaded int
-	_, err = LoadAll(context.Background(), two, LoadAllOptions{Jobs: 1}, func(_ ProjectConfig, p *Program, err error) error {
+	_, err = LoadAll(context.Background(), two, LoadAllOptions{Jobs: 1}, func(_ ProjectConfig, _ *Program, err error) error {
 		mu.Lock()
 		defer mu.Unlock()
 		if err != nil {

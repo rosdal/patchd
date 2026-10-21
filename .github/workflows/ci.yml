@@ -37,6 +37,9 @@ jobs:
       - run: pnpm lint:ts
       - run: pnpm format:check
       - run: pnpm test
+      - name: tsbridge under the race detector
+        if: runner.os == 'Linux'
+        run: go test -race ./engine/tsbridge/...
       - run: pnpm build
       - run: ./bin/patchd version
   commitlint:

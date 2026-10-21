@@ -110,8 +110,9 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 		var r result
 		defer func() {
 			if rec := recover(); rec != nil {
-				r.err = &PanicError{Op: "parse " + cfg.Name, Value: rec, Stack: debug.Stack()}
-				slog.Debug("tsbridge: recovered compiler panic", "op", r.err.(*PanicError).Op, "panic", rec, "stack", string(r.err.(*PanicError).Stack))
+				pe := &PanicError{Op: "parse " + cfg.Name, Value: rec, Stack: debug.Stack()}
+				slog.Debug("tsbridge: recovered compiler panic", "op", pe.Op, "panic", rec, "stack", string(pe.Stack))
+				r.err = pe
 			}
 			done <- r
 		}()
