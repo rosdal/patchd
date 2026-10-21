@@ -1,6 +1,7 @@
 package tsbridge
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/microsoft/typescript-go/shim/ast"
@@ -268,6 +269,18 @@ func (p *Program) qualifiedName(c *checker.Checker, sym *ast.Symbol, receiver *a
 		sym = roots[0]
 	}
 	if receiver != nil && isMember(sym) {
+		// A static or global receiver names the value: Date.now is
+		// global:Date.now, not the DateConstructor interface's member.
+		if rs := c.GetSymbolAtLocation(receiver); rs != nil {
+			if t := resolveAlias(c, rs); t != nil {
+				rs = t
+			}
+			if rs.Flags&(ast.SymbolFlagsClass|ast.SymbolFlagsEnum|ast.SymbolFlagsNamespaceModule|ast.SymbolFlagsValueModule) != 0 || isGlobalAmbientVariable(rs) {
+				if prefix := p.qualifiedName(c, rs, nil); prefix != "" {
+					return prefix + "." + sym.Name
+				}
+			}
+		}
 		if t := c.GetTypeAtLocation(receiver); t != nil {
 			owner := t.Symbol()
 			if a := t.Alias(); a != nil && a.Symbol() != nil {
@@ -311,7 +324,20 @@ func (p *Program) qualifiedName(c *checker.Checker, sym *ast.Symbol, receiver *a
 			if id := p.fileOf[sf]; id != 0 {
 				file = p.files[id-1]
 			}
+			// Top-level declarations a module doesn't export with the export
+			// keyword (the namespace behind `export = e`) have no parent
+			// symbol; their module is the file.
+			if module == nil && ast.IsExternalModule(sf) && !inGlobalAugmentation(decl) {
+				module = sf.AsNode().Symbol()
+			}
 		}
+	}
+
+	// Anonymous functions and classes have compiler-made names; name them by
+	// where they are, which is unique and readable: "(anonymous 12:5)".
+	if isInternalName(names[len(names)-1]) && decl != nil && file != nil {
+		line, col := file.Position(p.rangeOf(decl, ast.GetSourceFileOfNode(decl)).Pos)
+		names[len(names)-1] = fmt.Sprintf("(anonymous %d:%d)", line, col)
 	}
 
 	if module != nil {
@@ -335,7 +361,7 @@ func (p *Program) qualifiedName(c *checker.Checker, sym *ast.Symbol, receiver *a
 	if file == nil || file.Lib {
 		return "global:" + strings.Join(names, ".")
 	}
-	if module == nil && file.Declaration {
+	if module == nil && (file.Declaration || inGlobalAugmentation(decl)) {
 		return "global:" + strings.Join(names, ".")
 	}
 	if file.Package != nil {
@@ -397,15 +423,51 @@ func ambientPrefix(name string, file *File) string {
 }
 
 // publicPackageName maps a types package to the package it types:
-// @types/express -> express, @types/babel__core -> @babel/core.
+// @types/express -> express, @types/babel__core -> @babel/core. Packages
+// that only hold another package's internal types take that package's name.
 func publicPackageName(name string) string {
 	if bare, ok := strings.CutPrefix(name, "@types/"); ok {
+		name = bare
 		if scope, pkg, ok := strings.Cut(bare, "__"); ok {
-			return "@" + scope + "/" + pkg
+			name = "@" + scope + "/" + pkg
 		}
-		return bare
+	}
+	if public, ok := internalTypesPackages[name]; ok {
+		return public
 	}
 	return name
+}
+
+// internalTypesPackages are types packages users never import directly; their
+// declarations are named after the package that exposes them (ADR 0008).
+var internalTypesPackages = map[string]string{
+	"express-serve-static-core": "express",
+}
+
+// isGlobalAmbientVariable reports a variable declared in global scope by a
+// declaration file: Date, JSON, console, process, Buffer.
+func isGlobalAmbientVariable(s *ast.Symbol) bool {
+	if s.Flags&ast.SymbolFlagsVariable == 0 || s.ValueDeclaration == nil {
+		return false
+	}
+	sf := ast.GetSourceFileOfNode(s.ValueDeclaration)
+	if sf == nil || !sf.IsDeclarationFile {
+		return false
+	}
+	if inGlobalAugmentation(s.ValueDeclaration) {
+		return true
+	}
+	return s.Parent == nil && !ast.IsExternalModule(sf)
+}
+
+// inGlobalAugmentation reports whether decl sits inside `declare global { }`.
+func inGlobalAugmentation(decl *ast.Node) bool {
+	for n := decl; n != nil; n = n.Parent {
+		if n.Kind == ast.KindModuleDeclaration && ast.IsGlobalScopeAugmentation(n) {
+			return true
+		}
+	}
+	return false
 }
 
 func reverse(s []string) {

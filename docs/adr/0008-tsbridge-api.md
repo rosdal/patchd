@@ -79,13 +79,13 @@ local:<file>#<path>              code in the repo
 global:<path>                    globals from lib.*.d.ts and global declarations
 ```
 
-- **Package.** The npm package that declares the symbol, from the nearest `package.json` above the declaration file. Types packages are named after the package they type: `@types/express` is `express`, `@types/babel__core` is `@babel/core`. An ambient `declare module "m"` names package `m`.
+- **Package.** The npm package that declares the symbol, from the nearest `package.json` above the declaration file. Types packages are named after the package they type: `@types/express` is `express`, `@types/babel__core` is `@babel/core`. Types packages that only hold another package's internals take that package's name (`express-serve-static-core` is `express`); the list lives in `internalTypesPackages` in `resolve.go`. An ambient `declare module "m"` names package `m`.
 - **Node built-ins** are `node:<module>.<path>`, whether declared as `"fs"` or `"node:fs"` in `@types/node`: `node:child_process.exec`, `node:fs.readFileSync`, `node:fs/promises.readFile`.
 - **Export path.** The symbol's name, prefixed by its containers up to the module: `Client.query` for a method of exported class `Client`, `ns.fn` for a function in a namespace. Default exports are `default`. For a module written `export = e`, `e` is the module itself: `e`'s members are top-level (`express:Response`) and `e` is `default` (`express:default`).
-- **Members reached through a receiver.** For a method call, the owner is the type of the receiver as the code sees it, not the interface that happens to declare the member. `res.redirect()` on an Express `Response` is `express:Response.redirect`, even though `@types/express-serve-static-core` declares `redirect`.
+- **Members reached through a receiver.** For a method call, the owner is the type of the receiver as the code sees it, not the interface that happens to declare the member. `res.redirect()` on an Express `Response` is `express:Response.redirect`, even though `@types/express-serve-static-core` declares `redirect`. When the receiver is itself a named static value (a class, enum, namespace, or a global variable such as `Date`, `JSON`, `console`), the value names the owner: `Date.now()` is `global:Date.now`, not `global:DateConstructor.now`.
 - **Local code** is `local:<path relative to the workspace root>#<export path>`: `local:src/db.ts#runQuery`, `local:src/db.ts#Db.query`.
-- **Globals** are `global:<path>`: `global:encodeURIComponent`, `global:JSON.parse`, `global:Array.map`, `global:Console.log`.
-- Compiler-internal names (the object of `module.exports = {…}`) are not part of a path.
+- **Globals** are `global:<path>`: `global:encodeURIComponent`, `global:JSON.parse`, `global:console.log`, `global:Array.map` (a method on an array value).
+- Compiler-internal names (the object of `module.exports = {…}`) are not part of a path; an anonymous function or class is named by its position, `local:src/a.ts#(anonymous 12:5)`.
 
 Options that lost:
 

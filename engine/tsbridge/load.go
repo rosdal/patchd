@@ -143,6 +143,12 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 func (p *Program) configure(parsed *tsoptions.ParsedCommandLine, opts LoadOptions) {
 	o := parsed.CompilerOptions()
 	o.NoEmit = core.TSTrue
+	if o.Types == nil {
+		// TypeScript 6 stopped including every @types package by default;
+		// code written for TypeScript 5 relies on it (@types/node above all).
+		// Without "types" in the config, include them all, as tsc 5 did.
+		o.Types = []string{"*"}
+	}
 	if opts.SkipLibCheck == nil || *opts.SkipLibCheck {
 		o.SkipLibCheck = core.TSTrue
 	}
