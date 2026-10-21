@@ -16,6 +16,7 @@ import (
 // Compiler diagnostic codes config parsing reacts to.
 const (
 	codeFileNotFound    = 6053  // File '{0}' not found. (only reported for extends)
+	codeCannotReadFile  = 5083  // Cannot read file '{0}'. (an extends target that does not exist)
 	codeFilesListEmpty  = 18002 // The 'files' list in config file '{0}' is empty.
 	codeNoInputsFound   = 18003 // No inputs were found in config file '{0}'.
 	maxConfigProblemMsg = 3
@@ -66,8 +67,12 @@ func parseConfig(host tsoptions.ParseConfigHost, configPath, root string) (*tsop
 			continue
 		}
 		seen[msg] = true
-		switch d.Code() {
-		case codeFileNotFound:
+		code := d.Code()
+		if code == codeCannotReadFile && len(d.MessageArgs()) > 0 && d.MessageArgs()[0] == configPath {
+			code = 0 // the config itself, not an extends target
+		}
+		switch code {
+		case codeFileNotFound, codeCannotReadFile:
 			target := ""
 			if args := d.MessageArgs(); len(args) > 0 {
 				target = args[0]

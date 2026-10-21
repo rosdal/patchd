@@ -3,7 +3,9 @@ package tsbridge
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"path"
+	"runtime/debug"
 	"slices"
 	"sort"
 	"strings"
@@ -53,6 +55,9 @@ type typeEntry struct {
 	t *checker.Type
 	c *checker.Checker // types from different checkers can't be mixed
 }
+
+// testHookAfterParse lets tests inject a compiler panic.
+var testHookAfterParse func()
 
 // Load parses, binds and type-checks one project. It returns an error only
 // when nothing usable could be loaded; problems that leave a usable program
@@ -105,11 +110,15 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 		var r result
 		defer func() {
 			if rec := recover(); rec != nil {
-				r.err = &PanicError{Op: "parse " + cfg.Name, Value: rec}
+				r.err = &PanicError{Op: "parse " + cfg.Name, Value: rec, Stack: debug.Stack()}
+				slog.Debug("tsbridge: recovered compiler panic", "op", r.err.(*PanicError).Op, "panic", rec, "stack", string(r.err.(*PanicError).Stack))
 			}
 			done <- r
 		}()
 		r.prog = compiler.NewProgram(compiler.ProgramOptions{Config: parsed, Host: host})
+		if testHookAfterParse != nil {
+			testHookAfterParse()
+		}
 	}()
 	select {
 	case r := <-done:
