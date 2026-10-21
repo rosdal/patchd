@@ -26,11 +26,11 @@ The starting point: no files, no `git init`, nothing installed. The detailed che
 
 **Goal:** a clean, reproducible monorepo that every later version builds on.
 
-**Status (2026-10-20):** tagged `v0.1.0`. Still open: branch protection, required checks and secret scanning on `main` (not available for private repos on the GitHub Free plan), Go tools as `go tool` directives, and the product spec in the repo. `go.mod` pins Go through its `go 1.27.0` line, because Go drops a `toolchain` line that matches it. The large spike repo was microsoft/vscode, a single large program rather than a monorepo (see ADR 0007).
+**Status (2026-10-20):** tagged `v0.1.0`. The repo is public, so `main` is protected by a ruleset (pull requests, required `ci` checks, linear history, signed commits, no force-push or deletion), and secret scanning, push protection and private vulnerability reporting are on. Still open: Go tools as `go tool` directives, and the product spec in the repo. `go.mod` pins Go through its `go 1.27.0` line, because Go drops a `toolchain` line that matches it. The large spike repo was microsoft/vscode, a single large program rather than a monorepo (see ADR 0007).
 
 **Toolchain and workspace**
 
-- [ ] Git repo initialised, `main` branch, remote on GitHub (private), branch protection on `main`.
+- [x] Git repo initialised, `main` branch, remote on GitHub (private), branch protection on `main`.
 - [x] Node.js LTS pinned in `.nvmrc` / `.node-version`; pnpm pinned through the `packageManager` field in the root `package.json`.
 - [x] pnpm workspace (`pnpm-workspace.yaml`) covering `web/`, `ide/vscode/` and `tools/*`.
 - [x] Root `package.json` scripts act as the task runner for the whole repo, Go included: `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm gen`, `pnpm eval`.
@@ -58,7 +58,7 @@ The starting point: no files, no `git init`, nothing installed. The detailed che
 - [x] `ci.yml`: install pnpm and Go with caches → lint → unit tests → build binary → build web.
 - [x] Matrix: Linux and macOS (developers' machines); Windows later.
 - [x] Dependabot or Renovate for Go modules, npm packages and Actions.
-- [ ] OpenSSF Scorecard and secret scanning enabled on the repo.
+- [x] OpenSSF Scorecard and secret scanning enabled on the repo.
 - [x] `release.yml` skeleton with GoReleaser in snapshot mode (no publishing yet).
 
 **Docs and governance**
