@@ -24,6 +24,7 @@
     "gen": "node tools/scripts/gen.mjs",
     "targets:fetch": "node tools/scripts/fetch-targets.mjs",
     "tsgo:update": "node tools/scripts/tsgo-update.mjs",
+    "oracle": "node tools/tsoracle/run.mjs",
     "eval": "node tools/scripts/eval.mjs",
     "clean": "node tools/scripts/clean.mjs",
     "prepare": "lefthook install"
