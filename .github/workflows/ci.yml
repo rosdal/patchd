@@ -29,10 +29,11 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+          cache-dependency-path: |
+            go.sum
+            tools/go.sum
       - run: pnpm install --frozen-lockfile
-      - uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
-        with:
-          version: v2.15.0
+      - run: pnpm lint:go # golangci-lint pinned in tools/go.mod
       - run: pnpm lint:ts
       - run: pnpm format:check
       - run: pnpm test

@@ -10,4 +10,5 @@ engine/testdata/
 # exported from the design docs; edited at the source, not here
 docs/ROADMAP.md
 docs/TECHNICAL_DESIGN.md
+docs/PRODUCT_SPEC.md
 docs/todo/

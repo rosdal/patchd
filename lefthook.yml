@@ -3,7 +3,7 @@ pre-commit:
   commands:
     gofumpt:
       glob: "*.go"
-      run: gofumpt -l -w {staged_files}
+      run: go tool -modfile=tools/go.mod gofumpt -l -w {staged_files}
       stage_fixed: true
     prettier:
       glob: "*.{ts,tsx,js,mjs,json,md,yml,yaml,css}"

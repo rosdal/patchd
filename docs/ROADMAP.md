@@ -26,7 +26,7 @@ The starting point: no files, no `git init`, nothing installed. The detailed che
 
 **Goal:** a clean, reproducible monorepo that every later version builds on.
 
-**Status (2026-10-20):** tagged `v0.1.0`. The repo is public, so `main` is protected by a ruleset (pull requests, required `ci` checks, linear history, signed commits, no force-push or deletion), and secret scanning, push protection and private vulnerability reporting are on. Still open: Go tools as `go tool` directives, and the product spec in the repo. `go.mod` pins Go through its `go 1.27.0` line, because Go drops a `toolchain` line that matches it. The large spike repo was microsoft/vscode, a single large program rather than a monorepo (see ADR 0007).
+**Status (2026-10-20):** tagged `v0.1.0`. The repo is public, so `main` is protected by a ruleset (pull requests, required `ci` checks, linear history, signed commits, no force-push or deletion), and secret scanning, push protection and private vulnerability reporting are on. The Go tools are pinned as `go tool` directives in a separate `tools/go.mod`, which keeps their dependencies out of the main module, and the product spec is in `docs/PRODUCT_SPEC.md`. `go.mod` pins Go through its `go 1.27.0` line, because Go drops a `toolchain` line that matches it. The large spike repo was microsoft/vscode, a single large program rather than a monorepo (see ADR 0007).
 
 **Toolchain and workspace**
 
@@ -35,7 +35,7 @@ The starting point: no files, no `git init`, nothing installed. The detailed che
 - [x] pnpm workspace (`pnpm-workspace.yaml`) covering `web/`, `ide/vscode/` and `tools/*`.
 - [x] Root `package.json` scripts act as the task runner for the whole repo, Go included: `pnpm dev`, `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm gen`, `pnpm eval`.
 - [x] Go module `github.com/patchd/patchd` with the Go version pinned in `go.mod` (`toolchain` line).
-- [ ] Go tools pinned with `go tool` directives in `go.mod` (sqlc, goose, buf plugins, golangci-lint where supported).
+- [x] Go tools pinned with `go tool` directives in `go.mod` (sqlc, goose, buf plugins, golangci-lint where supported).
 
 **Skeleton code**
 
@@ -65,7 +65,7 @@ The starting point: no files, no `git init`, nothing installed. The detailed che
 
 - [x] `README.md` (what Patchd is, how to build), `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE` (decision: AGPL-3.0 or source-available; see open questions).
 - [x] `docs/adr/` with the first Architecture Decision Records: Go + typescript-go, Postgres-only, pnpm as task runner, own agent loop.
-- [ ] Product spec and technical design linked from the README.
+- [x] Product spec and technical design linked from the README.
 
 **Spikes (time-boxed, 1–2 days each)**
 

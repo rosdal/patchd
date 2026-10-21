@@ -6,14 +6,12 @@ Patchd reviews TypeScript and JavaScript pull requests. A dataflow engine built 
 
 ## Prerequisites
 
-| Tool          | Version                                                            |
-| ------------- | ------------------------------------------------------------------ |
-| Git           | 2.40+                                                              |
-| Node.js       | the version in `.node-version` (24 LTS)                            |
-| pnpm          | the version in `package.json` `packageManager` (`corepack enable`) |
-| Go            | the version in `go.mod`                                            |
-| golangci-lint | v2 (CI pins the exact version)                                     |
-| gofumpt       | latest, for `pnpm format`                                          |
+| Tool    | Version                                                            |
+| ------- | ------------------------------------------------------------------ |
+| Git     | 2.40+                                                              |
+| Node.js | the version in `.node-version` (24 LTS)                            |
+| pnpm    | the version in `package.json` `packageManager` (`corepack enable`) |
+| Go      | the version in `go.mod`                                            |
 
 ## Build and test
 
@@ -24,6 +22,8 @@ pnpm test           # go test ./... and the TypeScript tests
 pnpm lint           # golangci-lint, oxlint, tsc, prettier --check
 ./bin/patchd version
 ```
+
+Go tools (golangci-lint, gofumpt, buf and its Go plugins, sqlc, goose) are pinned in `tools/go.mod` and run through `go tool`, so there is nothing else to install.
 
 pnpm is the only task runner, for Go as well as TypeScript (see [ADR 0003](docs/adr/0003-pnpm-task-runner.md)). `pnpm format` rewrites Go and TypeScript files; `pnpm gen` and `pnpm eval` are placeholders until code generation and the eval harness exist.
 
@@ -47,6 +47,6 @@ pnpm is the only task runner, for Go as well as TypeScript (see [ADR 0003](docs/
 
 - [Technical design](docs/TECHNICAL_DESIGN.md)
 - [Roadmap](docs/ROADMAP.md)
-- Product spec: not yet in the repo
+- [Product spec](docs/PRODUCT_SPEC.md)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to work on Patchd and [SECURITY.md](SECURITY.md) to report a vulnerability.

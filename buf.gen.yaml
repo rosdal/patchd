@@ -5,10 +5,11 @@ managed:
     - file_option: go_package_prefix
       value: github.com/patchd/patchd/api/gen
 plugins:
-  - remote: buf.build/protocolbuffers/go
+  # Go plugins come from tools/go.mod, so their versions are pinned with the other Go tools.
+  - local: [go, tool, -modfile=tools/go.mod, protoc-gen-go]
     out: api/gen
     opt: paths=source_relative
-  - remote: buf.build/connectrpc/go
+  - local: [go, tool, -modfile=tools/go.mod, protoc-gen-connect-go]
     out: api/gen
     opt: paths=source_relative
   - remote: buf.build/bufbuild/es
