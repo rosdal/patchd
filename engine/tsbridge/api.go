@@ -23,10 +23,10 @@ type Workspace struct {
 
 // Package is a workspace package or an installed npm package.
 type Package struct {
-	Name    string
-	Version string
-	Dir     string // absolute
-	Config  string // workspace packages: config path of the project owning the package's files, if any
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+	Dir     string `json:"dir"`              // absolute
+	Config  string `json:"config,omitempty"` // workspace packages: config path of the project owning the package's files, if any
 }
 
 // ProjectConfig is one project to load: a tsconfig/jsconfig, or a synthesised

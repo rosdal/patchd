@@ -199,10 +199,8 @@ func answerAt(p *tsbridge.Program, file string, q positionQuery) typeAnswer {
 	if s, ok := p.SymbolOf(n); ok {
 		a.Symbol = p.SymbolName(s)
 		a.QualifiedName = p.QualifiedName(s)
+		// An alias whose target can't be found has no declaration to show.
 		a.Declarations = p.Declarations(p.ResolveAlias(s))
-		if len(a.Declarations) == 0 {
-			a.Declarations = p.Declarations(s)
-		}
 	}
 	if t := p.TypeOf(n); t != 0 {
 		a.Type = p.TypeString(t)

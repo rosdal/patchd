@@ -44,11 +44,16 @@ func (p *Program) locations(decls []*ast.Node) []Location {
 	return out
 }
 
-// SymbolName returns a symbol's name as declared ("default" for default exports).
+// SymbolName returns a symbol's name as declared ("default" for default
+// exports). Compiler-made names are spelled as tsc spells them: "__function",
+// "__call", "__index".
 func (p *Program) SymbolName(s SymbolID) string {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if sym := p.symbol(s); sym != nil {
+		if isInternalName(sym.Name) {
+			return "__" + sym.Name[1:]
+		}
 		return sym.Name
 	}
 	return ""

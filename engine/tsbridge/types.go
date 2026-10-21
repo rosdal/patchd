@@ -148,14 +148,44 @@ func (p *Program) typeOfLocked(n NodeID) TypeID {
 		return 0
 	}
 	var t *checker.Type
-	if ast.IsDeclaration(node) && node.Name() != nil && node.Kind != ast.KindSourceFile {
+	switch {
+	case ast.IsDeclaration(node) && node.Name() != nil && node.Kind != ast.KindSourceFile:
 		t = c.GetTypeAtLocation(node.Name())
-	} else {
+	case isTypeName(node):
+		// A name in a type position (Props in `p: Props<T>`) is the declared
+		// type of what it names, as in tsc; the checker would say any.
+		if s := c.GetSymbolAtLocation(node); s != nil {
+			if r := resolveAlias(c, s); r != nil {
+				s = r
+			}
+			t = c.GetDeclaredTypeOfSymbol(s)
+		}
+	}
+	if t == nil {
 		t = c.GetTypeAtLocation(node)
 	}
 	id := p.internType(c, t)
 	p.typeOf[n] = id
 	return id
+}
+
+// isTypeName reports an identifier naming a type in a type reference, an
+// implements/extends clause of an interface, or a qualified type name.
+func isTypeName(node *ast.Node) bool {
+	if node.Kind != ast.KindIdentifier || node.Parent == nil {
+		return false
+	}
+	parent := node.Parent
+	for parent.Kind == ast.KindQualifiedName && parent.AsQualifiedName().Right == node {
+		node, parent = parent, parent.Parent
+	}
+	switch parent.Kind {
+	case ast.KindTypeReference:
+		return parent.AsTypeReferenceNode().TypeName == node
+	case ast.KindExpressionWithTypeArguments:
+		return ast.IsPartOfTypeNode(parent)
+	}
+	return false
 }
 
 // TypeString returns a type as the compiler displays it.
