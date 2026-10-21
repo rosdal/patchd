@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 func available() uint64 {
@@ -24,4 +25,12 @@ func available() uint64 {
 		}
 	}
 	return 0
+}
+
+func peakRSS() uint64 {
+	var ru syscall.Rusage
+	if syscall.Getrusage(syscall.RUSAGE_SELF, &ru) != nil {
+		return 0
+	}
+	return uint64(ru.Maxrss) * 1024 //nolint:gosec // Maxrss is non-negative, in KiB on Linux
 }

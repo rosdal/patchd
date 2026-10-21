@@ -11,3 +11,11 @@ func available() uint64 {
 	}
 	return n
 }
+
+func peakRSS() uint64 {
+	var ru unix.Rusage
+	if unix.Getrusage(unix.RUSAGE_SELF, &ru) != nil {
+		return 0
+	}
+	return uint64(ru.Maxrss) //nolint:gosec // Maxrss is non-negative, in bytes on macOS
+}

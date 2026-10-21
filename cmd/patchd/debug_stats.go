@@ -31,6 +31,7 @@ type statsReport struct {
 	WalkMS     float64                           `json:"walk_ms"`
 	WallMS     float64                           `json:"wall_ms"`
 	PeakHeap   uint64                            `json:"peak_heap_bytes"`
+	PeakRSS    uint64                            `json:"peak_rss_bytes"`
 	LoadAll    tsbridge.LoadAllStats             `json:"load_all"`
 }
 
@@ -128,6 +129,7 @@ func newDebugStatsCmd(f *debugFlags) *cobra.Command {
 				rep.Rate = float64(rep.Resolved) / float64(rep.Calls)
 			}
 			rep.WallMS = float64(time.Since(start).Microseconds()) / 1000
+			rep.PeakRSS = tsbridge.ProcessPeakRSS()
 			out := cmd.OutOrStdout()
 			tw := &textWriter{w: out}
 			if f.format == "json" {
@@ -146,7 +148,7 @@ func newDebugStatsCmd(f *debugFlags) *cobra.Command {
 			}
 			tw.printf("time:        discover %.0f ms, parse %.0f ms, bind %.0f ms, check %.0f ms, walk %.0f ms (summed); wall %.0f ms\n",
 				rep.DiscoverMS, rep.ParseMS, rep.BindMS, rep.CheckMS, rep.WalkMS, rep.WallMS)
-			tw.printf("peak heap:   %s\n", formatBytes(rep.PeakHeap))
+			tw.printf("peak heap:   %s (process peak RSS %s)\n", formatBytes(rep.PeakHeap), formatBytes(rep.PeakRSS))
 			return tw.err
 		},
 	}

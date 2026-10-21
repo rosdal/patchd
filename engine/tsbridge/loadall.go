@@ -246,3 +246,7 @@ func PeakHeap(f func()) uint64 {
 	f()
 	return s.stop()
 }
+
+// ProcessPeakRSS returns this process's peak resident memory in bytes (0
+// when the platform doesn't say), for benchmarks and debug output.
+func ProcessPeakRSS() uint64 { return sysmem.PeakRSS() }

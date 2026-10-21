@@ -20,6 +20,8 @@ ide/vscode/out/
 .env.*
 !.env.example
 eval-results.json
+bench-results.json
+bench-results.txt
 
 # OS / editors
 .DS_Store

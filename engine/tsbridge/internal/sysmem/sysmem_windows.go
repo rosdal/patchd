@@ -28,3 +28,27 @@ func available() uint64 {
 	}
 	return m.availPhys
 }
+
+type processMemoryCounters struct {
+	cb                         uint32
+	pageFaultCount             uint32
+	peakWorkingSetSize         uintptr
+	workingSetSize             uintptr
+	quotaPeakPagedPoolUsage    uintptr
+	quotaPagedPoolUsage        uintptr
+	quotaPeakNonPagedPoolUsage uintptr
+	quotaNonPagedPoolUsage     uintptr
+	pagefileUsage              uintptr
+	peakPagefileUsage          uintptr
+}
+
+var procGetProcessMemoryInfo = windows.NewLazySystemDLL("psapi.dll").NewProc("GetProcessMemoryInfo")
+
+func peakRSS() uint64 {
+	var c processMemoryCounters
+	c.cb = uint32(unsafe.Sizeof(c))
+	if r, _, _ := procGetProcessMemoryInfo.Call(uintptr(windows.CurrentProcess()), uintptr(unsafe.Pointer(&c)), uintptr(c.cb)); r == 0 { //nolint:gosec // the API takes a pointer to the struct
+		return 0
+	}
+	return uint64(c.peakWorkingSetSize)
+}
