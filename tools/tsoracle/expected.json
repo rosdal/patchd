@@ -70,8 +70,8 @@
     "id": "jsdoc-object-type",
     "reason": "TypeScript 7 reads JSDoc {object} as the object type; TypeScript 6 as any",
     "file": "\\.[cm]?js$",
-    "ts6": "\bany\b",
-    "ts7": "\bobject\b"
+    "ts6": "\\bany\\b",
+    "ts7": "\\bobject\\b"
   },
   {
     "id": "js-this-alias",

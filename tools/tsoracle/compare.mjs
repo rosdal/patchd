@@ -20,6 +20,8 @@ export function normalizeType(s) {
     // from a file in another resolution mode.
     .replace(/(import\("[^"]*"), \{ with: \{ "resolution-mode": "(import|require)" \} \}\)/g, "$1)")
     .replace(/import\("[^"]*"\)\./g, "")
+    // TypeScript 7 keeps the source's quotes in indexed access types.
+    .replace(/\['([^'"]*)'\]/g, '["$1"]')
     // A truncated union shows its first and last members, which depend on
     // type IDs: keep only how many members it has.
     .replace(
@@ -120,6 +122,10 @@ function group(open, inner) {
   };
   if (open === "{") {
     const members = splitTop(inner, ";").filter((m) => m !== "");
+    // An object type cut short shows some members and "... N more ...": which
+    // ones depends on type IDs, so keep only how many there are.
+    const elided = members.map((m) => /^\.\.\. (\d+) more \.\.\.$/.exec(m)).find(Boolean);
+    if (elided) return ` <${members.length - 1 + Number(elided[1])} members> `;
     return ` ${members.map(member).toSorted().join("; ")} `;
   }
   return splitTop(inner, ",").map(member).join(", ");
@@ -159,7 +165,10 @@ export function matchesExpected(e, ts6, ts7, d6, d7) {
 }
 
 // truncated reports a type string the compiler cut short ("...;" or "...").
-const truncated = (t = "") => t.endsWith("...") || t.endsWith("...; }");
+// truncated reports a type the printer cut short: an ellipsis before ";", a
+// closing bracket or the end (spreads like ...args are followed by a name).
+const truncated = (t = "") =>
+  /\.\.\.(?=;|\s*[}>\])]|$)/.test(t.replace(/\.\.\. \d+ more \.\.\./g, ""));
 
 export function classify(ts6, ts7, root, expected) {
   if (ts6.error || ts7.error) return { kind: "unanswered", why: ts6.error || ts7.error };

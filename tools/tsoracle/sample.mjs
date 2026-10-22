@@ -167,7 +167,7 @@ function innermost(sf, pos) {
 }
 
 function createProgram(project) {
-  let parsedReferences;
+  let references;
   let options;
   let rootNames;
   if (project.synthesised) {
@@ -191,7 +191,7 @@ function createProgram(project) {
     );
     if (!parsed) throw new Error(`TypeScript 6 cannot parse ${configPath}`);
     options = parsed.options;
-    parsedReferences = parsed.projectReferences;
+    references = parsed.projectReferences;
     const owned = new Set(project.files.map(abs).map(norm));
     rootNames = parsed.fileNames.filter((f) => owned.has(norm(f)) || /\.d\.[mc]?ts$/.test(f));
     for (const f of project.files.map(abs))
@@ -204,13 +204,11 @@ function createProgram(project) {
   options.ignoreDeprecations = "6.0";
   options.traceResolution = false;
   options.extendedDiagnostics = false;
-  // Like tsbridge: imports into referenced projects use their source.
-  options.useSourceOfProjectReferenceRedirect = true;
-  return ts.createProgram({
-    rootNames,
-    options,
-    projectReferences: project.synthesised ? undefined : parsedReferences,
-  });
+  // Like tsbridge, imports into referenced projects use their source, not
+  // their (usually unbuilt) outputs. createProgram reads this from the host.
+  const host = ts.createCompilerHost(options);
+  host.useSourceOfProjectReferenceRedirect = () => true;
+  return ts.createProgram({ rootNames, options, host, projectReferences: references });
 }
 
 function abs(p) {
