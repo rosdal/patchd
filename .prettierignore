@@ -6,6 +6,8 @@ ide/vscode/out/
 store/gen/
 api/gen/
 engine/testdata/
+engine/tsbridge/testdata/
+.patchd/
 **/*.go
 # exported from the design docs; edited at the source, not here
 docs/ROADMAP.md

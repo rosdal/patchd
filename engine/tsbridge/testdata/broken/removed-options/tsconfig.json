@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "paths": { "@lib/*": ["lib/*"] }
+  },
+  "include": ["src", "lib"]
+}

@@ -1,0 +1,82 @@
+# Reference repos for tsbridge (v0.2): loaded, type-checked, sampled by the type
+# oracle and benchmarked. They are analysed, never run: `pnpm targets:fetch`
+# installs dependencies with lifecycle scripts disabled.
+#
+# Fields: id, url, commit (full SHA), shape, install, tsconfig ("auto" to use
+# discovery, or a path relative to the clone).
+#
+# install runs in the clone: pnpm commands joined with "&&", or "none". Every
+# install uses pnpm with --ignore-scripts. Repos that ship an npm lockfile are
+# converted with `pnpm import` so versions stay pinned; repos without their own
+# pnpm-workspace.yaml pass --ignore-workspace, because the clones live inside
+# this repo and pnpm would otherwise install into Patchd's workspace.
+
+- id: nodegoat
+  url: https://github.com/OWASP/NodeGoat
+  commit: c5cb68a7084e4ae7dcc60e6a98768720a81841e8
+  shape: small-express
+  install: pnpm import --ignore-workspace && pnpm install --frozen-lockfile --ignore-scripts --ignore-workspace
+  tsconfig: auto
+
+- id: juice-shop
+  url: https://github.com/juice-shop/juice-shop
+  commit: 399fba76194305a312693eee44f4df64bdf0c3ce
+  shape: express-angular
+  install: pnpm install --ignore-scripts --ignore-workspace # no lockfile in the repo
+  tsconfig: auto
+
+- id: commerce
+  url: https://github.com/vercel/commerce
+  commit: f7521d57d29f0eb3d23c1399cf9bb299d61fcd21
+  shape: nextjs-app-router
+  install: pnpm install --frozen-lockfile --ignore-scripts --ignore-workspace
+  tsconfig: auto
+
+- id: nestjs-realworld
+  url: https://github.com/lujakob/nestjs-realworld-example-app
+  commit: c1c2cc4e448b279ff083272df1ac50d20c3304fa
+  shape: nestjs
+  install: pnpm install --ignore-scripts --ignore-workspace # its npm lockfile points at a dead private registry
+  tsconfig: auto
+
+- id: pnpm
+  url: https://github.com/pnpm/pnpm
+  commit: cbe5accc7ace6812e1770f6301d2742c91381c85
+  shape: pnpm-monorepo-references
+  install: pnpm install --frozen-lockfile --ignore-scripts
+  tsconfig: auto
+
+- id: create-t3-turbo
+  url: https://github.com/t3-oss/create-t3-turbo
+  commit: 8f945b7bb3bfb3ca8358d48b1ff0214079bc11ee
+  shape: turborepo
+  install: pnpm install --frozen-lockfile --ignore-scripts
+  tsconfig: auto
+
+- id: express
+  url: https://github.com/expressjs/express
+  commit: 0dee2c52c7c873498f8ed7d8ee4ddd0a04d3ada8
+  shape: plain-js
+  install: pnpm install --ignore-scripts --ignore-workspace # no lockfile in the repo
+  tsconfig: auto
+
+- id: zod
+  url: https://github.com/colinhacks/zod
+  commit: afdac65e0f80c0ccf9e8909da97c411567908b57
+  shape: heavy-generics
+  install: none # nub-only workspace (zod@workspace:* at the root) that pnpm cannot install; analysed without node_modules (TSB001)
+  tsconfig: auto
+
+- id: vscode
+  url: https://github.com/microsoft/vscode
+  commit: 052acf011dbce6b7e2e2abb89ce5ebcdf06f9e5c
+  shape: very-large
+  install: pnpm import --ignore-workspace --config.minimum-release-age=0 && pnpm install --frozen-lockfile --ignore-scripts --ignore-workspace --config.minimum-release-age=0 # analysed only, scripts off: release-age policy does not apply
+  tsconfig: src/tsconfig.json
+
+- id: execa
+  url: https://github.com/sindresorhus/execa
+  commit: e7e0664c25e3a6fa3f2162f3d7f0128a81a4b8f3
+  shape: esm-exports
+  install: pnpm install --ignore-scripts --ignore-workspace # no lockfile in the repo
+  tsconfig: auto

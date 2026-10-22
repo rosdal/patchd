@@ -14,5 +14,12 @@
     "react/react-in-jsx-scope": "off",
     "no-underscore-dangle": ["warn", { "allow": ["__PATCHD_VERSION__"] }]
   },
-  "ignorePatterns": ["**/dist/**", "**/out/**", "**/routeTree.gen.ts", "engine/testdata/**"]
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/out/**",
+    "**/routeTree.gen.ts",
+    "engine/testdata/**",
+    "engine/tsbridge/testdata/**",
+    ".patchd/**"
+  ]
 }

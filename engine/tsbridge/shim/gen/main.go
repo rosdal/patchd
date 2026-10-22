@@ -61,6 +61,7 @@ func main() {
 		"ast",
 		"bundled",
 		"checker",
+		"collections",
 		"compiler",
 		"core",
 		"scanner",

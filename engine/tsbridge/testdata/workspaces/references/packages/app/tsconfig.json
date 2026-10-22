@@ -1,0 +1,1 @@
+{ "compilerOptions": { "module": "nodenext" }, "include": ["src"], "references": [{ "path": "../core" }] }

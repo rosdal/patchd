@@ -1,0 +1,6 @@
+# The typescript-go commit tsbridge is built against (ADR 0007).
+# Change it only with `pnpm tsgo:update <commit>`; see docs/engine/tsgo-upgrades.md.
+commit=2bd066d87f5bafd315be9f40889d0a60b9e58e0b
+module=v0.0.0-20260708042240-2bd066d87f5b
+tag=typescript/v7.0.2
+npm=typescript@7.0.2

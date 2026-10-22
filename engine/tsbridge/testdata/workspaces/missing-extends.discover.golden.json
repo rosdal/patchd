@@ -1,0 +1,13 @@
+{
+  "projects": [
+    {
+      "name": "tsconfig.json",
+      "files": [
+        "src/index.ts"
+      ]
+    }
+  ],
+  "warnings": [
+    "TSB003 tsconfig.json: extends target \"@tsconfig/node20/tsconfig.json\" not found (dependencies not installed?); using the config without it"
+  ]
+}

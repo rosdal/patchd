@@ -1,0 +1,19 @@
+{
+  "projects": [
+    {
+      "name": "synthesised:.",
+      "synthesised": true,
+      "files": [
+        "index.js",
+        "lib/util.js"
+      ]
+    }
+  ],
+  "uncovered": [
+    "index.js",
+    "lib/util.js"
+  ],
+  "warnings": [
+    "TSB008 component.vue: 1 .vue file(s) skipped until framework support exists"
+  ]
+}

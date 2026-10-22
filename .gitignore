@@ -20,6 +20,8 @@ ide/vscode/out/
 .env.*
 !.env.example
 eval-results.json
+bench-results.json
+bench-results.txt
 
 # OS / editors
 .DS_Store
@@ -27,3 +29,7 @@ eval-results.json
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# tsbridge fixtures need node_modules and build directories of their own
+!engine/tsbridge/testdata/**/node_modules/
+!engine/tsbridge/testdata/**/dist/

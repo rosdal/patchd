@@ -87,16 +87,18 @@ Phase 1 builds the bottom of the analysis engine and ends with `patchd scan` fin
 
 **Goal:** Go code can load any TypeScript or JavaScript project and ask the TypeScript 7 checker about it.
 
-- [ ] `engine/tsbridge/shim`: re-export the `typescript-go` internals we need (parser, binder, checker, program, compiler options), pinned to one commit.
-- [ ] `project.go`: find and load `tsconfig.json` / `jsconfig.json`, follow `extends` and project references, handle monorepos (pnpm, npm, Yarn workspaces, Turborepo, Nx layouts).
-- [ ] JavaScript-only projects: synthesise a default config (`allowJs`, `checkJs: false`) so plain JS repos still get types from inference and `@types`.
-- [ ] `ast.go`: a stable, Patchd-owned view of syntax nodes (kind, children, source range) so nothing outside `tsbridge` sees compiler types.
-- [ ] `types.go`: symbol of a node, type of an expression, call signature resolution, type-to-string, "is this type assignable to `X`".
-- [ ] `resolve.go`: resolve a call or property access to its declaration, including through re-exports, aliases and `import type`.
-- [ ] Handle missing `node_modules` gracefully: analysis still runs, types from unresolved packages become `unknown`, and a warning is recorded.
-- [ ] Parallel type-checking across projects in a monorepo with a configurable worker count.
-- [ ] `patchd debug types <file>:<line>:<col>` developer command printing the type at a position.
-- [ ] Benchmarks: type-check time and peak memory on 3 reference repos, tracked in CI.
+**Status (2026-10-22):** built on branch `feat/tsbridge-v0.2`; tag `v0.2.0` follows the merge. The 10 reference repos in `eval/targets/reference-repos.yaml` load and type-check without panics or hangs; against TypeScript 6 on 500 sampled positions each, the real-match rate is 98.4–100% per repo. Deviations from this list: the files are `discover.go`, `load.go`, `syntax.go`, `types.go` and `resolve.go` (see [docs/engine/tsbridge.md](engine/tsbridge.md)); imports from packages that are not installed are `any`, as the checker types them, with a `TSB001` warning; benchmarks cover all 10 repos; and the debug command is checked by the type oracle on 5,000 positions instead of 50 against VS Code.
+
+- [x] `engine/tsbridge/shim`: re-export the `typescript-go` internals we need (parser, binder, checker, program, compiler options), pinned to one commit.
+- [x] `project.go`: find and load `tsconfig.json` / `jsconfig.json`, follow `extends` and project references, handle monorepos (pnpm, npm, Yarn workspaces, Turborepo, Nx layouts).
+- [x] JavaScript-only projects: synthesise a default config (`allowJs`, `checkJs: false`) so plain JS repos still get types from inference and `@types`.
+- [x] `ast.go`: a stable, Patchd-owned view of syntax nodes (kind, children, source range) so nothing outside `tsbridge` sees compiler types.
+- [x] `types.go`: symbol of a node, type of an expression, call signature resolution, type-to-string, "is this type assignable to `X`".
+- [x] `resolve.go`: resolve a call or property access to its declaration, including through re-exports, aliases and `import type`.
+- [x] Handle missing `node_modules` gracefully: analysis still runs, types from unresolved packages become `unknown`, and a warning is recorded.
+- [x] Parallel type-checking across projects in a monorepo with a configurable worker count.
+- [x] `patchd debug types <file>:<line>:<col>` developer command printing the type at a position.
+- [x] Benchmarks: type-check time and peak memory on 3 reference repos, tracked in CI.
 
 **Exit criteria:** loads and type-checks 10 popular open-source TypeScript repos without crashing; the debug command matches what VS Code shows for 50 sampled positions.
 

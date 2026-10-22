@@ -1,0 +1,17 @@
+{
+  "projects": [
+    {
+      "name": "synthesised:.",
+      "synthesised": true,
+      "files": [
+        "src/index.ts"
+      ]
+    }
+  ],
+  "uncovered": [
+    "src/index.ts"
+  ],
+  "warnings": [
+    "TSB002 tsconfig.json: invalid JSON (',' expected.); its files fall back to a synthesised project"
+  ]
+}

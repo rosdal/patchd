@@ -1,0 +1,21 @@
+{
+  "layouts": [
+    "npm"
+  ],
+  "packages": [
+    {
+      "name": "web",
+      "version": "0.1.0",
+      "dir": "apps/web",
+      "config": "apps/web/tsconfig.json"
+    }
+  ],
+  "projects": [
+    {
+      "name": "apps/web/tsconfig.json",
+      "files": [
+        "apps/web/page.tsx"
+      ]
+    }
+  ]
+}

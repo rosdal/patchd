@@ -1,0 +1,19 @@
+{
+  "projects": [
+    {
+      "name": "packages/app/tsconfig.json",
+      "files": [
+        "packages/app/src/main.ts"
+      ],
+      "references": [
+        "packages/core/tsconfig.json"
+      ]
+    },
+    {
+      "name": "packages/core/tsconfig.json",
+      "files": [
+        "packages/core/src/index.ts"
+      ]
+    }
+  ]
+}

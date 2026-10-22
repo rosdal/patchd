@@ -1,0 +1,91 @@
+[
+  {
+    "id": "node10-resolution-removed",
+    "reason": "TypeScript 7 removed moduleResolution node10; resolving as bundler follows package.json exports, so a dual package's ESM types (.d.mts) win over the CommonJS ones TypeScript 6 picked (.d.ts)",
+    "ts6Declaration": "\\.d\\.ts:\\d+$",
+    "ts7Declaration": "\\.d\\.[mc]ts:\\d+$"
+  },
+  {
+    "id": "function-expando-printing",
+    "reason": "TypeScript 7 prints a function with properties assigned to it (Grid.Item = ...) as an object type with a call signature; TypeScript 6 prints typeof Grid",
+    "ts6": "^typeof [\\w$]+$",
+    "ts7": "^\\{ \\("
+  },
+  {
+    "id": "js-constructor-functions",
+    "reason": "TypeScript 7 no longer treats ES5 constructor functions in JavaScript (function F() { this.x = 1 }) as classes: F is a plain function",
+    "file": "\\.[cm]?js$",
+    "ts6": "^typeof [\\w$]+$",
+    "ts7": "=>"
+  },
+  {
+    "id": "js-constructor-instances",
+    "reason": "As js-constructor-functions: new F() on a constructor function is any in TypeScript 7, an instance of class F in TypeScript 6",
+    "file": "\\.[cm]?js$",
+    "ts6": "^[A-Z][\\w$]*$",
+    "ts7": "^any$"
+  },
+  {
+    "id": "commonjs-exports-object",
+    "reason": "TypeScript 7 types a CommonJS module's exports as the object assigned to module.exports; TypeScript 6 as typeof import(\"<file>\")",
+    "file": "\\.[cm]?js$",
+    "ts6": "typeof import\\(",
+    "ts7": "^\\{"
+  },
+  {
+    "id": "commonjs-module-symbol",
+    "reason": "TypeScript 7 resolves `module` and `exports` in CommonJS files to the module and exports objects; TypeScript 6 to the synthetic export= symbol",
+    "file": "\\.[cm]?js$",
+    "ts6Symbol": "^export=$",
+    "ts7Symbol": "^(module|exports)$"
+  },
+  {
+    "id": "js-this-property-assignments",
+    "reason": "TypeScript 7 no longer declares members from this.x = ... assignments inside JavaScript constructor functions, so those members and calls through them are any",
+    "file": "\\.[cm]?js$",
+    "ts7": "^any$",
+    "ts7Symbol": "^$",
+    "ts6Declaration": "\\.[cm]?js:\\d+$"
+  },
+  {
+    "id": "js-arguments-rest",
+    "reason": "TypeScript 7 no longer adds an implicit ...args: any[] parameter to JavaScript functions that read `arguments`",
+    "file": "\\.[cm]?js$",
+    "ts6": "\\.\\.\\.args: any\\[\\]"
+  },
+  {
+    "id": "index-signature-symbol",
+    "reason": "For a property read through an index signature (process.env.X), typescript-go returns the index signature's symbol; TypeScript 6 returns none",
+    "ts6Symbol": "^$",
+    "ts7Symbol": "^__index$"
+  },
+  {
+    "id": "js-function-expando-object",
+    "reason": "A JavaScript function that gets properties mixed in (express's app) is Function in TypeScript 7; TypeScript 6 prints Function's expanded members",
+    "file": "\\.[cm]?js$",
+    "ts6": "^\\{ apply\\(this: Function",
+    "ts7": "^Function$"
+  },
+  {
+    "id": "jsdoc-object-type",
+    "reason": "TypeScript 7 reads JSDoc {object} as the object type; TypeScript 6 as any",
+    "file": "\\.[cm]?js$",
+    "ts6": "\\bany\\b",
+    "ts7": "\\bobject\\b"
+  },
+  {
+    "id": "js-this-alias",
+    "reason": "As js-constructor-functions: `var self = this` in a JavaScript constructor function is any in TypeScript 7, the class instance (this) in TypeScript 6",
+    "file": "\\.[cm]?js$",
+    "ts6": "^this$",
+    "ts7": "^any$"
+  },
+  {
+    "id": "js-require-binding",
+    "reason": "`const { X } = require('m')` with m untyped: TypeScript 6 makes X an alias with no target, TypeScript 7 a plain binding declared at the destructuring",
+    "file": "\\.[cm]?js$",
+    "ts6": "^any$",
+    "ts7": "^any$",
+    "ts6Declaration": "^$"
+  }
+]

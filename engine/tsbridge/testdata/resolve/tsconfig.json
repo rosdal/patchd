@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "strict": true, "target": "es2022", "module": "nodenext", "jsx": "preserve",
+    "allowJs": true, "checkJs": false, "noEmit": true,
+    "paths": { "@app/*": ["./src/app/*"] }
+  },
+  "include": ["src"]
+}

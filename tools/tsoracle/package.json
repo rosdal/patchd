@@ -1,0 +1,12 @@
+{
+  "name": "@patchd/tsoracle",
+  "private": true,
+  "type": "module",
+  "description": "Checks tsbridge's answers against TypeScript 6's JavaScript API on sampled positions",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@typescript/typescript6": "6.0.2"
+  }
+}

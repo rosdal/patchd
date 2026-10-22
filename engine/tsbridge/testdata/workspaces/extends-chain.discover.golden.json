@@ -1,0 +1,14 @@
+{
+  "projects": [
+    {
+      "name": "tsconfig.json",
+      "files": [
+        "src/main.ts"
+      ],
+      "extends": [
+        "tsconfig.base.json",
+        "tsconfig.node.json"
+      ]
+    }
+  ]
+}

@@ -7,11 +7,11 @@ pre-commit:
       stage_fixed: true
     prettier:
       glob: "*.{ts,tsx,js,mjs,json,md,yml,yaml,css}"
-      run: pnpm prettier --write --ignore-unknown {staged_files}
+      run: pnpm prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
     oxlint:
       glob: "*.{ts,tsx,js,mjs}"
-      run: pnpm oxlint {staged_files}
+      run: pnpm oxlint --no-error-on-unmatched-pattern {staged_files}
 commit-msg:
   commands:
     commitlint:
