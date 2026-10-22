@@ -2,6 +2,9 @@ package tsbridge
 
 import (
 	"errors"
+	iofs "io/fs"
+	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -83,6 +86,22 @@ func TestReadOnlyFS(t *testing.T) {
 	}
 	if fs.FileExists("/virtual/other.json") {
 		t.Error("overlay invented a file")
+	}
+	// Reads pass through to disk.
+	dir, err := filepath.Abs(filepath.Join("testdata", "positions"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir = filepath.ToSlash(dir)
+	if st := fs.Stat(dir + "/tabs.ts"); st == nil || st.IsDir() {
+		t.Errorf("Stat(tabs.ts) = %v", st)
+	}
+	var walked []string
+	if err := fs.WalkDir(dir, func(p string, _ iofs.DirEntry, err error) error {
+		walked = append(walked, path.Base(p))
+		return err
+	}); err != nil || !slices.Contains(walked, "tabs.ts") {
+		t.Errorf("WalkDir: %v, saw %v", err, walked)
 	}
 }
 
