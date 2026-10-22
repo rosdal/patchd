@@ -22,7 +22,7 @@ func available() uint64 {
 // (v2, then v1). ok is false when there is no limit.
 func cgroupMemory() (limit, used uint64, ok bool) {
 	read := func(p string) (uint64, bool) {
-		b, err := os.ReadFile(p)
+		b, err := os.ReadFile(p) //nolint:gosec // fixed cgroup paths below, not input
 		if err != nil {
 			return 0, false
 		}
@@ -50,7 +50,7 @@ func memAvailable() uint64 {
 	if err != nil {
 		return 0
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }() // read-only: nothing to lose on close
 	s := bufio.NewScanner(f)
 	for s.Scan() {
 		if rest, ok := strings.CutPrefix(s.Text(), "MemAvailable:"); ok {
