@@ -1,0 +1,14 @@
+module interop-import.ts
+  import default as util from "./util" → ./util.js
+  import helper from "./util" → ./util.js
+  export r = v5 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global helper
+  v3 = load global util
+  v4 = load v3.name
+  v5 = call v2(v4)
+  store global r = v5
+  return undefined

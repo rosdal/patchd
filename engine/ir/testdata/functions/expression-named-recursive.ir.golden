@@ -1,0 +1,29 @@
+module expression-named-recursive.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; self
+  store global fact = v2
+  return undefined
+
+func f2 self(n) function in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = self self
+  v4 = const 1
+  v5 = binop <= v1 v4
+  branch v5 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v6 = const 1
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v7 = const 1
+  v8 = binop - v1 v7
+  v9 = call v3(v8)
+  v10 = binop * v1 v9
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v11 = phi [b2: v6, b3: v10]
+  return v11

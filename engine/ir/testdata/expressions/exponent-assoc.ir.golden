@@ -1,0 +1,12 @@
+module exponent-assoc.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 2
+  v3 = const 3
+  v4 = const 2
+  v5 = binop ** v3 v4
+  v6 = binop ** v2 v5
+  store global x = v6
+  return undefined

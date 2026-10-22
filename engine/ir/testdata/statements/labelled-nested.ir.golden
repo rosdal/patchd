@@ -1,0 +1,22 @@
+module labelled-nested.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  jump b2.for.head
+b2.for.head:  ; preds b1 b4
+  jump b3.for.body
+b3.for.body:  ; preds b2
+  jump b5.for.done
+b4.for.update:  ; unreachable
+  jump b2.for.head
+b5.for.done:  ; preds b3
+  v2 = const 1
+  return v2

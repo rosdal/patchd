@@ -1,0 +1,51 @@
+module try-nested-finally.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  jump b3.try
+b3.try:  ; preds b2
+  v2 = load global a                      ; exceptional → b8.finally.throw
+  jump b4.try
+b4.try:  ; preds b3
+  v3 = call v2()                          ; exceptional → b8.finally.throw
+  jump b5.try
+b5.try:  ; preds b4
+  v4 = load global b                      ; exceptional → b12.finally.throw
+  jump b6.try
+b6.try:  ; preds b5
+  v5 = call v4()                          ; exceptional → b12.finally.throw
+  jump b7.try
+b7.try:  ; preds b6
+  v6 = load global c
+  v7 = call v6()
+  return v3
+b8.finally.throw:  ; preds b3 b4
+  v8 = catchval
+  v9 = load global b                      ; exceptional → b12.finally.throw
+  jump b9.finally.throw
+b9.finally.throw:  ; preds b8
+  v10 = call v9()                         ; exceptional → b12.finally.throw
+  jump b10.finally.throw
+b10.finally.throw:  ; preds b9
+  throw v8                                ; exceptional → b12.finally.throw
+b11.try.done:  ; unreachable
+  v11 = load global c
+  v12 = call v11()
+  jump b13.try.done
+b12.finally.throw:  ; preds b5 b6 b8 b9 b10
+  v13 = catchval
+  v14 = load global c
+  v15 = call v14()
+  throw v13
+b13.try.done:  ; preds b11, unreachable
+  return undefined

@@ -1,0 +1,11 @@
+module object-numeric-keys.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "ok"
+  v3 = const "missing"
+  v4 = const "odd"
+  v5 = object {"200": v2, "404": v3, "1.5": v4}
+  store global codes = v5
+  return undefined

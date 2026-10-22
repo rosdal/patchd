@@ -1,0 +1,11 @@
+module require-template.js
+  import default as cfg from "./util" (require) → ./util.js
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global require
+  v3 = const "./util"
+  v4 = call v2(v3)                        ; require
+  store global cfg = v4
+  return undefined

@@ -1,0 +1,39 @@
+module logical-assign.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  v3 = load v1.a
+  v4 = binop == v3 undefined
+  branch v4 b2.nullish.rhs b3.nullish.done
+b2.nullish.rhs:  ; preds b1
+  v5 = const "x"
+  store v1.a = v5
+  jump b3.nullish.done
+b3.nullish.done:  ; preds b1 b2
+  v6 = phi [b1: v3, b2: v5]
+  v7 = load v1.b
+  branch v7 b5.or.done b4.or.rhs
+b4.or.rhs:  ; preds b3
+  v8 = const 1
+  store v1.b = v8
+  jump b5.or.done
+b5.or.done:  ; preds b3 b4
+  v9 = phi [b3: v7, b4: v8]
+  v10 = load v1.c
+  branch v10 b6.and.rhs b7.and.done
+b6.and.rhs:  ; preds b5
+  v11 = const false
+  store v1.c = v11
+  jump b7.and.done
+b7.and.done:  ; preds b5 b6
+  v12 = phi [b5: v10, b6: v11]
+  return v1

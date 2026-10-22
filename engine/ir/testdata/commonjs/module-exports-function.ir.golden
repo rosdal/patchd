@@ -1,0 +1,20 @@
+module module-exports-function.js
+  export default = v3 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global module
+  v3 = closure f2 []                      ; middleware
+  store v2.exports = v3
+  return undefined
+
+func f2 middleware(req, res, next) function in f1
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = this
+  v5 = self middleware
+  v6 = call v3()
+  return undefined

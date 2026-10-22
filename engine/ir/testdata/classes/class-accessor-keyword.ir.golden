@@ -1,0 +1,23 @@
+module class-accessor-keyword.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Model.constructor class
+  store global Model = v2
+  v3 = load v2.prototype
+  return undefined
+
+func f2 Model.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Model.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Model.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const "untitled"
+  store v1.title = v2
+  return undefined

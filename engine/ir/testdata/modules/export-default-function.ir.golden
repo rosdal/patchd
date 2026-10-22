@@ -1,0 +1,16 @@
+module export-default-function.ts
+  export default = handler = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; handler
+  store global handler = v2
+  return undefined
+
+func f2 handler(req) function in f1
+b1.entry:
+  v1 = param req
+  v2 = this
+  v3 = load v1.url
+  return v3

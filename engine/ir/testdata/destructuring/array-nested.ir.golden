@@ -1,0 +1,24 @@
+module array-nested.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(m) function in f1
+b1.entry:
+  v1 = param m
+  v2 = this
+  v3 = spread v1
+  v4 = load v3[0]                         ; path v1[0]
+  v5 = spread v4
+  v6 = load v5[0]                         ; a, path v1[0][0]
+  v7 = load v5[1]                         ; b, path v1[0][1]
+  v8 = load v3[1]                         ; path v1[1]
+  v9 = spread v8
+  v10 = load v9[0]                        ; c, path v1[1][0]
+  v11 = binop + v6 v7
+  v12 = binop + v11 v10
+  return v12

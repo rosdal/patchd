@@ -1,0 +1,29 @@
+module class-basic.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Point.constructor class
+  store global Point = v2
+  v3 = load v2.prototype
+  v4 = closure f3 []                      ; Point.len
+  store v3.len = v4                       ; method
+  return undefined
+
+func f2 Point.constructor(x, y) constructor in f1
+b1.entry:
+  v1 = param x
+  v2 = param y
+  v3 = this
+  store v3.x = v1
+  store v3.y = v2
+  return undefined
+
+func f3 Point.len() method in f1
+b1.entry:
+  v1 = this
+  v2 = load global Math
+  v3 = load v1.x
+  v4 = load v1.y
+  v5 = call v2.hypot(v3, v4) this=v2
+  return v5

@@ -1,0 +1,24 @@
+module assignment-to-members.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o, xs) function in f1
+b1.entry:
+  v1 = param o
+  v2 = param xs
+  v3 = this
+  v4 = spread v2
+  v5 = load v4[0]                         ; path v2[0]
+  store v1.first = v5
+  v6 = load v4[1]                         ; path v2[1]
+  store v1.second = v6
+  v7 = const 1
+  v8 = object {a: v7}
+  v9 = load v8.a                          ; path v8.a
+  store v1.a = v9
+  return undefined

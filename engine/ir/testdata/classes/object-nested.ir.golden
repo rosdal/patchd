@@ -1,0 +1,14 @@
+module object-nested.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "h"
+  v3 = const 5432
+  v4 = object {host: v2, port: v3}
+  v5 = const true
+  v6 = const false
+  v7 = array [v5, v6]
+  v8 = object {db: v4, flags: v7}
+  store global settings = v8
+  return undefined

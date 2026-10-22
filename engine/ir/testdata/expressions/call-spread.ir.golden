@@ -1,0 +1,18 @@
+module call-spread.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(args) function in f1
+b1.entry:
+  v1 = param args
+  v2 = this
+  v3 = load global Math
+  v4 = const 0
+  v5 = spread v1
+  v6 = call v3.max(v4, ...v5) this=v3
+  return v6

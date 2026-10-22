@@ -1,0 +1,18 @@
+module decorators-multiple.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Twice.constructor class
+  store global Twice = v2
+  v3 = load v2.prototype
+  v4 = load global A
+  v5 = load global B
+  v6 = call v5(v2)                        ; decorator @B class
+  v7 = call v4(v2)                        ; decorator @A class
+  return undefined
+
+func f2 Twice.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined

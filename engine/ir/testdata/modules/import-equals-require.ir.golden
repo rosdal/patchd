@@ -1,0 +1,12 @@
+module import-equals-require.ts
+  import * as fs from "fs" (import=)
+  export exists = v4 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global fs
+  v3 = const "/"
+  v4 = call v2.existsSync(v3) this=v2
+  store global exists = v4
+  return undefined

@@ -1,0 +1,36 @@
+module decorators-field-accessor.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Cmp.constructor class
+  store global Cmp = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Cmp.get value get
+  store v3.value = v4                     ; get
+  v5 = load global Input
+  v6 = call v5()
+  v7 = call v6(v3)                        ; decorator @Input field name
+  v8 = load global Log
+  v9 = call v8(v3)                        ; decorator @Log get value
+  return undefined
+
+func f2 Cmp.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Cmp.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Cmp.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const ""
+  store v1.name = v2
+  return undefined
+
+func f4 Cmp.get value() getter in f1
+b1.entry:
+  v1 = this
+  v2 = const 1
+  return v2

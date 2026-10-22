@@ -1,0 +1,57 @@
+module class-getters-setters.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Temp.constructor class
+  store global Temp = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Temp.get f get
+  store v3.f = v4                         ; get
+  v5 = closure f5 []                      ; Temp.set f set
+  store v3.f = v5                         ; set
+  v6 = closure f6 []                      ; Temp.get zero get
+  store v2.zero = v6                      ; get static
+  return undefined
+
+func f2 Temp.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Temp.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Temp.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const 0
+  store v1.#c = v2
+  return undefined
+
+func f4 Temp.get f() getter in f1
+b1.entry:
+  v1 = this
+  v2 = load v1.#c
+  v3 = const 1.8
+  v4 = binop * v2 v3
+  v5 = const 32
+  v6 = binop + v4 v5
+  return v6
+
+func f5 Temp.set f(v) setter in f1
+b1.entry:
+  v1 = param v
+  v2 = this
+  v3 = const 32
+  v4 = binop - v1 v3
+  v5 = const 1.8
+  v6 = binop / v4 v5
+  store v2.#c = v6
+  return undefined
+
+func f6 Temp.get zero() getter static in f1
+b1.entry:
+  v1 = this
+  v2 = load global Temp
+  v3 = new v2()
+  return v3

@@ -1,0 +1,53 @@
+module class-abstract.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Shape.constructor class
+  store global Shape = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Shape.describe
+  store v3.describe = v4                  ; method
+  v5 = load global Shape
+  v6 = closure f5 []                      ; Square.constructor class derived
+  store v6.__proto__ = v5                 ; proto
+  store global Square = v6
+  v7 = load v6.prototype
+  v8 = load v5.prototype
+  store v7.__proto__ = v8                 ; proto
+  v9 = closure f6 []                      ; Square.area
+  store v7.area = v9                      ; method
+  return undefined
+
+func f2 Shape.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 Shape.area() method abstract in f1
+b1.entry:
+  v1 = this
+  unreachable
+
+func f4 Shape.describe() method in f1
+b1.entry:
+  v1 = this
+  v2 = call v1.area() this=v1
+  v3 = template ["area ", v2]
+  return v3
+
+func f5 Square.constructor(s) constructor derived in f1
+b1.entry:
+  v1 = param s
+  v2 = this
+  v3 = call super() this=v2
+  store v2.s = v1
+  return undefined
+
+func f6 Square.area() method in f1
+b1.entry:
+  v1 = this
+  v2 = load v1.s
+  v3 = load v1.s
+  v4 = binop * v2 v3
+  return v4

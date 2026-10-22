@@ -1,0 +1,21 @@
+module function-name-property.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; api.find
+  v3 = closure f3 []                      ; api.remove
+  v4 = object {find: v2, remove: v3}
+  store global api = v4
+  return undefined
+
+func f2 api.find() function in f1
+b1.entry:
+  v1 = this
+  v2 = const 1
+  return v2
+
+func f3 api.remove() arrow in f1
+b1.entry:
+  v1 = const 2
+  return v1

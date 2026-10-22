@@ -1,0 +1,1 @@
+const xs: number[] = [];

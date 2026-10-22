@@ -1,0 +1,25 @@
+module identifiers-global.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global process
+  v3 = load v2.env
+  v4 = load v3.HOME
+  v5 = binop == v4 undefined
+  branch v5 b2.nullish.rhs b3.nullish.done
+b2.nullish.rhs:  ; preds b1
+  v6 = load global window
+  v7 = load v6.location
+  v8 = load v7.href
+  jump b3.nullish.done
+b3.nullish.done:  ; preds b1 b2
+  v9 = phi [b1: v4, b2: v8]
+  return v9

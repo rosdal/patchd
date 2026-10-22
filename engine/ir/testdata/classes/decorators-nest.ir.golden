@@ -1,0 +1,38 @@
+module decorators-nest.ts
+  export UsersController = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; UsersController.constructor class
+  store global UsersController = v2
+  v3 = load v2.prototype
+  v4 = closure f3 []                      ; UsersController.create
+  store v3.create = v4                    ; method
+  v5 = load global Body
+  v6 = call v5()
+  v7 = call v6(v3)                        ; decorator @Body param create#0
+  v8 = load global Param
+  v9 = const "id"
+  v10 = call v8(v9)
+  v11 = call v10(v3)                      ; decorator @Param param create#1
+  v12 = load global Post
+  v13 = call v12()
+  v14 = call v13(v3)                      ; decorator @Post method create
+  v15 = load global Controller
+  v16 = const "users"
+  v17 = call v15(v16)
+  v18 = call v17(v2)                      ; decorator @Controller class
+  return undefined
+
+func f2 UsersController.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 UsersController.create(dto, id) method in f1
+b1.entry:
+  v1 = param dto
+  v2 = param id
+  v3 = this
+  return v1

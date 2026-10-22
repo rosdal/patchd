@@ -1,0 +1,20 @@
+module module-exports-dot.js
+  export handler = v4 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global module
+  v3 = load v2.exports
+  v4 = closure f2 []                      ; module.exports.handler
+  store v3.handler = v4
+  return undefined
+
+func f2 module.exports.handler(req, res) function in f1
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = this
+  v4 = load v1.body
+  v5 = call v2.send(v4) this=v2
+  return undefined

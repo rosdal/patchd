@@ -1,0 +1,19 @@
+module array-rest.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  v3 = spread v1
+  v4 = load v3[0]                         ; head, path v1[0]
+  v5 = load v3[1:]                        ; tail, path v1[1:]
+  v6 = load v5.length
+  v7 = binop + v6 v4
+  return v7

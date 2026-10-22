@@ -1,0 +1,15 @@
+module return-expression.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a) arrow in f1
+b1.entry:
+  v1 = param a
+  v2 = const 2
+  v3 = binop * v1 v2
+  return v3

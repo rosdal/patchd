@@ -1,0 +1,28 @@
+module try-optional-catch-binding.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v2 = load global risky                  ; exceptional → b5.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v3 = call v2()                          ; exceptional → b5.catch
+  jump b4.try
+b4.try:  ; preds b3
+  jump b6.try.done
+b5.catch:  ; preds b2 b3
+  v4 = catchval
+  v5 = const false
+  return v5
+b6.try.done:  ; preds b4
+  v6 = const true
+  return v6

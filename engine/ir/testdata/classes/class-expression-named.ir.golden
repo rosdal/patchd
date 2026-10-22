@@ -1,0 +1,26 @@
+module class-expression-named.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = cell Inner
+  v3 = closure f2 []                      ; Inner.constructor class
+  store *v2 = v3
+  v4 = load v3.prototype
+  v5 = closure f3 [v2]                    ; Inner.clone
+  store v4.clone = v5                     ; method
+  store global Node = v3
+  return undefined
+
+func f2 Inner.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 Inner.clone() method in f1
+b1.entry:
+  v1 = this
+  v2 = free Inner (cell)
+  v3 = load *v2
+  v4 = new v3()
+  return v4

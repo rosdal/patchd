@@ -1,0 +1,46 @@
+module class-computed-members.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "dynamic"
+  store global key = v2
+  v3 = closure f2 []                      ; C.constructor class
+  store global C = v3
+  v4 = load v3.prototype
+  v5 = load global key
+  v6 = closure f3 []                      ; C.[key]
+  store v4[v5] = v6                       ; method
+  v7 = closure f4 []                      ; C.["literal"]
+  store v4.literal = v7                   ; method
+  v8 = load global Symbol
+  v9 = load v8.iterator
+  v10 = closure f5 []                     ; C.[Symbol.iterator]
+  store v4[v9] = v10                      ; method
+  return undefined
+
+func f2 C.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 C.[key]() method in f1
+b1.entry:
+  v1 = this
+  v2 = const 1
+  return v2
+
+func f4 C.["literal"]() method in f1
+b1.entry:
+  v1 = this
+  v2 = const 2
+  return v2
+
+func f5 C.[Symbol.iterator]() method in f1
+b1.entry:
+  v1 = this
+  v2 = array []
+  v3 = load global Symbol
+  v4 = load v3.iterator
+  v5 = call v2[v4]() this=v2
+  return v5

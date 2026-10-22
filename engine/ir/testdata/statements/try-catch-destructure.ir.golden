@@ -1,0 +1,36 @@
+module try-catch-destructure.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v2 = load global run                    ; exceptional → b5.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v3 = call v2()                          ; exceptional → b5.catch
+  jump b4.try
+b4.try:  ; preds b3
+  jump b8.try.done
+b5.catch:  ; preds b2 b3
+  v4 = catchval
+  v5 = load v4.message
+  v6 = load v4.code
+  v7 = binop === v6 undefined
+  branch v7 b6.default b7.default.done
+b6.default:  ; preds b5
+  v8 = const 500
+  jump b7.default.done
+b7.default.done:  ; preds b5 b6
+  v9 = phi [b5: v6, b6: v8]
+  v10 = object {message: v5, code: v9}
+  return v10
+b8.try.done:  ; preds b4
+  return undefined

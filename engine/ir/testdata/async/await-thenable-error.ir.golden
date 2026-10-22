@@ -1,0 +1,27 @@
+module await-thenable-error.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(p) function async in f1
+b1.entry:
+  v1 = param p
+  v2 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v3 = await v1                           ; exceptional → b4.catch
+  jump b3.try
+b3.try:  ; preds b2
+  jump b5.try.done
+b4.catch:  ; preds b2
+  v4 = catchval
+  v5 = const 1
+  v6 = unop - v5
+  return v6
+b5.try.done:  ; preds b3
+  v7 = const 0
+  return v7

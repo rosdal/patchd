@@ -1,0 +1,39 @@
+module class-referenced-inside.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Singleton.constructor class
+  store global Singleton = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Singleton.get
+  store v2.get = v4                       ; method static
+  v5 = closure f3 []                      ; Singleton.<static>
+  v6 = call v5() this=v2
+  return undefined
+
+func f2 Singleton.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 Singleton.<static>() staticinit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f4 Singleton.get() method static in f1
+b1.entry:
+  v1 = this
+  v2 = load global Singleton
+  v3 = load v2.instance
+  v4 = binop == v3 undefined
+  branch v4 b2.nullish.rhs b3.nullish.done
+b2.nullish.rhs:  ; preds b1
+  v5 = load global Singleton
+  v6 = new v5()
+  store v2.instance = v6
+  jump b3.nullish.done
+b3.nullish.done:  ; preds b1 b2
+  v7 = phi [b1: v3, b2: v6]
+  return v7

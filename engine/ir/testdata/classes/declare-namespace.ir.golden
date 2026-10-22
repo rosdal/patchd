@@ -1,0 +1,6 @@
+module declare-namespace.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  return undefined

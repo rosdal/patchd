@@ -1,0 +1,8 @@
+module import-side-effect.ts
+  import (side effect) from "./lib" → ./lib.ts
+  import (side effect) from "reflect-metadata"
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  return undefined

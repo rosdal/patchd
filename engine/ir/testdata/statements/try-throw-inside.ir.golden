@@ -1,0 +1,37 @@
+module try-throw-inside.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(x) function in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v3 = const 0
+  v4 = binop < v1 v3                      ; exceptional → b8.catch
+  jump b3.try
+b3.try:  ; preds b2
+  branch v4 b4.if.then b7.if.done
+b4.if.then:  ; preds b3
+  v5 = load global Error                  ; exceptional → b8.catch
+  jump b5.if.then
+b5.if.then:  ; preds b4
+  v6 = const "negative"
+  v7 = new v5(v6)                         ; exceptional → b8.catch
+  jump b6.if.then
+b6.if.then:  ; preds b5
+  throw v7                                ; exceptional → b8.catch
+b7.if.done:  ; preds b3
+  return v1
+b8.catch:  ; preds b2 b4 b5 b6
+  v8 = catchval
+  v9 = const 0
+  return v9
+b9.try.done:  ; unreachable
+  return undefined

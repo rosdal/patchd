@@ -1,0 +1,24 @@
+module function-hoisting.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; outer
+  store global outer = v2
+  return undefined
+
+func f2 outer() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; outer.inner
+  v3 = const 1
+  v4 = call v2(v3)
+  return v4
+
+func f3 outer.inner(n) function in f2
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = const 1
+  v4 = binop + v1 v3
+  return v4

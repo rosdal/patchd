@@ -1,0 +1,22 @@
+module destructured-params.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; handler
+  store global handler = v2
+  return undefined
+
+func f2 handler(v1, v2) function in f1
+b1.entry:
+  v1 = param
+  v2 = param
+  v3 = this
+  v4 = load v1.body
+  v5 = load v1.query
+  v6 = load v5.id
+  v7 = spread v2
+  v8 = load v7[0]
+  v9 = load v7[1]
+  v10 = array [v4, v6, v8, v9]
+  return v10

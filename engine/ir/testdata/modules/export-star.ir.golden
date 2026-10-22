@@ -1,0 +1,8 @@
+module export-star.ts
+  import * from "./lib" (re-export) → ./lib.ts
+  export * = * from "./lib" (re-export)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  return undefined

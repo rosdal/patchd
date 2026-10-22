@@ -1,0 +1,22 @@
+module logical-assign-local.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(x) function in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  v3 = binop == v1 undefined
+  branch v3 b2.nullish.rhs b3.nullish.done
+b2.nullish.rhs:  ; preds b1
+  v4 = const "default"
+  jump b3.nullish.done
+b3.nullish.done:  ; preds b1 b2
+  v5 = phi [b1: v1, b2: v4]
+  v6 = phi [b1: v1, b2: v4]
+  return v6

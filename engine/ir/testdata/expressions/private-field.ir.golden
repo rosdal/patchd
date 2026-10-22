@@ -1,0 +1,35 @@
+module private-field.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Counter.constructor class
+  store global Counter = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Counter.inc
+  store v3.inc = v4                       ; method
+  return undefined
+
+func f2 Counter.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Counter.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Counter.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const 0
+  store v1.#n = v2
+  return undefined
+
+func f4 Counter.inc() method in f1
+b1.entry:
+  v1 = this
+  v2 = load v1.#n
+  v3 = const 1
+  v4 = binop + v2 v3
+  store v1.#n = v4
+  v5 = load v1.#n
+  return v5

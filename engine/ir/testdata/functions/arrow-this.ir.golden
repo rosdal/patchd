@@ -1,0 +1,43 @@
+module arrow-this.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Timer.constructor class
+  store global Timer = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Timer.start
+  store v3.start = v4                     ; method
+  return undefined
+
+func f2 Timer.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Timer.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Timer.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const 0
+  store v1.ticks = v2
+  return undefined
+
+func f4 Timer.start() method in f1
+b1.entry:
+  v1 = this
+  v2 = load global setInterval
+  v3 = closure f5 [v1]                    ; Timer.start.<anon@4:17>
+  v4 = const 1000
+  v5 = call v2(v3, v4)
+  return undefined
+
+func f5 Timer.start.<anon@4:17>() arrow in f4
+b1.entry:
+  v1 = free this
+  v2 = load v1.ticks
+  v3 = const 1
+  v4 = binop + v2 v3
+  store v1.ticks = v4
+  return undefined

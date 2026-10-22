@@ -1,0 +1,24 @@
+module module-level-destructure.ts
+  export url = v11 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global process                ; process
+  v3 = load v2.env
+  v4 = load v3.PORT                       ; path v3.PORT
+  store global PORT = v4
+  v5 = load v3.HOST                       ; path v3.HOST
+  v6 = binop === v5 undefined
+  branch v6 b2.default b3.default.done
+b2.default:  ; preds b1
+  v7 = const "0.0.0.0"
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v8 = phi [b1: v5, b2: v7]
+  store global HOST = v8
+  v9 = load global HOST                   ; HOST
+  v10 = load global PORT                  ; PORT
+  v11 = template [v9, ":", v10]
+  store global url = v11
+  return undefined

@@ -1,0 +1,39 @@
+module class-private-methods.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Vault.constructor class
+  store global Vault = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Vault.#reveal
+  store v3.#reveal = v4                   ; method
+  v5 = closure f5 []                      ; Vault.open
+  store v3.open = v5                      ; method
+  return undefined
+
+func f2 Vault.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Vault.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Vault.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const "s"
+  store v1.#secret = v2
+  return undefined
+
+func f4 Vault.#reveal() method in f1
+b1.entry:
+  v1 = this
+  v2 = load v1.#secret
+  return v2
+
+func f5 Vault.open() method in f1
+b1.entry:
+  v1 = this
+  v2 = call v1.#reveal() this=v1
+  return v2

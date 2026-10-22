@@ -1,0 +1,17 @@
+module comma.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a) function in f1
+b1.entry:
+  v1 = param a
+  v2 = this
+  v3 = v1
+  v4 = const 1
+  v5 = binop + v3 v4
+  return v5

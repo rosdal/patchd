@@ -1,0 +1,33 @@
+module class-arrow-field.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Button.constructor class
+  store global Button = v2
+  v3 = load v2.prototype
+  return undefined
+
+func f2 Button.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Button.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Button.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const "ok"
+  store v1.label = v2
+  v3 = closure f4 [v1]                    ; Button.<init>.onClick
+  store v1.onClick = v3
+  return undefined
+
+func f4 Button.<init>.onClick() arrow in f3
+b1.entry:
+  v1 = free this
+  v2 = load global console
+  v3 = load v1.label
+  v4 = call v2.log(v3) this=v2
+  return undefined

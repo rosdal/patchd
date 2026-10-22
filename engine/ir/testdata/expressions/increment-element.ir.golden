@@ -1,0 +1,19 @@
+module increment-element.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(counts, k) function in f1
+b1.entry:
+  v1 = param counts
+  v2 = param k
+  v3 = this
+  v4 = load v1[v2]
+  v5 = const 1
+  v6 = binop + v4 v5
+  store v1[v2] = v6
+  return undefined

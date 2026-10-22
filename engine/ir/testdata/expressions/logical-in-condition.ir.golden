@@ -1,0 +1,26 @@
+module logical-in-condition.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(user) function in f1
+b1.entry:
+  v1 = param user
+  v2 = this
+  branch v1 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v3 = load v1.admin
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v4 = phi [b1: v1, b2: v3]
+  branch v4 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v5 = const true
+  return v5
+b5.if.done:  ; preds b3
+  v6 = const false
+  return v6

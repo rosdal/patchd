@@ -1,0 +1,24 @@
+module conditional-assign.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(c) function in f1
+b1.entry:
+  v1 = param c
+  v2 = this
+  branch v1 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v3 = load global load
+  v4 = call v3()
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v5 = const null
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v6 = phi [b2: v4, b3: v5]
+  return v6

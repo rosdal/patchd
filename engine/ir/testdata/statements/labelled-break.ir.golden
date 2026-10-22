@@ -1,0 +1,55 @@
+module labelled-break.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; find
+  store global find = v2
+  return undefined
+
+func f2 find(grid, v) function in f1
+b1.entry:
+  v1 = param grid
+  v2 = param v
+  v3 = this
+  v4 = const 1
+  v5 = unop - v4
+  v6 = const 0
+  jump b2.for.head
+b2.for.head:  ; preds b1 b10
+  v7 = phi [b1: v6, b10: v22]
+  v8 = load v1.length
+  v9 = binop < v7 v8
+  branch v9 b3.for.body b11.for.done
+b3.for.body:  ; preds b2
+  v10 = const 0
+  jump b4.for.head
+b4.for.head:  ; preds b3 b8
+  v11 = phi [b3: v10, b8: v20]
+  v12 = load v1[v7]
+  v13 = load v12.length
+  v14 = binop < v11 v13
+  branch v14 b5.for.body b9.for.done
+b5.for.body:  ; preds b4
+  v15 = load v1[v7]
+  v16 = load v15[v11]
+  v17 = binop === v16 v2
+  branch v17 b6.if.then b7.if.done
+b6.if.then:  ; preds b5
+  v18 = v7
+  jump b11.for.done
+b7.if.done:  ; preds b5
+  jump b8.for.update
+b8.for.update:  ; preds b7
+  v19 = const 1
+  v20 = binop + v11 v19
+  jump b4.for.head
+b9.for.done:  ; preds b4
+  jump b10.for.update
+b10.for.update:  ; preds b9
+  v21 = const 1
+  v22 = binop + v7 v21
+  jump b2.for.head
+b11.for.done:  ; preds b2 b6
+  v23 = phi [b2: v5, b6: v18]
+  return v23

@@ -1,0 +1,16 @@
+module tagged-template-plain.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global String
+  v3 = const strings ["C:path"]
+  v4 = call v2.raw(v3) this=v2            ; tagged
+  return v4

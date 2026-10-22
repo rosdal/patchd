@@ -1,0 +1,24 @@
+module closure-hoisted-before-let.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = cell later
+  v3 = closure f3 [v2]                    ; f.get
+  v4 = const 5
+  store *v2 = v4
+  return v3
+
+func f3 f.get() function in f2
+b1.entry:
+  v1 = this
+  v2 = free later (cell)
+  v3 = load *v2
+  return v3

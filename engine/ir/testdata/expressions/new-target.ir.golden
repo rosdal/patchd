@@ -1,0 +1,23 @@
+module new-target.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; F
+  store global F = v2
+  return undefined
+
+func f2 F() function in f1
+b1.entry:
+  v1 = this
+  v2 = new.target
+  v3 = unop ! v2
+  branch v3 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v4 = load global F
+  v5 = new v4()
+  return v5
+b3.if.done:  ; preds b1
+  v6 = const true
+  store v1.made = v6
+  return undefined

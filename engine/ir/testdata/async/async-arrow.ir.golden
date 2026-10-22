@@ -1,0 +1,17 @@
+module async-arrow.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; get
+  store global get = v2
+  return undefined
+
+func f2 get(url) arrow async in f1
+b1.entry:
+  v1 = param url
+  v2 = load global fetch
+  v3 = call v2(v1)
+  v4 = await v3
+  v5 = call v4.text() this=v4
+  return v5

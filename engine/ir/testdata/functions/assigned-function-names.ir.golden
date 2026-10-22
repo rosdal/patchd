@@ -1,0 +1,24 @@
+module assigned-function-names.ts
+  export helper = v6 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global app
+  v3 = closure f2 []                      ; app.handler
+  store v2.handler = v3
+  v4 = load global module
+  v5 = load v4.exports
+  v6 = closure f3 []                      ; module.exports.helper
+  store v5.helper = v6
+  return undefined
+
+func f2 app.handler() function in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 module.exports.helper() arrow in f1
+b1.entry:
+  v1 = const 1
+  return v1

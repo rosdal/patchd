@@ -1,0 +1,9 @@
+module import-meta.ts
+  export here = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load %import.meta.url
+  store global here = v2
+  return undefined

@@ -1,0 +1,16 @@
+module switch-empty.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(n) function in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  jump b2.switch.done
+b2.switch.done:  ; preds b1
+  return v1

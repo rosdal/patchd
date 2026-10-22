@@ -1,0 +1,25 @@
+module for-of-object.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(users) function in f1
+b1.entry:
+  v1 = param users
+  v2 = this
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b3
+  branch * b3.forof.body b4.forof.done
+b3.forof.body:  ; preds b2
+  v3 = load v1[of]
+  v4 = load v3.name                       ; name, path v3.name
+  v5 = load v3.age                        ; age, path v3.age
+  v6 = load global console                ; console
+  v7 = call v6.log(v4, v5) this=v6
+  jump b2.forof.head
+b4.forof.done:  ; preds b2
+  return undefined

@@ -1,0 +1,33 @@
+module await-in-try.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(db, id) function async in f1
+b1.entry:
+  v1 = param db
+  v2 = param id
+  v3 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v4 = const "SELECT * FROM t WHERE id = $1"
+  v5 = array [v2]                         ; exceptional → b6.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v6 = call v1.query(v4, v5) this=v1      ; exceptional → b6.catch
+  jump b4.try
+b4.try:  ; preds b3
+  v7 = await v6                           ; exceptional → b6.catch
+  jump b5.try
+b5.try:  ; preds b4
+  return v7
+b6.catch:  ; preds b2 b3 b4
+  v8 = catchval
+  v9 = const null
+  return v9
+b7.try.done:  ; unreachable
+  return undefined

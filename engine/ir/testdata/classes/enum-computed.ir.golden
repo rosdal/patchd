@@ -1,0 +1,18 @@
+module enum-computed.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = object {}
+  v3 = const 1
+  v4 = const 0
+  v5 = binop << v3 v4
+  store v2.A = v5
+  v6 = const 1
+  v7 = const 1
+  v8 = binop << v6 v7
+  store v2.B = v8
+  v9 = binop | v5 v8
+  store v2.AB = v9
+  store global Flags = v2
+  return undefined

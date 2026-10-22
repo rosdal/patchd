@@ -1,0 +1,32 @@
+module default-params.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a, b, c) function in f1
+b1.entry:
+  v1 = param a
+  v2 = param b
+  v3 = param c
+  v4 = this
+  v5 = binop === v2 undefined
+  branch v5 b2.default b3.default.done
+b2.default:  ; preds b1
+  v6 = const 1
+  v7 = binop + v1 v6
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v8 = phi [b1: v2, b2: v7]
+  v9 = binop === v3 undefined
+  branch v9 b4.default b5.default.done
+b4.default:  ; preds b3
+  v10 = const "x"
+  jump b5.default.done
+b5.default.done:  ; preds b3 b4
+  v11 = phi [b3: v3, b4: v10]
+  v12 = array [v1, v8, v11]
+  return v12

@@ -1,0 +1,20 @@
+module unreachable-after-throw.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global Error
+  v3 = const "x"
+  v4 = new v2(v3)
+  throw v4
+b2.unreachable:  ; unreachable
+  v5 = load global cleanup
+  v6 = call v5()
+  return undefined

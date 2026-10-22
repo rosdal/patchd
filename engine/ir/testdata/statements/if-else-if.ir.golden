@@ -1,0 +1,40 @@
+module if-else-if.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; grade
+  store global grade = v2
+  return undefined
+
+func f2 grade(n) function in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = const 90
+  v4 = binop > v1 v3
+  branch v4 b2.if.then b3.if.else
+b2.if.then:  ; preds b1
+  v5 = const "A"
+  return v5
+b3.if.else:  ; preds b1
+  v6 = const 80
+  v7 = binop > v1 v6
+  branch v7 b4.if.then b5.if.else
+b4.if.then:  ; preds b3
+  v8 = const "B"
+  return v8
+b5.if.else:  ; preds b3
+  v9 = const 70
+  v10 = binop > v1 v9
+  branch v10 b6.if.then b7.if.done
+b6.if.then:  ; preds b5
+  v11 = const "C"
+  return v11
+b7.if.done:  ; preds b5
+  jump b8.if.done
+b8.if.done:  ; preds b7
+  jump b9.if.done
+b9.if.done:  ; preds b8
+  v12 = const "F"
+  return v12

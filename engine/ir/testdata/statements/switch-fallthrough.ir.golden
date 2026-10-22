@@ -1,0 +1,43 @@
+module switch-fallthrough.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(n) function in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = const ""
+  v4 = const 1
+  v5 = binop === v1 v4
+  branch v5 b5.switch.case b2.switch.test
+b2.switch.test:  ; preds b1
+  v6 = const 2
+  v7 = binop === v1 v6
+  branch v7 b6.switch.case b3.switch.test
+b3.switch.test:  ; preds b2
+  v8 = const 3
+  v9 = binop === v1 v8
+  branch v9 b7.switch.case b4.switch.test
+b4.switch.test:  ; preds b3
+  jump b8.switch.done
+b5.switch.case:  ; preds b1
+  v10 = const "one"
+  v11 = binop + v3 v10
+  jump b6.switch.case
+b6.switch.case:  ; preds b2 b5
+  v12 = phi [b2: v3, b5: v11]
+  v13 = const "two"
+  v14 = binop + v12 v13
+  jump b8.switch.done
+b7.switch.case:  ; preds b3
+  v15 = const "three"
+  v16 = binop + v3 v15
+  jump b8.switch.done
+b8.switch.done:  ; preds b4 b6 b7
+  v17 = phi [b4: v3, b6: v14, b7: v16]
+  return v17

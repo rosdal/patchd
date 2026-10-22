@@ -1,0 +1,9 @@
+module import-unresolved.ts
+  import default as missing from "not-installed"
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global missing
+  v3 = call v2()
+  return undefined

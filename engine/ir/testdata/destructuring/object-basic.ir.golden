@@ -1,0 +1,17 @@
+module object-basic.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(req) function in f1
+b1.entry:
+  v1 = param req
+  v2 = this
+  v3 = load v1.body                       ; body, path v1.body
+  v4 = load v1.query                      ; query, path v1.query
+  v5 = array [v3, v4]
+  return v5

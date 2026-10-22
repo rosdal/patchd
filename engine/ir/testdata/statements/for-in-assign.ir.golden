@@ -1,0 +1,22 @@
+module for-in-assign.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  jump b2.forin.head
+b2.forin.head:  ; preds b1 b3
+  v3 = phi [b1: undefined, b3: v4]
+  branch * b3.forin.body b4.forin.done
+b3.forin.body:  ; preds b2
+  v4 = load v1[in]
+  jump b2.forin.head
+b4.forin.done:  ; preds b2
+  return v3

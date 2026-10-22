@@ -1,0 +1,13 @@
+module empty-function.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; nothing
+  store global nothing = v2
+  return undefined
+
+func f2 nothing() function in f1
+b1.entry:
+  v1 = this
+  return undefined

@@ -1,0 +1,19 @@
+module swap.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a, b) function in f1
+b1.entry:
+  v1 = param a
+  v2 = param b
+  v3 = this
+  v4 = array [v2, v1]
+  v5 = load v4[0]                         ; a, path v4[0]
+  v6 = load v4[1]                         ; b, path v4[1]
+  v7 = array [v5, v6]
+  return v7

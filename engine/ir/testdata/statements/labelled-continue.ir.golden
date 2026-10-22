@@ -1,0 +1,39 @@
+module labelled-continue.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(rows) function in f1
+b1.entry:
+  v1 = param rows
+  v2 = this
+  v3 = const 0
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b6 b8
+  v4 = phi [b1: v3, b6: v6, b8: v6]
+  branch * b3.forof.body b9.forof.done
+b3.forof.body:  ; preds b2
+  v5 = load v1[of]
+  jump b4.forof.head
+b4.forof.head:  ; preds b3 b7
+  v6 = phi [b3: v4, b7: v11]
+  branch * b5.forof.body b8.forof.done
+b5.forof.body:  ; preds b4
+  v7 = load v5[of]
+  v8 = const 0
+  v9 = binop === v7 v8
+  branch v9 b6.if.then b7.if.done
+b6.if.then:  ; preds b5
+  jump b2.forof.head
+b7.if.done:  ; preds b5
+  v10 = const 1
+  v11 = binop + v6 v10
+  jump b4.forof.head
+b8.forof.done:  ; preds b4
+  jump b2.forof.head
+b9.forof.done:  ; preds b2
+  return v4

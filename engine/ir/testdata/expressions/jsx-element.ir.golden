@@ -1,0 +1,23 @@
+module jsx-element.tsx
+  export Greeting = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Greeting
+  store global Greeting = v2
+  return undefined
+
+func f2 Greeting(props) function in f1
+b1.entry:
+  v1 = param props
+  v2 = this
+  v3 = const "div"
+  v4 = const "greeting"
+  v5 = object {className: v4}
+  v6 = const "Hello, "
+  v7 = load v1.name
+  v8 = const "!"
+  v9 = array [v6, v7, v8]
+  v10 = call %jsx(v3, v5, v9)             ; jsx
+  return v10

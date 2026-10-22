@@ -1,0 +1,15 @@
+module object-string-key.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(headers) function in f1
+b1.entry:
+  v1 = param headers
+  v2 = this
+  v3 = load v1["content-type"]            ; ct, path v1["content-type"]
+  return v3

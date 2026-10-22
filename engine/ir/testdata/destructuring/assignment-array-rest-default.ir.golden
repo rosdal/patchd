@@ -1,0 +1,24 @@
+module assignment-array-rest-default.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  v3 = spread v1
+  v4 = load v3[0]                         ; path v1[0]
+  v5 = binop === v4 undefined
+  branch v5 b2.default b3.default.done
+b2.default:  ; preds b1
+  v6 = const 0
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v7 = phi [b1: v4, b2: v6]               ; a
+  v8 = load v3[1:]                        ; rest, path v1[1:]
+  return v8

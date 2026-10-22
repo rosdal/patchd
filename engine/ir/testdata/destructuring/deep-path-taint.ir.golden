@@ -1,0 +1,24 @@
+module deep-path-taint.ts
+  export handler = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; handler
+  store global handler = v2
+  return undefined
+
+func f2 handler(req, res) function in f1
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = this
+  v4 = load v1.body                       ; path v1.body
+  v5 = load v4.user                       ; path v1.body.user
+  v6 = load v5.name                       ; name, path v1.body.user.name
+  v7 = load v5.roles                      ; path v1.body.user.roles
+  v8 = spread v7
+  v9 = load v8[0]                         ; primary, path v1.body.user.roles[0]
+  v10 = binop + v6 v9
+  v11 = call v2.send(v10) this=v2
+  return undefined

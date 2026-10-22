@@ -1,0 +1,58 @@
+module try-finally-break.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b9 b14
+  branch * b3.forof.body b15.forof.done
+b3.forof.body:  ; preds b2
+  v3 = load v1[of]
+  jump b4.try
+b4.try:  ; preds b3
+  v4 = const 1
+  v5 = binop > v3 v4                      ; exceptional → b13.finally.throw
+  jump b5.try
+b5.try:  ; preds b4
+  branch v5 b6.if.then b7.if.done
+b6.if.then:  ; preds b5
+  v6 = load global done
+  v7 = call v6(v3)
+  jump b15.forof.done
+b7.if.done:  ; preds b5
+  v8 = const 0
+  v9 = binop < v3 v8                      ; exceptional → b13.finally.throw
+  jump b8.if.done
+b8.if.done:  ; preds b7
+  branch v9 b9.if.then b10.if.done
+b9.if.then:  ; preds b8
+  v10 = load global done
+  v11 = call v10(v3)
+  jump b2.forof.head
+b10.if.done:  ; preds b8
+  v12 = load global use                   ; exceptional → b13.finally.throw
+  jump b11.if.done
+b11.if.done:  ; preds b10
+  v13 = call v12(v3)                      ; exceptional → b13.finally.throw
+  jump b12.if.done
+b12.if.done:  ; preds b11
+  v14 = load global done
+  v15 = call v14(v3)
+  jump b14.try.done
+b13.finally.throw:  ; preds b4 b7 b10 b11
+  v16 = catchval
+  v17 = load global done
+  v18 = call v17(v3)
+  throw v16
+b14.try.done:  ; preds b12
+  jump b2.forof.head
+b15.forof.done:  ; preds b2 b6
+  return undefined

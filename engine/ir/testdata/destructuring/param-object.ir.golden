@@ -1,0 +1,20 @@
+module param-object.ts
+  export handler = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; handler
+  store global handler = v2
+  return undefined
+
+func f2 handler(v1) function in f1
+b1.entry:
+  v1 = param
+  v2 = this
+  v3 = load v1.params                     ; params, path v1.params
+  v4 = load v1.body                       ; body, path v1.body
+  v5 = load v3.id
+  v6 = load v4.name
+  v7 = binop + v5 v6
+  return v7

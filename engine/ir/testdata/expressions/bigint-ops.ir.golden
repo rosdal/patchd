@@ -1,0 +1,18 @@
+module bigint-ops.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a) function in f1
+b1.entry:
+  v1 = param a
+  v2 = this
+  v3 = const 2n
+  v4 = binop * v1 v3
+  v5 = unop - v1
+  v6 = binop + v4 v5
+  return v6

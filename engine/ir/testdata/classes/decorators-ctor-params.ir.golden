@@ -1,0 +1,20 @@
+module decorators-ctor-params.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Svc.constructor class
+  store global Svc = v2
+  v3 = load v2.prototype
+  v4 = load global Inject
+  v5 = const "DB"
+  v6 = call v4(v5)
+  v7 = call v6(v2)                        ; decorator @Inject param constructor#0
+  return undefined
+
+func f2 Svc.constructor(db) constructor in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  store v2.db = v1
+  return undefined

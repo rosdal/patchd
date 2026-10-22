@@ -1,0 +1,8 @@
+module this-at-top-level.js
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 1
+  store v1.x = v2
+  return undefined

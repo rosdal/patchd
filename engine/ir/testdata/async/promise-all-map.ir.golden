@@ -1,0 +1,27 @@
+module promise-all-map.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(ids) function async in f1
+b1.entry:
+  v1 = param ids
+  v2 = this
+  v3 = load global Promise
+  v4 = closure f3 []                      ; f.<anon@2:30>
+  v5 = call v1.map(v4) this=v1
+  v6 = call v3.all(v5) this=v3
+  return v6
+
+func f3 f.<anon@2:30>(id) arrow async in f2
+b1.entry:
+  v1 = param id
+  v2 = load global fetch
+  v3 = call v2(v1)
+  v4 = await v3
+  v5 = call v4.json() this=v4
+  return v5

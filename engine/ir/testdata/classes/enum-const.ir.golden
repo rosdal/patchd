@@ -1,0 +1,19 @@
+module enum-const.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = object {}
+  v3 = const 0
+  store v2.Up = v3
+  v4 = const "Up"
+  store v2[v3] = v4
+  v5 = const 1
+  store v2.Down = v5
+  v6 = const "Down"
+  store v2[v5] = v6
+  store global Dir = v2
+  v7 = load global Dir
+  v8 = load v7.Up
+  store global d = v8
+  return undefined

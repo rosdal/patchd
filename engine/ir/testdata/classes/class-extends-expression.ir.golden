@@ -1,0 +1,31 @@
+module class-extends-expression.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Base.constructor class
+  store global Base = v2
+  v3 = load v2.prototype
+  v4 = load global mixin
+  v5 = load global Base
+  v6 = call v4(v5)
+  v7 = closure f3 []                      ; M.constructor class derived
+  store v7.__proto__ = v6                 ; proto
+  store global M = v7
+  v8 = load v7.prototype
+  v9 = load v6.prototype
+  store v8.__proto__ = v9                 ; proto
+  return undefined
+
+func f2 Base.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 M.constructor(...args) constructor implicit derived in f1
+b1.entry:
+  v1 = param args
+  v2 = this
+  v3 = spread v1
+  v4 = call super(...v3) this=v2
+  return undefined

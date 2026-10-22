@@ -1,0 +1,13 @@
+module import-named.ts
+  import version from "./lib" → ./lib.ts
+  import bump as increment from "./lib" → ./lib.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global increment
+  v3 = call v2()
+  v4 = load global console
+  v5 = load global version
+  v6 = call v4.log(v5) this=v4
+  return undefined

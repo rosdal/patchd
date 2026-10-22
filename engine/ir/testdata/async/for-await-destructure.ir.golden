@@ -1,0 +1,26 @@
+module for-await-destructure.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(pages) function async in f1
+b1.entry:
+  v1 = param pages
+  v2 = this
+  v3 = array []
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b3
+  branch * b3.forof.body b4.forof.done
+b3.forof.body:  ; preds b2
+  v4 = load v1[of]
+  v5 = await v4
+  v6 = load v5.items
+  v7 = spread v6
+  v8 = call v3.push(...v7) this=v3
+  jump b2.forof.head
+b4.forof.done:  ; preds b2
+  return v3

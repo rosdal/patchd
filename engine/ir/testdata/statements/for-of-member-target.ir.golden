@@ -1,0 +1,23 @@
+module for-of-member-target.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o, xs) function in f1
+b1.entry:
+  v1 = param o
+  v2 = param xs
+  v3 = this
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b3
+  branch * b3.forof.body b4.forof.done
+b3.forof.body:  ; preds b2
+  v4 = load v2[of]
+  store v1.cur = v4
+  jump b2.forof.head
+b4.forof.done:  ; preds b2
+  return undefined

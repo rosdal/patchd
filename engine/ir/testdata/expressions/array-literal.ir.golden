@@ -1,0 +1,19 @@
+module array-literal.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a, rest) function in f1
+b1.entry:
+  v1 = param a
+  v2 = param rest
+  v3 = this
+  v4 = const 1
+  v5 = binop + v1 v4
+  v6 = spread v2
+  v7 = array [v1, <hole>, v5, ...v6]
+  return v7

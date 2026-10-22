@@ -1,0 +1,47 @@
+module for-let-closures.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = array []
+  v3 = cell i
+  v4 = const 0
+  store *v3 = v4
+  v5 = load *v3
+  v6 = cell i
+  store *v6 = v5
+  jump b2.for.head
+b2.for.head:  ; preds b1 b4
+  v7 = phi [b1: v6, b4: v14]
+  v8 = load *v7
+  v9 = const 3
+  v10 = binop < v8 v9
+  branch v10 b3.for.body b5.for.done
+b3.for.body:  ; preds b2
+  v11 = closure f3 [v7]                   ; f.<anon@4:14>
+  v12 = call v2.push(v11) this=v2
+  jump b4.for.update
+b4.for.update:  ; preds b3
+  v13 = load *v7
+  v14 = cell i
+  store *v14 = v13
+  v15 = load *v14
+  v16 = const 1
+  v17 = binop + v15 v16
+  store *v14 = v17
+  jump b2.for.head
+b5.for.done:  ; preds b2
+  return v2
+
+func f3 f.<anon@4:14>() arrow in f2
+b1.entry:
+  v1 = free i (cell)
+  v2 = load *v1
+  return v2

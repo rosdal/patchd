@@ -1,0 +1,32 @@
+module closure-shared-cell.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; pair
+  store global pair = v2
+  return undefined
+
+func f2 pair() function in f1
+b1.entry:
+  v1 = this
+  v2 = cell v
+  v3 = const 0
+  store *v2 = v3
+  v4 = closure f3 [v2]                    ; pair.get
+  v5 = closure f4 [v2]                    ; pair.set
+  v6 = object {get: v4, set: v5}
+  return v6
+
+func f3 pair.get() arrow in f2
+b1.entry:
+  v1 = free v (cell)
+  v2 = load *v1
+  return v2
+
+func f4 pair.set(x) arrow in f2
+b1.entry:
+  v1 = param x
+  v2 = free v (cell)
+  store *v2 = v1
+  return undefined

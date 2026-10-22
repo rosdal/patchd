@@ -1,0 +1,31 @@
+module higher-order-return.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; compose
+  store global compose = v2
+  return undefined
+
+func f2 compose(f, g) function in f1
+b1.entry:
+  v1 = param f
+  v2 = param g
+  v3 = this
+  v4 = cell f
+  v5 = cell g
+  store *v4 = v1
+  store *v5 = v2
+  v6 = closure f3 [v4, v5]                ; compose.<anon@2:10>
+  return v6
+
+func f3 compose.<anon@2:10>(x) arrow in f2
+b1.entry:
+  v1 = param x
+  v2 = free f (cell)
+  v3 = free g (cell)
+  v4 = load *v2
+  v5 = load *v3
+  v6 = call v5(v1)
+  v7 = call v4(v6)
+  return v7

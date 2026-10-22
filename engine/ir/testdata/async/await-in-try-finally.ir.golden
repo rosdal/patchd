@@ -1,0 +1,31 @@
+module await-in-try-finally.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(conn) function async in f1
+b1.entry:
+  v1 = param conn
+  v2 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v3 = call v1.run() this=v1              ; exceptional → b5.finally.throw
+  jump b3.try
+b3.try:  ; preds b2
+  v4 = await v3                           ; exceptional → b5.finally.throw
+  jump b4.try
+b4.try:  ; preds b3
+  v5 = call v1.close() this=v1
+  v6 = await v5
+  return v4
+b5.finally.throw:  ; preds b2 b3
+  v7 = catchval
+  v8 = call v1.close() this=v1
+  v9 = await v8
+  throw v7
+b6.try.done:  ; unreachable
+  return undefined

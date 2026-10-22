@@ -1,0 +1,27 @@
+module module-exports-class.js
+  export default = v6 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Store.constructor class
+  store global Store = v2
+  v3 = load v2.prototype
+  v4 = closure f3 []                      ; Store.get
+  store v3.get = v4                       ; method
+  v5 = load global module
+  v6 = load global Store
+  store v5.exports = v6
+  return undefined
+
+func f2 Store.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 Store.get(k) method in f1
+b1.entry:
+  v1 = param k
+  v2 = this
+  v3 = load v2[v1]
+  return v3

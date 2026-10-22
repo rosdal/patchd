@@ -1,0 +1,23 @@
+module for-in.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; keys
+  store global keys = v2
+  return undefined
+
+func f2 keys(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  v3 = array []
+  jump b2.forin.head
+b2.forin.head:  ; preds b1 b3
+  branch * b3.forin.body b4.forin.done
+b3.forin.body:  ; preds b2
+  v4 = load v1[in]
+  v5 = call v3.push(v4) this=v3
+  jump b2.forin.head
+b4.forin.done:  ; preds b2
+  return v3

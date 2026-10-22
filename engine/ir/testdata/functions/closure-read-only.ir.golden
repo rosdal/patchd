@@ -1,0 +1,25 @@
+module closure-read-only.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; make
+  store global make = v2
+  return undefined
+
+func f2 make(prefix) function in f1
+b1.entry:
+  v1 = param prefix
+  v2 = this
+  v3 = cell prefix
+  store *v3 = v1
+  v4 = closure f3 [v3]                    ; make.<anon@2:10>
+  return v4
+
+func f3 make.<anon@2:10>(s) arrow in f2
+b1.entry:
+  v1 = param s
+  v2 = free prefix (cell)
+  v3 = load *v2
+  v4 = binop + v3 v1
+  return v4

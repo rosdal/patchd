@@ -1,0 +1,26 @@
+module iife-arrow-capture.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(x) function in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  v3 = cell x
+  store *v3 = v1
+  v4 = closure f3 [v3]                    ; f.<anon@2:11>
+  v5 = call v4()                          ; iife
+  return v5
+
+func f3 f.<anon@2:11>() arrow in f2
+b1.entry:
+  v1 = free x (cell)
+  v2 = load *v1
+  v3 = const 1
+  v4 = binop + v2 v3
+  return v4

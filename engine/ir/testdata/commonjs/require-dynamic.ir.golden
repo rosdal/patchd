@@ -1,0 +1,20 @@
+module require-dynamic.js
+  export default = v4 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; load
+  store global load = v2
+  v3 = load global module
+  v4 = load global load
+  store v3.exports = v4
+  return undefined
+
+func f2 load(name) function in f1
+b1.entry:
+  v1 = param name
+  v2 = this
+  v3 = load global require
+  v4 = call v3(v1)
+  return v4

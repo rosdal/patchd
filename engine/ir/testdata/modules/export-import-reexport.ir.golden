@@ -1,0 +1,8 @@
+module export-import-reexport.ts
+  import version from "./lib" → ./lib.ts
+  export version = version from "./lib" (named)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  return undefined

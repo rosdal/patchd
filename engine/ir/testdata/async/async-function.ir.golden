@@ -1,0 +1,19 @@
+module async-function.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; load
+  store global load = v2
+  return undefined
+
+func f2 load(id) function async in f1
+b1.entry:
+  v1 = param id
+  v2 = this
+  v3 = load global fetch
+  v4 = template ["/api/", v1]
+  v5 = call v3(v4)
+  v6 = await v5
+  v7 = call v6.json() this=v6
+  return v7

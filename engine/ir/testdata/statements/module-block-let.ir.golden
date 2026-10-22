@@ -1,0 +1,11 @@
+module module-block-let.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 1
+  v3 = const 1
+  v4 = binop + v2 v3
+  v5 = load global console
+  v6 = call v5.log(v4) this=v5
+  return undefined

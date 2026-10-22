@@ -1,0 +1,26 @@
+module closure-module-var.ts
+  export hit = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; hit
+  store global hit = v2
+  v3 = const 0
+  store global hits = v3
+  return undefined
+
+func f2 hit() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global hits
+  v3 = const 1
+  v4 = binop + v2 v3
+  store global hits = v4
+  v5 = closure f3 []                      ; hit.<anon@4:10>
+  return v5
+
+func f3 hit.<anon@4:10>() arrow in f2
+b1.entry:
+  v1 = load global hits
+  return v1

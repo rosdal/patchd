@@ -8,4 +8,5 @@ web/src/api/gen/** linguist-generated=true
 # test fixtures are intentionally vulnerable code
 engine/testdata/** linguist-vendored=true
 engine/tsbridge/testdata/** linguist-vendored=true
+engine/ir/testdata/** linguist-vendored=true
 engine/tsbridge/testdata/positions/** -text

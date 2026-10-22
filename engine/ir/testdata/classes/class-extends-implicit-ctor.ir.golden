@@ -1,0 +1,30 @@
+module class-extends-implicit-ctor.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global Error
+  v3 = closure f2 []                      ; E.constructor class derived
+  store v3.__proto__ = v2                 ; proto
+  store global E = v3
+  v4 = load v3.prototype
+  v5 = load v2.prototype
+  store v4.__proto__ = v5                 ; proto
+  return undefined
+
+func f2 E.constructor(...args) constructor implicit derived in f1
+b1.entry:
+  v1 = param args
+  v2 = this
+  v3 = spread v1
+  v4 = call super(...v3) this=v2
+  v5 = closure f3 []                      ; E.<init>
+  v6 = call v5() this=v2
+  return undefined
+
+func f3 E.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const 500
+  store v1.code = v2
+  return undefined

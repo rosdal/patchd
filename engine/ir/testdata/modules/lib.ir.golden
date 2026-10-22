@@ -1,0 +1,61 @@
+module lib.ts
+  export bump = v2 (declaration)
+  export version = v3 (declaration)
+  export counter = v4 (declaration)
+  export default = Client = v5 (declaration)
+  export Mode = v8 (declaration)
+  export Tools = v11 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; bump
+  store global bump = v2
+  v3 = const "1.0"
+  store global version = v3
+  v4 = const 0
+  store global counter = v4
+  v5 = closure f3 []                      ; Client.constructor class
+  store global Client = v5
+  v6 = load v5.prototype
+  v7 = closure f4 []                      ; Client.run
+  store v6.run = v7                       ; method
+  v8 = object {}
+  v9 = const 0
+  store v8.A = v9
+  v10 = const "A"
+  store v8[v9] = v10
+  store global Mode = v8
+  v11 = object {}
+  store global Tools = v11
+  v12 = closure f5 []                     ; Tools
+  v13 = call v12(v11)
+  return undefined
+
+func f2 bump() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global counter
+  v3 = const 1
+  v4 = binop + v2 v3
+  store global counter = v4
+  return undefined
+
+func f3 Client.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f4 Client.run() method in f1
+b1.entry:
+  v1 = this
+  v2 = load global version
+  return v2
+
+func f5 Tools(Tools) namespace in f1
+b1.entry:
+  v1 = param Tools
+  v2 = this
+  v3 = const 1
+  store v1.id = v3
+  return undefined

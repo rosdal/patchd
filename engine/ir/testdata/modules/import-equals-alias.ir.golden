@@ -1,0 +1,35 @@
+module import-equals-alias.ts
+  export x = v8 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = object {}
+  store global Outer = v2
+  v3 = closure f2 []                      ; Outer
+  v4 = call v3(v2)
+  v5 = load global Outer
+  v6 = load v5.Inner
+  store global V = v6
+  v7 = load global V
+  v8 = load v7.v
+  store global x = v8
+  return undefined
+
+func f2 Outer(Outer) namespace in f1
+b1.entry:
+  v1 = param Outer
+  v2 = this
+  v3 = object {}
+  store v1.Inner = v3
+  v4 = closure f3 []                      ; Outer.Inner
+  v5 = call v4(v3)
+  return undefined
+
+func f3 Outer.Inner(Inner) namespace in f2
+b1.entry:
+  v1 = param Inner
+  v2 = this
+  v3 = const 1
+  store v1.v = v3
+  return undefined

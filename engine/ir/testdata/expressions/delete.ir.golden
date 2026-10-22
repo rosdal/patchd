@@ -1,0 +1,18 @@
+module delete.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o, k) function in f1
+b1.entry:
+  v1 = param o
+  v2 = param k
+  v3 = this
+  v4 = delete v1.a
+  v5 = delete v1[v2]
+  v6 = delete v1.b
+  return v6

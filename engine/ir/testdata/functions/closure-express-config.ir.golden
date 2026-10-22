@@ -1,0 +1,35 @@
+module closure-express-config.ts
+  export makeHandler = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; makeHandler
+  store global makeHandler = v2
+  v3 = const "x"
+  v4 = object {secret: v3}
+  store global config = v4
+  return undefined
+
+func f2 makeHandler(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = cell db
+  store *v3 = v1
+  v4 = closure f3 [v3]                    ; makeHandler.<anon@3:10>
+  return v4
+
+func f3 makeHandler.<anon@3:10>(req, res) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = free db (cell)
+  v4 = load *v3
+  v5 = load v1.query
+  v6 = load v5.sql
+  v7 = load global config
+  v8 = load v7.secret
+  v9 = call v4.query(v6, v8) this=v4
+  v10 = call v2.end() this=v2
+  return undefined

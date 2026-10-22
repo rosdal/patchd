@@ -1,0 +1,24 @@
+module assignment-object-rename-default.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  v3 = load v1.a                          ; path v1.a
+  v4 = binop === v3 undefined
+  branch v4 b2.default b3.default.done
+b2.default:  ; preds b1
+  v5 = const 1
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v6 = phi [b1: v3, b2: v5]               ; x
+  v7 = load v1.b                          ; y, path v1.b
+  v8 = array [v6, v7]
+  return v8

@@ -1,0 +1,20 @@
+module object-computed.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(k, v) function in f1
+b1.entry:
+  v1 = param k
+  v2 = param v
+  v3 = this
+  v4 = template [v1, "_raw"]
+  v5 = load global String
+  v6 = call v5(v2)
+  v7 = const 1
+  v8 = object {[v1]: v2, [v4]: v6, fixed: v7}
+  return v8

@@ -1,0 +1,44 @@
+module closure-recursive-declaration.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; outer
+  store global outer = v2
+  return undefined
+
+func f2 outer() function in f1
+b1.entry:
+  v1 = this
+  v2 = cell fib
+  v3 = closure f3 [v2]                    ; outer.fib
+  store *v2 = v3
+  v4 = load *v2
+  v5 = const 10
+  v6 = call v4(v5)
+  return v6
+
+func f3 outer.fib(n) function in f2
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = free fib (cell)
+  v4 = const 2
+  v5 = binop < v1 v4
+  branch v5 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v6 = load *v3
+  v7 = const 1
+  v8 = binop - v1 v7
+  v9 = call v6(v8)
+  v10 = load *v3
+  v11 = const 2
+  v12 = binop - v1 v11
+  v13 = call v10(v12)
+  v14 = binop + v9 v13
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v15 = phi [b2: v1, b3: v14]
+  return v15

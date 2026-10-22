@@ -1,0 +1,24 @@
+module enum-numeric.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = object {}
+  v3 = const 0
+  store v2.Red = v3
+  v4 = const "Red"
+  store v2[v3] = v4
+  v5 = const 1
+  store v2.Green = v5
+  v6 = const "Green"
+  store v2[v5] = v6
+  v7 = const 10
+  store v2.Blue = v7
+  v8 = const "Blue"
+  store v2[v7] = v8
+  v9 = const 11
+  store v2.Next = v9
+  v10 = const "Next"
+  store v2[v9] = v10
+  store global Color = v2
+  return undefined

@@ -1,0 +1,28 @@
+module class-static-block.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Env.constructor class
+  store global Env = v2
+  v3 = load v2.prototype
+  v4 = closure f3 []                      ; Env.<static>
+  v5 = call v4() this=v2
+  return undefined
+
+func f2 Env.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 Env.<static>() staticinit in f1
+b1.entry:
+  v1 = this
+  v2 = load global Env
+  v3 = const "dev"
+  v4 = object {mode: v3}
+  store v2.vars = v4
+  v5 = const 1
+  v6 = load global console
+  v7 = call v6.log(v5) this=v6
+  return undefined

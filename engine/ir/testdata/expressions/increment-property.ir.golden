@@ -1,0 +1,22 @@
+module increment-property.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  v3 = load v1.count
+  v4 = const 1
+  v5 = binop + v3 v4
+  store v1.count = v5
+  v6 = load v1.count
+  v7 = const 1
+  v8 = binop + v6 v7
+  store v1.count = v8
+  return v8

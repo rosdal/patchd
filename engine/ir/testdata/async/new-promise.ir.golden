@@ -1,0 +1,28 @@
+module new-promise.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; delay
+  store global delay = v2
+  return undefined
+
+func f2 delay(ms) function in f1
+b1.entry:
+  v1 = param ms
+  v2 = this
+  v3 = cell ms
+  store *v3 = v1
+  v4 = load global Promise
+  v5 = closure f3 [v3]                    ; delay.<anon@2:28>
+  v6 = new v4(v5)
+  return v6
+
+func f3 delay.<anon@2:28>(resolve) arrow in f2
+b1.entry:
+  v1 = param resolve
+  v2 = free ms (cell)
+  v3 = load global setTimeout
+  v4 = load *v2
+  v5 = call v3(v1, v4)
+  return v5

@@ -1,0 +1,19 @@
+module enum-in-function.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = object {}
+  v3 = const 0
+  store v2.X = v3
+  v4 = const "X"
+  store v2[v3] = v4
+  v5 = load v2.X
+  return v5

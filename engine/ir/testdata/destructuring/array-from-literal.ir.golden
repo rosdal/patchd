@@ -1,0 +1,13 @@
+module array-from-literal.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 1
+  v3 = const 2
+  v4 = array [v2, v3]
+  v5 = load v4[0]                         ; path v4[0]
+  store global x = v5
+  v6 = load v4[1]                         ; path v4[1]
+  store global y = v6
+  return undefined

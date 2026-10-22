@@ -1,0 +1,35 @@
+module conditional.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(n) function in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = const 0
+  v4 = binop > v1 v3
+  branch v4 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v5 = const "positive"
+  jump b7.cond.done
+b3.cond.false:  ; preds b1
+  v6 = const 0
+  v7 = binop < v1 v6
+  branch v7 b4.cond.true b5.cond.false
+b4.cond.true:  ; preds b3
+  v8 = const "negative"
+  jump b6.cond.done
+b5.cond.false:  ; preds b3
+  v9 = const "zero"
+  jump b6.cond.done
+b6.cond.done:  ; preds b4 b5
+  v10 = phi [b4: v8, b5: v9]
+  jump b7.cond.done
+b7.cond.done:  ; preds b2 b6
+  v11 = phi [b2: v5, b6: v10]
+  return v11

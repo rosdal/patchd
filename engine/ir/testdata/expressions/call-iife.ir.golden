@@ -1,0 +1,23 @@
+module call-iife.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; <anon@1:16>
+  v3 = call v2()                          ; iife
+  store global value = v3
+  v4 = closure f3 []                      ; <anon@4:16>
+  v5 = call v4()                          ; iife
+  store global arrow = v5
+  return undefined
+
+func f2 <anon@1:16>() function in f1
+b1.entry:
+  v1 = this
+  v2 = const 42
+  return v2
+
+func f3 <anon@4:16>() arrow in f1
+b1.entry:
+  v1 = const 1
+  return v1

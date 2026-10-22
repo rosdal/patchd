@@ -1,0 +1,20 @@
+module jsx-spread-attrs.tsx
+  export Button = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Button
+  store global Button = v2
+  return undefined
+
+func f2 Button(p) function in f1
+b1.entry:
+  v1 = param p
+  v2 = this
+  v3 = const "button"
+  v4 = const true
+  v5 = object {...v1, disabled: v4}
+  v6 = array []
+  v7 = call %jsx(v3, v5, v6)              ; jsx
+  return v7

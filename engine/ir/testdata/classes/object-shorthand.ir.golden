@@ -1,0 +1,16 @@
+module object-shorthand.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(id, name) function in f1
+b1.entry:
+  v1 = param id
+  v2 = param name
+  v3 = this
+  v4 = object {id: v1, name: v2}
+  return v4

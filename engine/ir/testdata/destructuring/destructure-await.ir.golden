@@ -1,0 +1,18 @@
+module destructure-await.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(db) function async in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = const "SELECT 1"
+  v4 = call v1.query(v3) this=v1
+  v5 = await v4
+  v6 = load v5.rows                       ; rows, path v5.rows
+  return v6

@@ -1,0 +1,33 @@
+module object-methods.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "svc"
+  v3 = closure f2 []                      ; svc.run
+  v4 = closure f3 []                      ; svc.load
+  v5 = closure f4 []                      ; svc.gen
+  v6 = object {name: v2, run(): v3, load(): v4, gen(): v5}
+  store global svc = v6
+  return undefined
+
+func f2 svc.run(x) method in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  v3 = load v2.name
+  v4 = binop + v3 v1
+  return v4
+
+func f3 svc.load() method async in f1
+b1.entry:
+  v1 = this
+  v2 = const 1
+  return v2
+
+func f4 svc.gen() method generator in f1
+b1.entry:
+  v1 = this
+  v2 = const 1
+  v3 = yield v2
+  return undefined
