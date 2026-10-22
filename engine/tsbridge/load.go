@@ -116,7 +116,9 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 			}
 			done <- r
 		}()
-		r.prog = compiler.NewProgram(compiler.ProgramOptions{Config: parsed, Host: host})
+		// Imports into a referenced project use its source, not its build
+		// output: the outputs usually don't exist in a checkout.
+		r.prog = compiler.NewProgram(compiler.ProgramOptions{Config: parsed, Host: host, UseSourceOfProjectReference: true})
 		if testHookAfterParse != nil {
 			testHookAfterParse()
 		}

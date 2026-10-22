@@ -344,7 +344,7 @@ func reachableFiles(host configHost, configPath, root string) (files []string) {
 	if parsed == nil {
 		return nil
 	}
-	prog := compiler.NewProgram(compiler.ProgramOptions{Config: parsed, Host: ch})
+	prog := compiler.NewProgram(compiler.ProgramOptions{Config: parsed, Host: ch, UseSourceOfProjectReference: true})
 	for _, sf := range prog.GetSourceFiles() {
 		name := sf.FileName()
 		if !sf.IsDeclarationFile && !strings.Contains(name, "/node_modules/") && strings.HasPrefix(name, root+"/") {
