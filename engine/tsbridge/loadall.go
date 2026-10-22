@@ -16,7 +16,8 @@ import (
 // LoadAllOptions tune LoadAll. The zero value is the default.
 type LoadAllOptions struct {
 	LoadOptions
-	// Jobs is how many projects load at once (0: the number of CPU cores).
+	// Jobs is how many projects load at once (0: a quarter of the CPU
+	// cores; each program already parses and checks in parallel).
 	Jobs int
 	// MaxMemory is the memory budget in bytes (0: 75% of available memory).
 	// A project starts only when its estimated cost fits in what is left.
@@ -48,7 +49,7 @@ func LoadAll(ctx context.Context, ws *Workspace, opts LoadAllOptions, visit func
 	start := time.Now()
 	stats := LoadAllStats{Jobs: opts.Jobs, Budget: opts.MaxMemory}
 	if stats.Jobs <= 0 {
-		stats.Jobs = runtime.NumCPU()
+		stats.Jobs = defaultJobs()
 	}
 	if stats.Budget == 0 {
 		stats.Budget = sysmem.Available() / 4 * 3
@@ -250,3 +251,16 @@ func PeakHeap(f func()) uint64 {
 // ProcessPeakRSS returns this process's peak resident memory in bytes (0
 // when the platform doesn't say), for benchmarks and debug output.
 func ProcessPeakRSS() uint64 { return sysmem.PeakRSS() }
+
+// defaultJobs and defaultCheckers were measured on the reference repos
+// (docs/engine/tsbridge.md#parallelism): typescript-go parses and checks each
+// program in parallel already, so a few programs at once saturate the
+// machine, and only very large projects gain from more than 4 checkers.
+func defaultJobs() int { return max(1, runtime.NumCPU()/4) }
+
+func defaultCheckers(files int) int {
+	if files >= 2000 {
+		return max(4, min(8, runtime.NumCPU()/2))
+	}
+	return 0 // typescript-go's default, 4
+}

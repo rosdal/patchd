@@ -17,6 +17,12 @@ type readOnlyFS struct {
 	base    vfs.FS
 	mu      sync.RWMutex
 	overlay map[string]string // absolute path -> contents
+	json    sync.Map          // absolute path -> jsonFile: package.json and configs, read again and again by module resolution
+}
+
+type jsonFile struct {
+	text string
+	ok   bool
 }
 
 func newReadOnlyFS() *readOnlyFS {
@@ -49,7 +55,16 @@ func (f *readOnlyFS) ReadFile(path string) (string, bool) {
 	if s, ok := f.lookup(path); ok {
 		return s, true
 	}
-	return f.base.ReadFile(path)
+	if !strings.HasSuffix(path, ".json") {
+		return f.base.ReadFile(path)
+	}
+	if v, ok := f.json.Load(path); ok {
+		j := v.(jsonFile)
+		return j.text, j.ok
+	}
+	text, ok := f.base.ReadFile(path)
+	f.json.Store(path, jsonFile{text: text, ok: ok})
+	return text, ok
 }
 
 func (f *readOnlyFS) WriteFile(string, string) error             { return vfs.ErrPermission }

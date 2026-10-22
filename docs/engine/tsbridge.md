@@ -95,6 +95,27 @@ tsbridge degrades instead of failing, and says where it is blind.
 
 Calls that don't resolve carry a reason: `any-receiver`, `dynamic-property`, `package-not-installed`, `untyped-package`, `unresolved-name`, `no-symbol`, `no-declaration`, `not-a-call`, `failed`. `patchd debug stats` counts them per repo, because they are where analysis is blind.
 
+## Parallelism
+
+Measured on the reference repos on a 16-thread laptop (Intel Core Ultra 7 255H, 32 GB, Windows 11), October 2026; each number is one run of `patchd debug stats`, and repeated runs differed by about 1%.
+
+| Setting                                                                                | pnpm (519 projects) | vscode (165 projects, one of 10,659 files)                  |
+| -------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------- |
+| No shared parse cache, 16 jobs                                                         | 575 s, 4.5 GB heap  | –                                                           |
+| Shared cache for lib and `node_modules` declarations, 16 jobs                          | 253 s, 3.1 GB       | 78 s, 12.9 GB                                               |
+| Shared cache for every file                                                            | 221 s, 1.3 GB       | –                                                           |
+| … plus cached `package.json`/config reads (module resolution re-reads them per import) | 51 s, 1.5 GB        | –                                                           |
+| … with 4 jobs                                                                          | **42 s, 1.0 GB**    | –                                                           |
+| 4 jobs, 1 / 4 / **8** / 16 checkers                                                    | 42 s at any count   | 72 s / 78 s / **52 s** / 54 s; 11.0 / 12.9 / 14.8 / 15.4 GB |
+
+So the defaults are:
+
+- **Jobs:** a quarter of the CPU cores. typescript-go already parses each program on all cores and checks it with several checkers; more programs at once only contend (16 jobs were slower than 4 on pnpm, juice-shop and create-t3-turbo).
+- **Checkers:** 8 (at most half the cores) for projects of 2,000 or more files, else typescript-go's 4. Only very large projects gain from more, and each checker costs memory.
+- **Shared parse cache and file reads:** on in `LoadAll`. Parsed files are immutable and bind once, as in typescript-go's language server.
+
+Before these, imports into referenced projects resolved to their build output; resolving them to source (as editors do) raised pnpm's call resolution rate from 80% to 99%.
+
 ## Developer commands
 
 `patchd debug` is hidden from the main help (`patchd debug --help` shows it). Every subcommand takes `--format json`, `--jobs`, `--max-memory`, `--timeout`, `--max-files`, `--no-check`, `--checkers`, `--no-shared-cache`, `--root` and `-v` (debug logs, including recovered compiler panics).

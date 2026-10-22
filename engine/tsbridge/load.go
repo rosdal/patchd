@@ -1,6 +1,7 @@
 package tsbridge
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"log/slog"
@@ -18,6 +19,7 @@ import (
 	"github.com/microsoft/typescript-go/shim/compiler"
 	"github.com/microsoft/typescript-go/shim/core"
 	"github.com/microsoft/typescript-go/shim/tsoptions"
+	"github.com/microsoft/typescript-go/shim/vfs"
 	"github.com/microsoft/typescript-go/shim/vfs/cachedvfs"
 )
 
@@ -82,13 +84,20 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 	p.ctx, p.cancel = context.WithCancel(context.WithoutCancel(ctx))
 
 	start := time.Now()
-	fs := newReadOnlyFS()
+	fs, files := newReadOnlyFS(), vfs.FS(nil)
+	if opts.cache != nil {
+		// LoadAll shares one file system, and its cache of lookups, between
+		// programs: module resolution is mostly file system calls.
+		fs, files = opts.cache.fs, opts.cache.files
+	} else {
+		files = bundled.WrapFS(cachedvfs.From(fs))
+	}
 	configPath := cfg.ConfigPath
 	if cfg.Synthesised {
 		configPath = path.Join(cfg.Dir, synthesisedConfigName)
 		fs.set(configPath, synthesisedConfig(cfg.Files))
 	}
-	host := compiler.NewCompilerHost(cfg.Dir, bundled.WrapFS(cachedvfs.From(fs)), bundled.LibPath(), nil, nil)
+	host := compiler.NewCompilerHost(cfg.Dir, files, bundled.LibPath(), nil, nil)
 	if opts.cache != nil {
 		host = &cachingHost{CompilerHost: host, cache: opts.cache}
 	}
@@ -164,8 +173,7 @@ func (p *Program) configure(parsed *tsoptions.ParsedCommandLine, opts LoadOption
 	if opts.SkipLibCheck == nil || *opts.SkipLibCheck {
 		o.SkipLibCheck = core.TSTrue
 	}
-	if opts.Checkers > 0 {
-		n := opts.Checkers
+	if n := cmp.Or(opts.Checkers, defaultCheckers(len(p.cfg.Files))); n > 0 {
 		o.Checkers = &n
 	}
 	p.stats.Checkers = 4

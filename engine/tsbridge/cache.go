@@ -1,21 +1,27 @@
 package tsbridge
 
 import (
-	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/microsoft/typescript-go/shim/ast"
+	"github.com/microsoft/typescript-go/shim/bundled"
 	"github.com/microsoft/typescript-go/shim/compiler"
+	"github.com/microsoft/typescript-go/shim/vfs"
+	"github.com/microsoft/typescript-go/shim/vfs/cachedvfs"
 )
 
-// parseCache shares parsed declaration files from node_modules and the
-// bundled lib files between programs, the way typescript-go's language server
-// shares them between projects. Parsed files are immutable and bind once
+// parseCache shares parsed files between the programs of one LoadAll, the
+// way typescript-go's language server shares them between projects: lib
+// files, node_modules declarations, and source files that several programs
+// include (a monorepo's referenced projects). Parsed files are immutable and bind once
 // (ast.SourceFile.BindOnce), and checkers keep their state off the nodes, so
 // sharing is safe. Files are keyed by their parse options, which include
 // everything that changes how a file parses.
 type parseCache struct {
+	fs    *readOnlyFS // shared by every program of the LoadAll
+	files vfs.FS      // fs with lookups cached and lib files served
+
 	mu      sync.Mutex
 	entries map[ast.SourceFileParseOptions]*parseEntry
 	hits    atomic.Int64
@@ -28,14 +34,18 @@ type parseEntry struct {
 }
 
 func newParseCache() *parseCache {
-	return &parseCache{entries: map[ast.SourceFileParseOptions]*parseEntry{}}
+	fs := newReadOnlyFS()
+	return &parseCache{
+		fs:      fs,
+		files:   bundled.WrapFS(cachedvfs.From(fs)),
+		entries: map[ast.SourceFileParseOptions]*parseEntry{},
+	}
 }
 
-// shareable reports whether a file is the same for every program: compiler
-// lib files and declaration files of installed packages.
-func shareable(name string) bool {
-	return strings.HasPrefix(name, "bundled:///") || (strings.Contains(name, "/node_modules/") && isDeclarationFile(name))
-}
+// shareable reports whether a file may be shared between programs. Every
+// file is: files don't change during a LoadAll, and the key holds all parse
+// options. Overlay configs never reach GetSourceFile.
+func shareable(string) bool { return true }
 
 func (c *parseCache) get(opts ast.SourceFileParseOptions, parse func() *ast.SourceFile) *ast.SourceFile {
 	c.mu.Lock()

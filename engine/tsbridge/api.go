@@ -60,7 +60,7 @@ type LoadOptions struct {
 	Timeout      time.Duration // cancel loading and checking after this long (0: no limit); see TSB006
 	SkipLibCheck *bool         // default true: do not type-check .d.ts files
 	IncludeTests *bool         // default true: security bugs hide in test helpers too
-	Checkers     int           // typescript-go checkers per program (0: typescript-go's default of 4)
+	Checkers     int           // typescript-go checkers per program (0: 8 for projects of 2,000+ files, else typescript-go's 4)
 	NoCheck      bool          // parse and bind only; types are still computed on demand
 	// Priority files are analysed first when MaxFiles cuts a project (for
 	// example the files a pull request changes). Absolute paths.
