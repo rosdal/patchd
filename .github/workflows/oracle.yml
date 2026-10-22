@@ -10,7 +10,11 @@ on:
     - cron: "0 3 * * *"
   pull_request:
     paths:
-      ["engine/tsbridge/TSGO_VERSION", "engine/tsbridge/shim/**", "go.mod", "tools/tsoracle/**"]
+      - engine/tsbridge/TSGO_VERSION
+      - engine/tsbridge/shim/**
+      - go.mod
+      - tools/tsoracle/**
+      - .github/workflows/oracle.yml # check the workflow itself when it changes
   workflow_dispatch:
 
 permissions:
