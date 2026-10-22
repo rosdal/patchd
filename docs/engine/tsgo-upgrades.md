@@ -34,3 +34,18 @@ It runs steps 1–3 below and stops at the first failure. Prefer a `typescript/v
 ## Shims we add
 
 To expose another compiler package, add it to `packagesToShim` in `engine/tsbridge/shim/gen/main.go`, create the module directory with a `go.mod` like its siblings, add a `require` and `replace` for it to the root `go.mod`, run `pnpm gen`, and list it with its reason in [`engine/tsbridge/shim/README.md`](../../engine/tsbridge/shim/README.md).
+
+## Trial run, 2026-10-22
+
+The procedure was run end to end from the 7.0.2 pin (`2bd066d8`) to typescript-go `main` (`89d5d5b`, 2026-08-20), in a throwaway worktree:
+
+1. `pnpm tsgo:update 89d5d5b2849a0db0957065889ca58536fa6d2e4a --npm typescript@7.0.2-dev` moved all 13 modules and regenerated the shims (39 files changed). The kind table did not change: still 351 compiler kinds.
+2. Step 3 stopped at the one known break: `compiler.NewCompilerHost` gained a trailing `contentmapper.Project` parameter. Passing `nil` at its two call sites in `engine/tsbridge` (and the shim test) fixed the build; the whole tsbridge suite passed.
+3. Oracle and benchmarks, before → after:
+
+| Repo     | Oracle real-match rate | Load + check    | Peak RSS        |
+| -------- | ---------------------- | --------------- | --------------- |
+| nodegoat | 99.8% → 99.8%          | 0.13 s → 0.12 s | 102 MB → 99 MB  |
+| commerce | 100.0% → 100.0%        | 2.11 s → 1.77 s | 287 MB → 265 MB |
+
+The pin stays at the `typescript/v7.0.2` release: `main` is not a release, and upgrades follow tags.

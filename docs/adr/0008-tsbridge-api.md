@@ -1,6 +1,6 @@
 # 0008. A small, handle-based tsbridge API with stable qualified names
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-22
 
 ## Context

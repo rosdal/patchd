@@ -2,7 +2,7 @@
 
 Patchd reviews TypeScript and JavaScript pull requests. A dataflow engine built on typescript-go finds candidate bugs, agents confirm each one with evidence before it is posted, and patches are verified in a sandbox before Patchd suggests them. It is built for teams that want fewer, provable review comments, hosted in the EU or self-hosted.
 
-**Status:** pre-alpha, v0.1 (repo foundation). There is no analysis code yet; every subcommand except `version` returns "not implemented yet".
+**Status:** pre-alpha, v0.2: engine loads TypeScript projects. `engine/tsbridge` discovers, loads and type-checks any TypeScript or JavaScript repo and answers questions about its syntax, types and calls; inspect it with `patchd debug project|types|resolve|stats` ([docs/engine/tsbridge.md](docs/engine/tsbridge.md)). The review subcommands still return "not implemented yet".
 
 ## Prerequisites
 
