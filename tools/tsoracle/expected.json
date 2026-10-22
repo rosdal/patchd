@@ -58,5 +58,34 @@
     "reason": "For a property read through an index signature (process.env.X), typescript-go returns the index signature's symbol; TypeScript 6 returns none",
     "ts6Symbol": "^$",
     "ts7Symbol": "^__index$"
+  },
+  {
+    "id": "js-function-expando-object",
+    "reason": "A JavaScript function that gets properties mixed in (express's app) is Function in TypeScript 7; TypeScript 6 prints Function's expanded members",
+    "file": "\\.[cm]?js$",
+    "ts6": "^\\{ apply\\(this: Function",
+    "ts7": "^Function$"
+  },
+  {
+    "id": "jsdoc-object-type",
+    "reason": "TypeScript 7 reads JSDoc {object} as the object type; TypeScript 6 as any",
+    "file": "\\.[cm]?js$",
+    "ts6": "\bany\b",
+    "ts7": "\bobject\b"
+  },
+  {
+    "id": "js-this-alias",
+    "reason": "As js-constructor-functions: `var self = this` in a JavaScript constructor function is any in TypeScript 7, the class instance (this) in TypeScript 6",
+    "file": "\\.[cm]?js$",
+    "ts6": "^this$",
+    "ts7": "^any$"
+  },
+  {
+    "id": "js-require-binding",
+    "reason": "`const { X } = require('m')` with m untyped: TypeScript 6 makes X an alias with no target, TypeScript 7 a plain binding declared at the destructuring",
+    "file": "\\.[cm]?js$",
+    "ts6": "^any$",
+    "ts7": "^any$",
+    "ts6Declaration": "^$"
   }
 ]

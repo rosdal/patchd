@@ -135,6 +135,15 @@ function answer(sf, checker, pos) {
           line: dsf.getLineAndCharacterOfPosition(decl.getStart(dsf)).line + 1,
           lib: isLib(dsf.fileName),
         };
+        // All of them: for a union's property, the order follows type IDs.
+        out.declarations = sym.declarations.map((d) => {
+          const f = d.getSourceFile();
+          return {
+            file: declFile(f.fileName),
+            line: f.getLineAndCharacterOfPosition(d.getStart(f)).line + 1,
+            lib: isLib(f.fileName),
+          };
+        });
       }
     }
   } catch (e) {
@@ -158,10 +167,17 @@ function innermost(sf, pos) {
 }
 
 function createProgram(project) {
+  let parsedReferences;
   let options;
   let rootNames;
   if (project.synthesised) {
-    options = { ...synthesisedOptions };
+    // tsbridge's synthesised config lives (in memory) in the project's
+    // directory, which is where @types are looked up from.
+    const dir = project.name.slice("synthesised:".length);
+    options = {
+      ...synthesisedOptions,
+      configFilePath: abs(join(dir, "tsconfig.patchd-synthesised.json")),
+    };
     rootNames = project.files.map(abs);
   } else {
     const configPath = abs(project.config);
@@ -175,6 +191,7 @@ function createProgram(project) {
     );
     if (!parsed) throw new Error(`TypeScript 6 cannot parse ${configPath}`);
     options = parsed.options;
+    parsedReferences = parsed.projectReferences;
     const owned = new Set(project.files.map(abs).map(norm));
     rootNames = parsed.fileNames.filter((f) => owned.has(norm(f)) || /\.d\.[mc]?ts$/.test(f));
     for (const f of project.files.map(abs))
@@ -185,7 +202,15 @@ function createProgram(project) {
   options.noEmit = true;
   options.skipLibCheck = true;
   options.ignoreDeprecations = "6.0";
-  return ts.createProgram({ rootNames, options });
+  options.traceResolution = false;
+  options.extendedDiagnostics = false;
+  // Like tsbridge: imports into referenced projects use their source.
+  options.useSourceOfProjectReferenceRedirect = true;
+  return ts.createProgram({
+    rootNames,
+    options,
+    projectReferences: project.synthesised ? undefined : parsedReferences,
+  });
 }
 
 function abs(p) {

@@ -16,6 +16,9 @@ import { pathToFileURL } from "node:url";
 export function normalizeType(s) {
   if (s === undefined) return "";
   const t = s
+    // TypeScript 6 prints the import attributes of a module type it reached
+    // from a file in another resolution mode.
+    .replace(/(import\("[^"]*"), \{ with: \{ "resolution-mode": "(import|require)" \} \}\)/g, "$1)")
     .replace(/import\("[^"]*"\)\./g, "")
     // A truncated union shows its first and last members, which depend on
     // type IDs: keep only how many members it has.
@@ -40,6 +43,10 @@ function splitTop(s, sep) {
   let start = 0;
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
+    if (c === '"' || c === "'" || c === "`") {
+      i = skipString(s, i);
+      continue;
+    }
     if (c in OPEN) depth++;
     else if (")]}>".includes(c) && !(c === ">" && s[i - 1] === "=")) depth--;
     else if (depth === 0 && s.startsWith(sep, i)) {
@@ -50,6 +57,17 @@ function splitTop(s, sep) {
   }
   parts.push(s.slice(start));
   return parts.map((p) => p.trim());
+}
+
+// skipString returns the index of the quote that closes the string literal
+// starting at i, so brackets inside literals ("<=") don't count.
+function skipString(s, i) {
+  const q = s[i];
+  for (let j = i + 1; j < s.length; j++) {
+    if (s[j] === "\\") j++;
+    else if (s[j] === q) return j;
+  }
+  return s.length;
 }
 
 function canonical(t) {
@@ -65,6 +83,12 @@ function canonical(t) {
   let out = "";
   for (let i = 0; i < t.length; i++) {
     const c = t[i];
+    if (c === '"' || c === "'" || c === "`") {
+      const end = skipString(t, i);
+      out += t.slice(i, end + 1);
+      i = end;
+      continue;
+    }
     if (!(c in OPEN)) {
       out += c;
       continue;
@@ -72,6 +96,10 @@ function canonical(t) {
     let depth = 0;
     let j = i;
     for (; j < t.length; j++) {
+      if (t[j] === '"' || t[j] === "'" || t[j] === "`") {
+        j = skipString(t, j);
+        continue;
+      }
       if (t[j] in OPEN) depth++;
       else if (")]}>".includes(t[j]) && !(t[j] === ">" && t[j - 1] === "=")) depth--;
       if (depth === 0) break;
@@ -130,18 +158,34 @@ export function matchesExpected(e, ts6, ts7, d6, d7) {
   );
 }
 
+// truncated reports a type string the compiler cut short ("...;" or "...").
+const truncated = (t = "") => t.endsWith("...") || t.endsWith("...; }");
+
 export function classify(ts6, ts7, root, expected) {
   if (ts6.error || ts7.error) return { kind: "unanswered", why: ts6.error || ts7.error };
   const d6 = declKey(ts6.declaration);
   const d7 = declKey(ts7Decl(ts7, root));
   const sameSymbol = (ts6.symbol ?? "") === (ts7.symbol ?? "");
-  const sameDecl = d6 === d7;
-  if (ts6.type === ts7.type && sameSymbol && sameDecl) return { kind: "match" };
+  // Declarations compare as sets: a union property's order follows type IDs.
+  const set6 = (ts6.declarations ?? (ts6.declaration ? [ts6.declaration] : []))
+    .map(declKey)
+    .toSorted()
+    .join(",");
+  const set7 = (ts7.declarations ?? [])
+    .map((d) => declKey(ts7Decl({ declarations: [d] }, root)))
+    .toSorted()
+    .join(",");
+  const sameDecl = d6 === d7 || (set6 !== "" && set6 === set7);
+  if (ts6.type === ts7.type && sameSymbol && d6 === d7) return { kind: "match" };
   for (const e of expected) {
     if (matchesExpected(e, ts6, ts7, d6, d7)) return { kind: "expected", why: e.id };
   }
   if (normalizeType(ts6.type) === normalizeType(ts7.type) && sameSymbol && sameDecl)
     return { kind: "cosmetic" };
+  // Both printed types were cut short, at different members because member
+  // order follows type IDs; the same symbol and declaration say they're the same.
+  if (truncated(ts6.type) && truncated(ts7.type) && sameSymbol && sameDecl && ts6.symbol)
+    return { kind: "cosmetic", why: "truncated" };
   const why = [];
   if (normalizeType(ts6.type) !== normalizeType(ts7.type)) why.push("type");
   if (!sameSymbol) why.push("symbol");
