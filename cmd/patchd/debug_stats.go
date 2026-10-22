@@ -37,7 +37,7 @@ type statsReport struct {
 
 func newDebugStatsCmd(f *debugFlags) *cobra.Command {
 	return &cobra.Command{
-		Use:   "stats [path]",
+		Use:   "stats [workspace-root]",
 		Short: "Show files, nodes, call resolution rate, memory and timings for a workspace",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

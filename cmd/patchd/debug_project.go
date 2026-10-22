@@ -40,23 +40,24 @@ type workspaceReport struct {
 func newDebugProjectCmd(f *debugFlags) *cobra.Command {
 	var noLoad bool
 	cmd := &cobra.Command{
-		Use:   "project [path]",
+		Use:   "project [workspace-root]",
 		Short: "Show discovered projects, which config covers which files, warnings and time per phase",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := f.validate(); err != nil {
 				return err
 			}
-			path := "."
-			if len(args) == 1 {
-				path = args[0]
-			}
-			root, err := f.workspaceRoot(path)
-			if err != nil {
-				return err
-			}
-			if len(args) == 1 && f.root == "" {
-				root = path
+			// A path names the workspace to discover; without one, the
+			// enclosing git repository (or --root).
+			root := f.root
+			if len(args) == 1 && root == "" {
+				root = args[0]
+			} else if root == "" {
+				r, err := f.workspaceRoot(".")
+				if err != nil {
+					return err
+				}
+				root = r
 			}
 			ctx := cmd.Context()
 			ws, err := tsbridge.Discover(ctx, root, tsbridge.DiscoverOptions{})

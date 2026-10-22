@@ -20,24 +20,39 @@ func (p *Program) checkerFor(f FileID) *checker.Checker {
 	return c
 }
 
-func (p *Program) internSymbol(s *ast.Symbol) SymbolID {
+// symbolEntry is a symbol and the checker that produced it: transient
+// symbols (union properties, instantiated members) only mean something to
+// their own checker.
+type symbolEntry struct {
+	s *ast.Symbol
+	c *checker.Checker
+}
+
+func (p *Program) internSymbol(c *checker.Checker, s *ast.Symbol) SymbolID {
 	if s == nil {
 		return 0
 	}
 	if id, ok := p.symbolIDs[s]; ok {
 		return id
 	}
-	p.symbols = append(p.symbols, s)
+	p.symbols = append(p.symbols, symbolEntry{s: s, c: c})
 	id := SymbolID(len(p.symbols)) //nolint:gosec // a program has far fewer than 2^32 symbols
 	p.symbolIDs[s] = id
 	return id
 }
 
 func (p *Program) symbol(id SymbolID) *ast.Symbol {
+	s, _ := p.symbolWithChecker(id)
+	return s
+}
+
+// symbolWithChecker returns a symbol and the checker to ask about it.
+func (p *Program) symbolWithChecker(id SymbolID) (*ast.Symbol, *checker.Checker) {
 	if p.closed || id == 0 || int(id) > len(p.symbols) {
-		return nil
+		return nil, nil
 	}
-	return p.symbols[id-1]
+	e := p.symbols[id-1]
+	return e.s, e.c
 }
 
 func (p *Program) internType(c *checker.Checker, t *checker.Type) TypeID {
@@ -83,7 +98,7 @@ func (p *Program) symbolOfLocked(n NodeID) (SymbolID, bool) {
 		return 0, false
 	}
 	s := symbolAtNode(c, node)
-	id := p.internSymbol(s)
+	id := p.internSymbol(c, s)
 	p.symbolOf[n] = id
 	return id, id != 0
 }
@@ -285,11 +300,11 @@ func (p *Program) Properties(t TypeID) []SymbolID {
 	apparent := e.c.GetApparentType(e.t)
 	var out []SymbolID
 	for _, s := range e.c.GetPropertiesOfType(apparent) {
-		out = append(out, p.internSymbol(s))
+		out = append(out, p.internSymbol(e.c, s))
 	}
 	for _, info := range e.c.GetIndexInfosOfType(apparent) {
 		if decl := info.Declaration(); decl != nil && decl.Symbol() != nil {
-			out = append(out, p.internSymbol(decl.Symbol()))
+			out = append(out, p.internSymbol(e.c, decl.Symbol()))
 		}
 	}
 	return out

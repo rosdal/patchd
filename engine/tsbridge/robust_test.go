@@ -96,6 +96,13 @@ func TestSyntaxErrorsKeepPartialTree(t *testing.T) { // TSB004
 	if got := p.TypeString(p.TypeOf(nodeAtText(t, p, "broken.ts", "b.toUpperCase", 0))); got != "string" {
 		t.Errorf("type of b after the error = %q, want string", got)
 	}
+	// o[]() has no key at all: unresolved, not a compiler panic.
+	if c, ok := p.ResolveCall(callAt(t, p, "broken.ts", "o[]()", 0)); ok || c.Reason != ReasonDynamicProperty {
+		t.Errorf("o[]() = %+v %v, want dynamic-property", c, ok)
+	}
+	if hasWarning(p.Warnings(), WarnCompilerPanic, "") {
+		t.Errorf("unexpected TSB007: %v", p.Warnings())
+	}
 }
 
 func TestMaxFiles(t *testing.T) { // TSB005
@@ -118,6 +125,10 @@ func TestMaxFiles(t *testing.T) { // TSB005
 	if strings.Join(roots, ",") != "f0.ts,f4.ts" {
 		t.Errorf("analysed %v, want [f0.ts f4.ts]", roots)
 	}
+	// f0.ts imports f1-f3: they are in the program, but not analysed.
+	if st := p.Stats(); st.RootFiles != 2 || st.Files < 5 {
+		t.Errorf("stats %+v: want 2 root files among all program files", st)
+	}
 }
 
 func TestIncludeTestsOff(t *testing.T) {
@@ -139,7 +150,9 @@ func TestIncludeTestsOff(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) { // TSB006
-	ws := discoverBroken(t, "many-files")
+	// Its own fixture: the parse it abandons keeps running and must not
+	// meet other tests' hooks.
+	ws := discoverBroken(t, "missing-extends")
 	p, err := Load(context.Background(), ws.Projects[0], LoadOptions{Timeout: time.Nanosecond})
 	switch {
 	case err != nil:
@@ -156,8 +169,16 @@ func TestTimeout(t *testing.T) { // TSB006
 
 func TestCompilerPanicIsRecovered(t *testing.T) { // TSB007
 	ws := discoverBroken(t, "many-files")
-	testHookAfterParse = func() { panic("boom") }
-	defer func() { testHookAfterParse = nil }()
+	// Hooks match the project by directory: a timed-out load from another
+	// test may still be parsing the same fixture on an abandoned goroutine.
+	target := ws.Projects[0].Dir
+	boom := func(cfg ProjectConfig) {
+		if cfg.Dir == target {
+			panic("boom")
+		}
+	}
+	testHookAfterParse.Store(&boom)
+	defer testHookAfterParse.Store(nil)
 	_, err := Load(context.Background(), ws.Projects[0], LoadOptions{})
 	var pe *PanicError
 	if !errors.As(err, &pe) || !strings.Contains(pe.Error(), "boom") || len(pe.Stack) == 0 {
@@ -168,7 +189,12 @@ func TestCompilerPanicIsRecovered(t *testing.T) { // TSB007
 	two := discoverBroken(t, "no-node-modules")
 	two.Projects = append(two.Projects, ws.Projects...)
 	var once sync.Once
-	testHookAfterParse = func() { once.Do(func() { panic("only once") }) }
+	onlyOnce := func(cfg ProjectConfig) {
+		if cfg.Dir == target {
+			once.Do(func() { panic("only once") })
+		}
+	}
+	testHookAfterParse.Store(&onlyOnce)
 	var mu sync.Mutex
 	var failed, loaded int
 	_, err = LoadAll(context.Background(), two, LoadAllOptions{Jobs: 1}, func(_ ProjectConfig, _ *Program, err error) error {

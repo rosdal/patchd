@@ -67,8 +67,7 @@ func (p *Program) ResolveAlias(s SymbolID) SymbolID {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	defer p.recoverQuery("ResolveAlias")
-	sym := p.symbol(s)
-	c := p.anyChecker()
+	sym, c := p.symbolWithChecker(s)
 	if sym == nil || c == nil {
 		return 0
 	}
@@ -76,7 +75,7 @@ func (p *Program) ResolveAlias(s SymbolID) SymbolID {
 	if target == nil {
 		return 0
 	}
-	return p.internSymbol(target)
+	return p.internSymbol(c, target)
 }
 
 func resolveAlias(c *checker.Checker, s *ast.Symbol) *ast.Symbol {
@@ -133,7 +132,10 @@ func (p *Program) resolveCall(c *checker.Checker, node *ast.Node) (Callee, bool)
 	// obj[expr] with a key the checker can't read.
 	if target.Kind == ast.KindElementAccessExpression {
 		arg := target.AsElementAccessExpression().ArgumentExpression
-		if arg == nil || !ast.IsStringOrNumericLiteralLike(arg) {
+		if arg == nil {
+			return Callee{Reason: ReasonDynamicProperty}, false // obj[] in a file with syntax errors
+		}
+		if !ast.IsStringOrNumericLiteralLike(arg) {
 			if t := c.GetTypeAtLocation(arg); t == nil || t.Flags()&checker.TypeFlagsStringOrNumberLiteralOrUnique == 0 {
 				return Callee{Reason: ReasonDynamicProperty}, false
 			}
@@ -180,7 +182,7 @@ func (p *Program) resolveCall(c *checker.Checker, node *ast.Node) (Callee, bool)
 		decls = sym.Declarations
 	}
 	callee := Callee{
-		Symbol:        p.internSymbol(sym),
+		Symbol:        p.internSymbol(c, sym),
 		Name:          sym.Name,
 		QualifiedName: p.qualifiedName(c, sym, receiverOf(target)),
 		Declarations:  p.locations(decls),
@@ -254,8 +256,7 @@ func (p *Program) QualifiedName(s SymbolID) string {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	defer p.recoverQuery("QualifiedName")
-	sym := p.symbol(s)
-	c := p.anyChecker()
+	sym, c := p.symbolWithChecker(s)
 	if sym == nil || c == nil {
 		return ""
 	}

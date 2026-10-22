@@ -7,3 +7,6 @@ export function broken( {
 export function after(b: string) {
   return b.toUpperCase();
 }
+export function missingKey(o: Record<string, () => void>) {
+  o[]();
+}

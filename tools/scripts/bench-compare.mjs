@@ -30,6 +30,11 @@ export function compare(base, head) {
       regressed: dt > thresholds.time || dm > thresholds.memory,
     });
   }
+  // A repo main measured that the PR didn't is a failure, not a pass: its
+  // benchmark probably crashed or timed out.
+  for (const repo of Object.keys(base.repos)) {
+    if (!head.repos[repo]) rows.push({ repo, missing: true, regressed: true });
+  }
   return rows;
 }
 
@@ -41,9 +46,10 @@ export function table(rows) {
   return [
     "| Repo | Load + check (main → PR) | Δ | Peak RSS (main → PR) | Δ | |",
     "| --- | --- | ---: | --- | ---: | --- |",
-    ...rows.map(
-      (r) =>
-        `| ${r.repo} | ${s(r.baseTime)} → ${s(r.time)} | ${pct(r.dt)} | ${mb(r.baseMemory)} → ${mb(r.memory)} | ${pct(r.dm)} | ${r.regressed ? "regression" : ""} |`,
+    ...rows.map((r) =>
+      r.missing
+        ? `| ${r.repo} | missing from this run | | | | regression |`
+        : `| ${r.repo} | ${s(r.baseTime)} → ${s(r.time)} | ${pct(r.dt)} | ${mb(r.baseMemory)} → ${mb(r.memory)} | ${pct(r.dm)} | ${r.regressed ? "regression" : ""} |`,
     ),
     "",
     `Alarm: load + check more than ${thresholds.time * 100}% slower, or peak memory more than ${thresholds.memory * 100}% higher, on any repo.`,

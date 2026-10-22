@@ -3,6 +3,7 @@ package tsbridge
 import (
 	"cmp"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"path"
@@ -11,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/microsoft/typescript-go/shim/ast"
@@ -44,8 +46,10 @@ type Program struct {
 	trees     []*tree             // FileID-1 -> syntax index, built on first use
 	pkgs      map[string]*Package // directory -> package, for files under node_modules
 	installed map[string]bool     // dir + package -> installed at or above dir
+	fs        *readOnlyFS         // the file system the program reads through
+	analysed  map[string]bool     // the files the project analyses: its root files
 
-	symbols   []*ast.Symbol
+	symbols   []symbolEntry
 	symbolIDs map[*ast.Symbol]SymbolID
 	types     []typeEntry
 	typeIDs   map[typeEntry]TypeID
@@ -58,8 +62,9 @@ type typeEntry struct {
 	c *checker.Checker // types from different checkers can't be mixed
 }
 
-// testHookAfterParse lets tests inject a compiler panic.
-var testHookAfterParse func()
+// testHookAfterParse lets tests inject a compiler panic. It is atomic
+// because a timed-out load leaves its parse goroutine running.
+var testHookAfterParse atomic.Pointer[func(ProjectConfig)]
 
 // Load parses, binds and type-checks one project. It returns an error only
 // when nothing usable could be loaded; problems that leave a usable program
@@ -92,6 +97,7 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 	} else {
 		files = bundled.WrapFS(cachedvfs.From(fs))
 	}
+	p.fs = fs
 	configPath := cfg.ConfigPath
 	if cfg.Synthesised {
 		configPath = path.Join(cfg.Dir, synthesisedConfigName)
@@ -128,8 +134,8 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 		// Imports into a referenced project use its source, not its build
 		// output: the outputs usually don't exist in a checkout.
 		r.prog = compiler.NewProgram(compiler.ProgramOptions{Config: parsed, Host: host, UseSourceOfProjectReference: true})
-		if testHookAfterParse != nil {
-			testHookAfterParse()
+		if hook := testHookAfterParse.Load(); hook != nil {
+			(*hook)(cfg)
 		}
 	}()
 	select {
@@ -147,7 +153,7 @@ func Load(ctx context.Context, cfg ProjectConfig, opts LoadOptions) (p *Program,
 	p.prog.BindSourceFiles()
 	p.stats.Bind = time.Since(start)
 
-	p.indexFiles(cfg, opts)
+	p.indexFiles()
 	p.collectSyntaxDiagnostics()
 	p.reportUnresolvedImports()
 
@@ -181,36 +187,37 @@ func (p *Program) configure(parsed *tsoptions.ParsedCommandLine, opts LoadOption
 		p.stats.Checkers = *o.Checkers
 	}
 
-	roots := parsed.FileNames()
-	if !p.cfg.Synthesised && len(p.cfg.Files) > 0 {
-		// Analyse only the files this project owns, plus every declaration
-		// file the config includes: those carry global types the owned files
-		// may depend on.
-		owned := make(map[string]bool, len(p.cfg.Files))
-		for _, f := range p.cfg.Files {
-			owned[f] = true
+	// The files this project analyses: the files it owns (for an entry-point
+	// config that includes files reached through imports), minus tests if
+	// asked, cut to MaxFiles. They become the program's roots, with every
+	// declaration file the config includes: those carry global types.
+	var analysed, decls []string
+	for _, f := range parsed.FileNames() {
+		if isDeclarationFile(f) {
+			decls = append(decls, f)
+		} else if p.cfg.Synthesised || len(p.cfg.Files) == 0 {
+			analysed = append(analysed, f)
 		}
-		roots = slices.DeleteFunc(slices.Clone(roots), func(f string) bool { return !owned[f] && !isDeclarationFile(f) })
+	}
+	if !p.cfg.Synthesised && len(p.cfg.Files) > 0 {
+		analysed = slices.DeleteFunc(slices.Clone(p.cfg.Files), isDeclarationFile)
 	}
 	if opts.IncludeTests != nil && !*opts.IncludeTests {
-		roots = slices.DeleteFunc(roots, func(f string) bool { return isTestFile(f) && !isDeclarationFile(f) })
+		analysed = slices.DeleteFunc(analysed, isTestFile)
 	}
-	if opts.MaxFiles > 0 {
-		var nonDecl int
-		for _, f := range roots {
-			if !isDeclarationFile(f) {
-				nonDecl++
-			}
-		}
-		if nonDecl > opts.MaxFiles {
-			roots = prioritise(roots, opts.Priority, opts.MaxFiles)
-			p.warnings = append(p.warnings, Warning{
-				Code: WarnMaxFiles, File: relPath(p.cfg.Root, p.cfg.ConfigPath),
-				Message: fmt.Sprintf("%d files, analysing the first %d by priority (changed files, then non-test source); %d skipped",
-					nonDecl, opts.MaxFiles, nonDecl-opts.MaxFiles),
-			})
-		}
+	if opts.MaxFiles > 0 && len(analysed) > opts.MaxFiles {
+		p.warnings = append(p.warnings, Warning{
+			Code: WarnMaxFiles, File: relPath(p.cfg.Root, p.cfg.ConfigPath),
+			Message: fmt.Sprintf("%d files, analysing the first %d by priority (changed files, then non-test source); %d skipped",
+				len(analysed), opts.MaxFiles, len(analysed)-opts.MaxFiles),
+		})
+		analysed = prioritise(analysed, opts.Priority, opts.MaxFiles)
 	}
+	p.analysed = make(map[string]bool, len(analysed))
+	for _, f := range analysed {
+		p.analysed[f] = true
+	}
+	roots := append(decls, analysed...)
 	po := *parsed.ParsedConfig
 	po.FileNames = roots
 	parsed.SetParsedOptions(&po)
@@ -265,24 +272,7 @@ func isTestFile(f string) bool {
 	return false
 }
 
-func (p *Program) indexFiles(cfg ProjectConfig, opts LoadOptions) {
-	// Root files: the files this project owns, which for an entry-point
-	// config include files reached through imports; for a synthesised
-	// project, its listed files.
-	roots := make(map[string]bool)
-	for _, f := range p.prog.CommandLine().FileNames() {
-		roots[f] = true
-	}
-	for _, f := range cfg.Files {
-		roots[f] = true
-	}
-	if opts.IncludeTests != nil && !*opts.IncludeTests {
-		for f := range roots {
-			if isTestFile(f) {
-				delete(roots, f)
-			}
-		}
-	}
+func (p *Program) indexFiles() {
 	srcs := p.prog.GetSourceFiles()
 	p.sources = srcs
 	p.files = make([]*File, len(srcs))
@@ -294,7 +284,7 @@ func (p *Program) indexFiles(cfg ProjectConfig, opts LoadOptions) {
 			ID:          id,
 			Path:        name,
 			Text:        sf.Text(),
-			Root:        roots[name] && !sf.IsDeclarationFile,
+			Root:        p.analysed[name] && !sf.IsDeclarationFile,
 			Declaration: sf.IsDeclarationFile,
 			JS:          ast.IsSourceFileJS(sf),
 			Lib:         strings.HasPrefix(name, "bundled:///"),
@@ -318,17 +308,28 @@ func (p *Program) packageOf(file string) *Package {
 	if i < 0 {
 		return nil
 	}
+	// Walk up to the nearest package.json, then remember the answer (or
+	// that there is none) for every directory passed on the way.
+	var visited []string
+	var pkg *Package
 	for dir := path.Dir(file); len(dir) > i+len("/node_modules"); dir = path.Dir(dir) {
-		if pkg, ok := p.pkgs[dir]; ok {
-			return pkg
+		if cached, ok := p.pkgs[dir]; ok {
+			pkg = cached
+			break
 		}
-		if pj, ok := readPackageJSON(path.Join(dir, "package.json")); ok && pj.Name != "" {
-			pkg := &Package{Name: pj.Name, Version: pj.Version, Dir: dir}
-			p.pkgs[dir] = pkg
-			return pkg
+		visited = append(visited, dir)
+		if text, ok := p.fs.ReadFile(path.Join(dir, "package.json")); ok {
+			var pj packageJSON
+			if json.Unmarshal([]byte(text), &pj) == nil && pj.Name != "" {
+				pkg = &Package{Name: pj.Name, Version: pj.Version, Dir: dir}
+				break
+			}
 		}
 	}
-	return nil
+	for _, d := range visited {
+		p.pkgs[d] = pkg
+	}
+	return pkg
 }
 
 func (p *Program) collectSyntaxDiagnostics() {
@@ -620,9 +621,7 @@ func (p *Program) Close() {
 	p.symbols, p.symbolIDs = nil, nil
 	p.types, p.typeIDs = nil, nil
 	p.typeOf, p.symbolOf = nil, nil
-	for _, f := range p.files {
-		f.Text = ""
-	}
+	// File values stay as they are: callers may still hold them.
 }
 
 // Closed reports whether Close was called.

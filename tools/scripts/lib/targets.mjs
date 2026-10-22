@@ -2,8 +2,9 @@
 // maps, so a small line parser is enough and keeps the root free of a YAML dependency.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-export const repoRoot = new URL("../../../", import.meta.url).pathname.replace(/^\/(\w:)/, "$1");
+export const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 export const targetsDir = join(repoRoot, ".patchd", "targets");
 
 export function readTargets(file = join(repoRoot, "eval", "targets", "reference-repos.yaml")) {
