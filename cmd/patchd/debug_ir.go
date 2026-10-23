@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"runtime/pprof"
 	"slices"
 	"strconv"
@@ -205,6 +207,15 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			// Each program's IR lives as long as the program here, and lowering
+			// keeps programs alive longer, so LoadAll gets two thirds of the
+			// budget and the GC is told to stay inside all of it.
+			budget := opts.MaxMemory
+			if budget == 0 {
+				budget = tsbridge.DefaultMemoryBudget()
+			}
+			opts.MaxMemory = budget / 3 * 2
+			defer debug.SetMemoryLimit(debug.SetMemoryLimit(int64(min(budget, math.MaxInt64)))) //nolint:gosec // bounded above
 			rep := irCoverageReport{Root: ws.Root, Warnings: map[string]int{}, Threshold: minPercent}
 			var mu sync.Mutex
 			var loadTime time.Duration
