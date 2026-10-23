@@ -1,0 +1,13 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended"],
+  schedule: ["before 6am on monday"],
+  postUpdateOptions: ["gomodTidy"],
+  // One PR per ecosystem, majors included.
+  separateMajorMinor: false,
+  packageRules: [
+    { matchManagers: ["gomod"], groupName: "go" },
+    { matchManagers: ["npm"], groupName: "npm" },
+    { matchManagers: ["github-actions"], groupName: "actions" },
+  ],
+}
