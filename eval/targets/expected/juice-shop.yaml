@@ -1,0 +1,42 @@
+# OWASP Juice Shop's command-injection, path-traversal and SQL-injection
+# challenges (its vuln-code-snippet markers and challenge docs), read against
+# the code at the pinned commit. Lines are the sink call. Juice Shop has no
+# command injection; its RCE challenges are code injection (v0.6 rules).
+repo: juice-shop
+commit: 399fba76194305a312693eee44f4df64bdf0c3ce
+findings:
+  - rule: ts/path-traversal
+    file: routes/keyServer.ts
+    line: 14
+    scope: v0.4 # params.file -> res.sendFile(path.resolve(...)); the "/" check doesn't stop ..\ or encoded paths
+    source: Forgotten Developer Backup / Leaked Access Logs family (serveKeyFiles)
+  - rule: ts/path-traversal
+    file: routes/logfileServer.ts
+    line: 14
+    scope: v0.4
+    source: Leaked Access Logs (serveLogFiles)
+  - rule: ts/path-traversal
+    file: routes/quarantineServer.ts
+    line: 14
+    scope: v0.4
+    source: serveQuarantineFiles
+  - rule: ts/path-traversal
+    file: routes/fileServer.ts
+    line: 32
+    scope: v0.5 # params.file is passed to verify(), which calls res.sendFile: crosses functions
+    source: Poison Null Byte / Forgotten Backup challenges (servePublicFiles)
+  - rule: ts/path-traversal
+    file: routes/dataErasure.ts
+    line: 107
+    scope: v0.6 # req.body.layout reaches res.render's layout option: needs a res.render model
+    source: Local File Read challenge (lfrChallenge)
+  - rule: ts/sqli
+    file: routes/login.ts
+    line: 34
+    scope: v0.6 # models.sequelize.query: needs a Sequelize model
+    source: loginAdmin / loginBender / loginJim challenges
+  - rule: ts/sqli
+    file: routes/search.ts
+    line: 23
+    scope: v0.6 # models.sequelize.query: needs a Sequelize model
+    source: unionSqlInjection / dbSchema challenges

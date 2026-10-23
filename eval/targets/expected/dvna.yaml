@@ -1,0 +1,15 @@
+# DVNA's documented injection issues (docs/solution/a1-injection.md), read
+# against the code at the pinned commit. Lines are the sink call.
+repo: dvna
+commit: 9ba473add536f66ac9007966acb2a775dd31277a
+findings:
+  - rule: ts/cmdi
+    file: core/appHandler.js
+    line: 39
+    scope: v0.4 # exec("ping -c 2 " + req.body.address) inside the ping handler
+    source: docs/solution/a1-injection.md (Command Injection)
+  - rule: ts/sqli
+    file: core/appHandler.js
+    line: 11
+    scope: v0.6 # db.sequelize.query(query): needs a Sequelize model; the query is built in the same function
+    source: docs/solution/a1-injection.md (SQL Injection)

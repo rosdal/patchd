@@ -28,6 +28,8 @@
     "oracle": "node tools/tsoracle/run.mjs",
     "bench": "node tools/scripts/bench.mjs",
     "eval": "node tools/scripts/eval.mjs",
+    "eval:targets": "go run ./eval/cmd/targets -report eval/reports/v0.4-targets.md",
+    "eval:reference": "go run ./eval/cmd/targets -reference -report eval/reports/v0.4-reference.md",
     "clean": "node tools/scripts/clean.mjs",
     "prepare": "lefthook install"
   },
