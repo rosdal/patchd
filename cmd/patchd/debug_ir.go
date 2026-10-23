@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
+	"runtime/pprof"
 	"slices"
 	"strconv"
 	"strings"
@@ -143,7 +143,7 @@ type irCoverageReport struct {
 	VerifyMS  float64        `json:"verify_ms"`
 	WallMS    float64        `json:"wall_ms"`
 	PeakHeap  uint64         `json:"peak_heap_bytes"`
-	IRBytes   uint64         `json:"ir_bytes"` // heap growth while the IR was alive, summed over projects
+	IRBytes   uint64         `json:"ir_bytes"` // estimated size of the IR (Module.Bytes), summed over files
 	SrcBytes  int            `json:"source_bytes"`
 	Threshold float64        `json:"threshold,omitempty"`
 }
@@ -158,6 +158,7 @@ type kindReport struct {
 func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 	var verify bool
 	var minPercent float64
+	var cpuProfile string
 	cmd := &cobra.Command{
 		Use:   "ir-coverage [workspace-root]",
 		Short: "Lower a workspace to IR and report how much syntax lowered to real instructions",
@@ -170,6 +171,17 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := f.validate(); err != nil {
 				return err
+			}
+			if cpuProfile != "" {
+				pf, err := os.Create(cpuProfile)
+				if err != nil {
+					return err
+				}
+				defer pf.Close()
+				if err := pprof.StartCPUProfile(pf); err != nil {
+					return err
+				}
+				defer pprof.StopCPUProfile()
 			}
 			start := time.Now()
 			root := "."
@@ -202,12 +214,10 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 					}
 					mu.Unlock()
 					st := p.Stats()
-					before := heapInUse()
 					t0 := time.Now()
 					mods := ir.BuildProgram(ctx, p, ir.BuildOptions{})
 					lower := time.Since(t0)
-					after := heapInUse()
-					irBytes := after - min(before, after)
+					var irBytes uint64
 					var cov ir.Coverage
 					var funcs, instrs, invalid, verified, srcBytes int
 					var failures []string
@@ -218,6 +228,7 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 							continue
 						}
 						cov.Add(m.Coverage)
+						irBytes += uint64(m.Bytes()) //nolint:gosec // sizes are non-negative
 						if sf := p.File(m.File); sf != nil {
 							srcBytes += len(sf.Text)
 						}
@@ -313,6 +324,7 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 	}
 	cmd.Flags().BoolVar(&verify, "verify", false, "validate every function's IR")
 	cmd.Flags().Float64Var(&minPercent, "min", 0, "fail when coverage is below this percentage or any function is invalid")
+	cmd.Flags().StringVar(&cpuProfile, "cpuprofile", "", "write a CPU profile of the run to this file")
 	return cmd
 }
 
@@ -354,7 +366,7 @@ func printIRCoverage(w io.Writer, rep irCoverageReport, verify bool) error {
 		}
 		tw.printf("warnings: %s\n", strings.Join(parts, ", "))
 	}
-	tw.printf("time: load %s, lower %s, verify %s, wall %s; peak heap %s; IR ~%s (%.1f bytes per source byte)\n",
+	tw.printf("time: load %s, lower %s, verify %s, wall %s; peak heap %s; IR %s (%.1f bytes per source byte)\n",
 		msf(rep.LoadMS), msf(rep.LowerMS), msf(rep.VerifyMS), msf(rep.WallMS), formatBytes(rep.PeakHeap), formatBytes(rep.IRBytes),
 		float64(rep.IRBytes)/float64(max(1, rep.SrcBytes)))
 	if tw.err != nil {
@@ -364,11 +376,3 @@ func printIRCoverage(w io.Writer, rep irCoverageReport, verify bool) error {
 }
 
 func msf(v float64) string { return ms(time.Duration(v * float64(time.Millisecond))) }
-
-// heapInUse returns the bytes of live heap, after a collection.
-func heapInUse() uint64 {
-	runtime.GC()
-	var ms runtime.MemStats
-	runtime.ReadMemStats(&ms)
-	return ms.HeapAlloc
-}

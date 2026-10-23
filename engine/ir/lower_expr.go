@@ -72,9 +72,9 @@ func (fb *fnBuilder) lowerExpr(n tsbridge.NodeID) ValueID {
 	case tsbridge.KindDeleteExpression:
 		return fb.lowerDelete(n)
 	case tsbridge.KindTypeOfExpression:
-		return fb.emitTyped(OpUnOp, n, Aux{Name: Intern("typeof")}, fb.lowerExpr(fb.first(n)))
+		return fb.emitTyped(OpUnOp, n, Aux{Name: fb.name("typeof")}, fb.lowerExpr(fb.first(n)))
 	case tsbridge.KindVoidExpression:
-		return fb.emitTyped(OpUnOp, n, Aux{Name: Intern("void")}, fb.lowerExpr(fb.first(n)))
+		return fb.emitTyped(OpUnOp, n, Aux{Name: fb.name("void")}, fb.lowerExpr(fb.first(n)))
 	case tsbridge.KindAwaitExpression:
 		return fb.emitTyped(OpAwait, n, Aux{}, fb.lowerExpr(fb.first(n)))
 	case tsbridge.KindPrefixUnaryExpression:
@@ -82,7 +82,7 @@ func (fb *fnBuilder) lowerExpr(n tsbridge.NodeID) ValueID {
 		if op == "++" || op == "--" {
 			return fb.lowerUpdate(n, fb.first(n), op, true)
 		}
-		return fb.emitTyped(OpUnOp, n, Aux{Name: Intern(op)}, fb.lowerExpr(fb.first(n)))
+		return fb.emitTyped(OpUnOp, n, Aux{Name: fb.name(op)}, fb.lowerExpr(fb.first(n)))
 	case tsbridge.KindPostfixUnaryExpression:
 		return fb.lowerUpdate(n, fb.first(n), t.Operator(n), false)
 	case tsbridge.KindBinaryExpression:
@@ -200,20 +200,20 @@ func (fb *fnBuilder) templateParts(n tsbridge.NodeID) ([]Part, []ValueID) {
 	var args []ValueID
 	if t.Kind(n) == tsbridge.KindNoSubstitutionTemplateLiteral {
 		fb.mark(n)
-		return []Part{{Kind: PartString, Name: Intern(t.Value(n))}}, nil
+		return []Part{{Kind: PartString, Name: fb.name(t.Value(n))}}, nil
 	}
 	for _, c := range t.Children(n) {
 		switch t.Kind(c) {
 		case tsbridge.KindTemplateHead:
 			fb.mark(c)
-			parts = append(parts, Part{Kind: PartString, Name: Intern(t.Value(c))})
+			parts = append(parts, Part{Kind: PartString, Name: fb.name(t.Value(c))})
 		case tsbridge.KindTemplateSpan:
 			fb.mark(c)
 			for _, sc := range t.Children(c) {
 				switch t.Kind(sc) {
 				case tsbridge.KindTemplateMiddle, tsbridge.KindTemplateTail:
 					fb.mark(sc)
-					parts = append(parts, Part{Kind: PartString, Name: Intern(t.Value(sc))})
+					parts = append(parts, Part{Kind: PartString, Name: fb.name(t.Value(sc))})
 				default:
 					args = append(args, fb.lowerExpr(sc))
 				}
@@ -332,7 +332,7 @@ func (fb *fnBuilder) nullCheck(v ValueID, n tsbridge.NodeID) {
 		return
 	}
 	short := fb.chains[len(fb.chains)-1]
-	isNull := fb.emit(OpBinOp, n, Aux{Name: Intern("==")}, v, fb.undef)
+	isNull := fb.emit(OpBinOp, n, Aux{Name: fb.name("==")}, v, fb.undef)
 	cont := fb.newBlock("opt.cont")
 	fb.branch(n, isNull, short, cont)
 	fb.seal(cont)
@@ -346,9 +346,9 @@ func (fb *fnBuilder) lowerLink(n tsbridge.NodeID) ValueID {
 	case tsbridge.KindPropertyAccessExpression:
 		obj, name, super := fb.accessBase(n)
 		if super {
-			return fb.emitTyped(OpLoad, n, Aux{Name: Intern(name), Flags: AuxSuper}, obj)
+			return fb.emitTyped(OpLoad, n, Aux{Name: fb.name(name), Flags: AuxSuper}, obj)
 		}
-		return fb.emitTyped(OpLoad, n, Aux{Name: Intern(name)}, obj)
+		return fb.emitTyped(OpLoad, n, Aux{Name: fb.name(name)}, obj)
 	case tsbridge.KindElementAccessExpression:
 		e := fb.elems(n)
 		if len(e) < 2 {
@@ -359,7 +359,7 @@ func (fb *fnBuilder) lowerLink(n tsbridge.NodeID) ValueID {
 			fb.nullCheck(obj, n)
 		}
 		if name, ok := fb.staticKey(e[1]); ok {
-			return fb.emitTyped(OpLoad, n, Aux{Name: Intern(name)}, obj)
+			return fb.emitTyped(OpLoad, n, Aux{Name: fb.name(name)}, obj)
 		}
 		key := fb.lowerExpr(e[1])
 		return fb.emitTyped(OpLoad, n, Aux{Flags: AuxDynamic}, obj, key)
@@ -419,7 +419,7 @@ func (fb *fnBuilder) lowerCallee(callee tsbridge.NodeID) (fn ValueID, aux Aux, l
 		if super {
 			flags |= AuxSuper
 		}
-		return recv, Aux{Name: Intern(name), Flags: flags}, nil
+		return recv, Aux{Name: fb.name(name), Flags: flags}, nil
 	case tsbridge.KindElementAccessExpression:
 		if t.Flags(c)&tsbridge.FlagOptionalChain != 0 && fb.chainRoot(c) {
 			break
@@ -434,13 +434,13 @@ func (fb *fnBuilder) lowerCallee(callee tsbridge.NodeID) (fn ValueID, aux Aux, l
 			fb.nullCheck(recv, c)
 		}
 		if name, ok := fb.staticKey(e[1]); ok {
-			return recv, Aux{Name: Intern(name), Flags: AuxMethod}, nil
+			return recv, Aux{Name: fb.name(name), Flags: AuxMethod}, nil
 		}
 		key := fb.lowerExpr(e[1])
 		return recv, Aux{Flags: AuxMethod | AuxDynamic}, []ValueID{key}
 	case tsbridge.KindIdentifier:
 		v := fb.lowerExpr(c)
-		return v, Aux{Name: Intern(t.Value(c))}, nil
+		return v, Aux{Name: fb.name(t.Value(c))}, nil
 	case tsbridge.KindFunctionExpression, tsbridge.KindArrowFunction:
 		return fb.lowerExpr(c), Aux{Flags: AuxIIFE}, nil
 	}
@@ -551,7 +551,7 @@ func (fb *fnBuilder) lowerNew(n tsbridge.NodeID) ValueID {
 		hint = t.Text(c)
 	}
 	argv := fb.lowerArgs(e[1:])
-	return fb.emitTypedArgs(OpNew, n, Aux{Name: Intern(hint)}, append([]ValueID{callee}, argv...))
+	return fb.emitTypedArgs(OpNew, n, Aux{Name: fb.name(hint)}, append([]ValueID{callee}, argv...))
 }
 
 func (fb *fnBuilder) lowerDelete(n tsbridge.NodeID) ValueID {
@@ -587,7 +587,7 @@ func (fb *fnBuilder) lowerDeleteTarget(n, target tsbridge.NodeID) ValueID {
 	case tsbridge.KindPropertyAccessExpression:
 		fb.mark(target)
 		obj, name, _ := fb.accessBase(target)
-		return fb.emitTyped(OpDelete, n, Aux{Name: Intern(name)}, obj)
+		return fb.emitTyped(OpDelete, n, Aux{Name: fb.name(name)}, obj)
 	case tsbridge.KindElementAccessExpression:
 		fb.mark(target)
 		e := fb.elems(target)
@@ -599,7 +599,7 @@ func (fb *fnBuilder) lowerDeleteTarget(n, target tsbridge.NodeID) ValueID {
 			fb.nullCheck(obj, target)
 		}
 		if name, ok := fb.staticKey(e[1]); ok {
-			return fb.emitTyped(OpDelete, n, Aux{Name: Intern(name)}, obj)
+			return fb.emitTyped(OpDelete, n, Aux{Name: fb.name(name)}, obj)
 		}
 		key := fb.lowerExpr(e[1])
 		return fb.emitTyped(OpDelete, n, Aux{Flags: AuxDynamic}, obj, key)
@@ -619,7 +619,7 @@ func (fb *fnBuilder) lowerUpdate(n, operand tsbridge.NodeID, op string, prefix b
 	if op == "--" {
 		bop = "-"
 	}
-	nv := fb.emitTyped(OpBinOp, n, Aux{Name: Intern(bop)}, old, one)
+	nv := fb.emitTyped(OpBinOp, n, Aux{Name: fb.name(bop)}, old, one)
 	ref.write(nv, n)
 	if prefix {
 		return nv
@@ -678,7 +678,7 @@ func (r *ref) read() ValueID {
 		if r.super {
 			flags = AuxSuper
 		}
-		return fb.emitTyped(OpLoad, r.node, Aux{Name: Intern(r.name), Flags: flags}, r.obj)
+		return fb.emitTyped(OpLoad, r.node, Aux{Name: fb.name(r.name), Flags: flags}, r.obj)
 	}
 	return fb.emitUnknown(r.node)
 }
@@ -697,10 +697,10 @@ func (r *ref) write(v ValueID, at tsbridge.NodeID) {
 		if r.super {
 			flags = AuxSuper
 		}
-		fb.emit(OpStore, at, Aux{Name: Intern(r.name), Flags: flags}, r.obj, v)
+		fb.emit(OpStore, at, Aux{Name: fb.name(r.name), Flags: flags}, r.obj, v)
 		fb.commonJSExport(r, v, at)
 	default:
-		fb.emitArgs(OpUnknown, r.node, Aux{Name: Intern(fb.t.CompilerKind(r.node))}, []ValueID{v})
+		fb.emitArgs(OpUnknown, r.node, Aux{Name: fb.name(fb.t.CompilerKind(r.node))}, []ValueID{v})
 		fb.markUnknown(r.node)
 	}
 }
@@ -733,13 +733,13 @@ func (fb *fnBuilder) lowerBinary(n tsbridge.NodeID) ValueID {
 		ref := fb.reference(l)
 		old := ref.read()
 		rv := fb.lowerExpr(r)
-		nv := fb.emitTyped(OpBinOp, n, Aux{Name: Intern(bop)}, old, rv)
+		nv := fb.emitTyped(OpBinOp, n, Aux{Name: fb.name(bop)}, old, rv)
 		ref.write(nv, n)
 		return nv
 	}
 	lv := fb.lowerExpr(l)
 	rv := fb.lowerExpr(r)
-	return fb.emitTyped(OpBinOp, n, Aux{Name: Intern(op)}, lv, rv)
+	return fb.emitTyped(OpBinOp, n, Aux{Name: fb.name(op)}, lv, rv)
 }
 
 // lowerAssign lowers target = value; a pattern target destructures.
@@ -773,7 +773,7 @@ func (fb *fnBuilder) lowerShortCircuit(n, l, r tsbridge.NodeID, op string) Value
 func (fb *fnBuilder) shortCircuit(n tsbridge.NodeID, lv ValueID, op string, rhs func() ValueID) ValueID {
 	cond := lv
 	if op == "??" {
-		cond = fb.emit(OpBinOp, n, Aux{Name: Intern("==")}, lv, fb.undef)
+		cond = fb.emit(OpBinOp, n, Aux{Name: fb.name("==")}, lv, fb.undef)
 	}
 	check := fb.cur
 	right := fb.newBlock(map[string]string{"&&": "and.rhs", "||": "or.rhs", "??": "nullish.rhs"}[op])
@@ -921,7 +921,7 @@ func (fb *fnBuilder) lowerJSX(n tsbridge.NodeID) ValueID {
 		}
 	}
 	arr := fb.emitArgs(OpArray, n, Aux{}, kids)
-	return fb.emitTypedArgs(OpCall, n, Aux{Name: Intern(tagName), Flags: AuxJSX}, []ValueID{fb.intrinsic("%jsx"), tag, props, arr})
+	return fb.emitTypedArgs(OpCall, n, Aux{Name: fb.name(tagName), Flags: AuxJSX}, []ValueID{fb.intrinsic("%jsx"), tag, props, arr})
 }
 
 func (fb *fnBuilder) lowerJSXAttributes(attrs, at tsbridge.NodeID) ValueID {
@@ -957,7 +957,7 @@ func (fb *fnBuilder) lowerJSXAttributes(attrs, at tsbridge.NodeID) ValueID {
 				default:
 					v = fb.lowerExpr(e[1])
 				}
-				parts = append(parts, Part{Kind: PartKey, Name: Intern(name)})
+				parts = append(parts, Part{Kind: PartKey, Name: fb.name(name)})
 				args = append(args, v)
 			case tsbridge.KindJsxSpreadAttribute:
 				parts = append(parts, Part{Kind: PartSpread})

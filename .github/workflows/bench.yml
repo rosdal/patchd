@@ -1,8 +1,9 @@
 name: bench
 
-# tsbridge speed and memory on the reference repos, on every change to the
-# engine. Pull requests compare against the latest main run and fail on a
-# regression (> 15% load + check time or > 20% peak memory on any repo)
+# Engine speed and memory on the reference repos (tsbridge load and check, IR
+# lowering), on every change to the engine. Pull requests compare against the
+# latest main run and fail on a regression (> 15% load + check or lowering
+# time, or > 20% peak memory, on any repo)
 # unless the PR carries the perf-accepted label with a reason. Advisory: not a
 # required check, so a noisy runner can't block merges; the comment shows the
 # numbers either way.
@@ -95,7 +96,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           {
-            echo "### tsbridge benchmarks"
+            echo "### Engine benchmarks"
             echo
             cat bench-table.md
             echo

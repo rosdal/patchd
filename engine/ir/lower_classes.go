@@ -37,10 +37,10 @@ func (fb *fnBuilder) lowerObject(n tsbridge.NodeID) ValueID {
 				parts = append(parts, Part{Kind: PartComputed})
 				args = append(args, kv, v)
 			case key == "__proto__" && t.Kind(e[0]) != tsbridge.KindComputedPropertyName:
-				parts = append(parts, Part{Kind: PartProto, Name: Intern(key)})
+				parts = append(parts, Part{Kind: PartProto, Name: fb.name(key)})
 				args = append(args, v)
 			default:
-				parts = append(parts, Part{Kind: PartKey, Name: Intern(key)})
+				parts = append(parts, Part{Kind: PartKey, Name: fb.name(key)})
 				args = append(args, v)
 			}
 		case tsbridge.KindShorthandPropertyAssignment:
@@ -49,7 +49,7 @@ func (fb *fnBuilder) lowerObject(n tsbridge.NodeID) ValueID {
 				continue
 			}
 			fb.mark(e[0])
-			parts = append(parts, Part{Kind: PartKey, Name: Intern(t.Value(e[0]))})
+			parts = append(parts, Part{Kind: PartKey, Name: fb.name(t.Value(e[0]))})
 			args = append(args, fb.readIdent(e[0]))
 		case tsbridge.KindSpreadAssignment:
 			parts = append(parts, Part{Kind: PartSpread})
@@ -69,7 +69,7 @@ func (fb *fnBuilder) lowerObject(n tsbridge.NodeID) ValueID {
 				parts = append(parts, Part{Kind: PartComputed})
 				args = append(args, kv, clo)
 			} else {
-				parts = append(parts, Part{Kind: kind, Name: Intern(key)})
+				parts = append(parts, Part{Kind: kind, Name: fb.name(key)})
 				args = append(args, clo)
 			}
 		}
@@ -146,7 +146,7 @@ func (fb *fnBuilder) lowerClass(n tsbridge.NodeID) ValueID {
 	}
 	ctor := fb.closureOfFn(ci.ctor, ctorSyntax, flags)
 	if base != NoValue {
-		fb.emit(OpStore, n, Aux{Name: Intern("__proto__"), Flags: AuxProto}, ctor, base)
+		fb.emit(OpStore, n, Aux{Name: fb.name("__proto__"), Flags: AuxProto}, ctor, base)
 	}
 	if nameNode != 0 {
 		fb.mark(nameNode)
@@ -157,10 +157,10 @@ func (fb *fnBuilder) lowerClass(n tsbridge.NodeID) ValueID {
 	} else if t.Kind(n) == tsbridge.KindClassDeclaration {
 		fb.exportAnonymousDefault(n, ctor)
 	}
-	proto := fb.emit(OpLoad, n, Aux{Name: Intern("prototype")}, ctor)
+	proto := fb.emit(OpLoad, n, Aux{Name: fb.name("prototype")}, ctor)
 	if base != NoValue {
-		bp := fb.emit(OpLoad, n, Aux{Name: Intern("prototype")}, base)
-		fb.emit(OpStore, n, Aux{Name: Intern("__proto__"), Flags: AuxProto}, proto, bp)
+		bp := fb.emit(OpLoad, n, Aux{Name: fb.name("prototype")}, base)
+		fb.emit(OpStore, n, Aux{Name: fb.name("__proto__"), Flags: AuxProto}, proto, bp)
 	}
 	for _, m := range t.Children(n) {
 		if fb.b.skipped(m) {
@@ -192,7 +192,7 @@ func (fb *fnBuilder) lowerClass(n tsbridge.NodeID) ValueID {
 			if computed {
 				fb.emit(OpStore, m, Aux{Flags: sflags | AuxDynamic}, target, kv, clo)
 			} else {
-				fb.emit(OpStore, m, Aux{Name: Intern(key), Flags: sflags}, target, clo)
+				fb.emit(OpStore, m, Aux{Name: fb.name(key), Flags: sflags}, target, clo)
 			}
 		case tsbridge.KindConstructor, tsbridge.KindPropertyDeclaration, tsbridge.KindClassStaticBlockDeclaration,
 			tsbridge.KindSemicolonClassElement:
@@ -201,7 +201,7 @@ func (fb *fnBuilder) lowerClass(n tsbridge.NodeID) ValueID {
 	}
 	if ci.static >= 0 {
 		s := fb.closureOfFn(ci.static, n, 0)
-		fb.emit(OpCall, n, Aux{Name: Intern("<static>"), Flags: AuxWithThis}, s, ctor)
+		fb.emit(OpCall, n, Aux{Name: fb.name("<static>"), Flags: AuxWithThis}, s, ctor)
 	}
 	fb.lowerDecorators(n, ctor, proto)
 	return ctor
@@ -245,7 +245,7 @@ func (fb *fnBuilder) lowerFields(static bool) {
 			if computed {
 				fb.emit(OpStore, m, Aux{Flags: AuxDynamic}, fb.thisValue(), kv, v)
 			} else {
-				fb.emit(OpStore, m, Aux{Name: Intern(key)}, fb.thisValue(), v)
+				fb.emit(OpStore, m, Aux{Name: fb.name(key)}, fb.thisValue(), v)
 			}
 		case tsbridge.KindClassStaticBlockDeclaration:
 			if !static {
@@ -291,7 +291,7 @@ func (fb *fnBuilder) lowerDecorators(n tsbridge.NodeID, ctor, proto ValueID) {
 			vals[i] = fb.lowerExpr(fb.first(d))
 		}
 		for i := len(decs) - 1; i >= 0; i-- {
-			aux := fb.withParts(Aux{Name: Intern(fb.decoratorName(decs[i])), Flags: AuxDecorator}, []Part{{Kind: PartTarget, Name: Intern(what)}})
+			aux := fb.withParts(Aux{Name: fb.name(fb.decoratorName(decs[i])), Flags: AuxDecorator}, []Part{{Kind: PartTarget, Name: fb.name(what)}})
 			fb.emit(OpCall, decs[i], aux, vals[i], target)
 		}
 	}
@@ -403,7 +403,7 @@ func (fb *fnBuilder) lowerEnum(n tsbridge.NodeID) {
 				isNum = numeric
 				next++
 			}
-			fb.emit(OpStore, c, Aux{Name: Intern(name)}, obj, v)
+			fb.emit(OpStore, c, Aux{Name: fb.name(name)}, obj, v)
 			if isNum {
 				fb.emit(OpStore, c, Aux{Flags: AuxDynamic}, obj, v, fb.constant(e[0], LitString, name))
 			}
@@ -458,7 +458,7 @@ func (fb *fnBuilder) lowerNamespace(n tsbridge.NodeID) {
 		}
 	}
 	clo := fb.closureOfFn(idx, n, 0)
-	fb.emit(OpCall, n, Aux{Name: Intern(t.Value(nameNode))}, clo, obj)
+	fb.emit(OpCall, n, Aux{Name: fb.name(t.Value(nameNode))}, clo, obj)
 }
 
 // declared records that v's binding was created and reports whether it had

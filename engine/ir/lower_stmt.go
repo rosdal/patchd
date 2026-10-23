@@ -82,7 +82,7 @@ func (fb *fnBuilder) emitUnknown(n tsbridge.NodeID, args ...ValueID) ValueID {
 	fb.markUnknown(n)
 	kind := fb.t.CompilerKind(n)
 	fb.b.warn(WarnUnknown, n, "not lowered: "+kind)
-	return fb.emitArgs(OpUnknown, n, Aux{Name: Intern(kind)}, args)
+	return fb.emitArgs(OpUnknown, n, Aux{Name: fb.name(kind)}, args)
 }
 
 // lowerStmts lowers a statement list.
@@ -456,9 +456,7 @@ func (fb *fnBuilder) lowerForInOf(n tsbridge.NodeID, labels []string) {
 			if t.Kind(d) == tsbridge.KindVariableDeclaration {
 				fb.mark(d)
 				if de := fb.elems(d); len(de) > 0 {
-					if t.Kind(de[0]) == tsbridge.KindIdentifier {
-						fb.typeOf(elem, de[0])
-					}
+					fb.typeOf(elem, d) // the declared element type, also for a pattern
 					fb.bindTarget(de[0], elem, elem, "")
 				}
 			}
@@ -596,7 +594,7 @@ func (fb *fnBuilder) lowerSwitch(n tsbridge.NodeID, labels []string) {
 		ce := fb.elems(c)
 		if t.Kind(c) == tsbridge.KindCaseClause && len(ce) > 0 {
 			v := fb.lowerExpr(ce[0])
-			eq := fb.emit(OpBinOp, c, Aux{Name: Intern("===")}, disc, v)
+			eq := fb.emit(OpBinOp, c, Aux{Name: fb.name("===")}, disc, v)
 			next := fb.newBlock("switch.test")
 			fb.branch(c, eq, bodies[i], next)
 			fb.seal(next)
@@ -736,7 +734,7 @@ func (fb *fnBuilder) lowerWith(n tsbridge.NodeID) {
 	}
 	obj := fb.lowerExpr(e[0])
 	fb.b.warn(WarnWith, n, "with statement: names in its body may read the object's properties")
-	fb.emitArgs(OpUnknown, n, Aux{Name: Intern("WithStatement")}, []ValueID{obj})
+	fb.emitArgs(OpUnknown, n, Aux{Name: fb.name("WithStatement")}, []ValueID{obj})
 	if i := fb.t.Index(n); i >= 0 {
 		fb.b.marks[i] = markUnknown
 	}

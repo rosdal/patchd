@@ -75,7 +75,7 @@ func (fb *fnBuilder) bindObjectPattern(pat tsbridge.NodeID, v, base ValueID, pat
 		}
 		val, keyText := fb.loadKey(el, keyNode, v)
 		if keyText != "" {
-			seen = append(seen, Part{Kind: PartExclude, Name: Intern(keyText)})
+			seen = append(seen, Part{Kind: PartExclude, Name: fb.name(keyText)})
 		}
 		sub := path + accessPath(keyText)
 		fb.pathLink(val, base, sub)
@@ -101,7 +101,7 @@ func (fb *fnBuilder) loadKey(at, key tsbridge.NodeID, obj ValueID) (ValueID, str
 	case tsbridge.KindIdentifier, tsbridge.KindStringLiteral, tsbridge.KindNumericLiteral,
 		tsbridge.KindPrivateIdentifier, tsbridge.KindNoSubstitutionTemplateLiteral, tsbridge.KindBigIntLiteral:
 		name := t.Value(key)
-		return fb.emit(OpLoad, at, Aux{Name: Intern(name)}, obj), name
+		return fb.emit(OpLoad, at, Aux{Name: fb.name(name)}, obj), name
 	}
 	return fb.emitUnknown(key), ""
 }
@@ -162,10 +162,10 @@ func (fb *fnBuilder) bindArrayPattern(pat tsbridge.NodeID, v, base ValueID, path
 		var val ValueID
 		var sub string
 		if rest {
-			val = fb.emit(OpLoad, el, Aux{Name: Intern(idx), Flags: AuxRest}, src)
+			val = fb.emit(OpLoad, el, Aux{Name: fb.name(idx), Flags: AuxRest}, src)
 			sub = path + "[" + idx + ":]"
 		} else {
-			val = fb.emit(OpLoad, el, Aux{Name: Intern(idx)}, src)
+			val = fb.emit(OpLoad, el, Aux{Name: fb.name(idx)}, src)
 			sub = path + "[" + idx + "]"
 		}
 		fb.pathLink(val, base, sub)
@@ -237,7 +237,7 @@ func (fb *fnBuilder) assignObjectPattern(pat tsbridge.NodeID, v, base ValueID, p
 			}
 			val, keyText := fb.loadKey(m, e[0], v)
 			if keyText != "" {
-				seen = append(seen, Part{Kind: PartExclude, Name: Intern(keyText)})
+				seen = append(seen, Part{Kind: PartExclude, Name: fb.name(keyText)})
 			}
 			sub := path + accessPath(keyText)
 			fb.pathLink(val, base, sub)
@@ -253,7 +253,7 @@ func (fb *fnBuilder) assignObjectPattern(pat tsbridge.NodeID, v, base ValueID, p
 			}
 			name := e[0]
 			val, keyText := fb.loadKey(m, name, v)
-			seen = append(seen, Part{Kind: PartExclude, Name: Intern(keyText)})
+			seen = append(seen, Part{Kind: PartExclude, Name: fb.name(keyText)})
 			sub := path + accessPath(keyText)
 			fb.pathLink(val, base, sub)
 			if len(e) > 1 {
@@ -282,12 +282,12 @@ func (fb *fnBuilder) assignArrayPattern(pat tsbridge.NodeID, v, base ValueID, pa
 		}
 		idx := strconv.Itoa(i)
 		if t.Kind(el) == tsbridge.KindSpreadElement {
-			val := fb.emit(OpLoad, el, Aux{Name: Intern(idx), Flags: AuxRest}, src)
+			val := fb.emit(OpLoad, el, Aux{Name: fb.name(idx), Flags: AuxRest}, src)
 			fb.pathLink(val, base, path+"["+idx+":]")
 			fb.assignTarget(fb.first(el), val, base, path+"["+idx+":]")
 			continue
 		}
-		val := fb.emit(OpLoad, el, Aux{Name: Intern(idx)}, src)
+		val := fb.emit(OpLoad, el, Aux{Name: fb.name(idx)}, src)
 		sub := path + "[" + idx + "]"
 		fb.pathLink(val, base, sub)
 		target, def := fb.splitDefault(el)

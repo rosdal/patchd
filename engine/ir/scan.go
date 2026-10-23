@@ -1001,7 +1001,7 @@ func (b *builder) inferredName(n tsbridge.NodeID) string {
 		if len(kids) == 3 && kids[2] == n && t.Operator(p) == "=" {
 			switch t.Kind(kids[0]) {
 			case tsbridge.KindIdentifier, tsbridge.KindPropertyAccessExpression:
-				return t.Text(kids[0])
+				return strings.TrimPrefix(t.Text(kids[0]), "this.")
 			}
 		}
 	case tsbridge.KindExportAssignment:

@@ -1,7 +1,8 @@
 // Compares two bench-results.json files and raises the alarm: it exits 1 when
-// any reference repo's full load and check got more than 15% slower, or its
-// peak memory more than 20% higher, unless PERF_ACCEPTED is set (the
-// perf-accepted label on the PR, with a reason in its description).
+// any reference repo's full load and check, or its lowering to IR, got more
+// than 15% slower, or its peak memory more than 20% higher, unless
+// PERF_ACCEPTED is set (the perf-accepted label on the PR, with a reason in
+// its description).
 //
 // Usage: node bench-compare.mjs <base.json> <head.json> [--out table.md]
 import { readFileSync, writeFileSync } from "node:fs";
@@ -14,20 +15,25 @@ export function compare(base, head) {
   for (const [repo, h] of Object.entries(head.repos)) {
     const b = base.repos[repo];
     if (!b) {
-      rows.push({ repo, time: h.check.ns, memory: h.peakRssMB, new: true });
+      rows.push({ repo, time: h.check.ns, lower: h.lower?.ns, memory: h.peakRssMB, new: true });
       continue;
     }
     const dt = b.check.ns ? h.check.ns / b.check.ns - 1 : 0;
     const dm = b.peakRssMB ? h.peakRssMB / b.peakRssMB - 1 : 0;
+    // Results from before the IR existed have no lowering time.
+    const dl = b.lower?.ns && h.lower?.ns ? h.lower.ns / b.lower.ns - 1 : undefined;
     rows.push({
       repo,
       baseTime: b.check.ns,
       time: h.check.ns,
       dt,
+      baseLower: b.lower?.ns,
+      lower: h.lower?.ns,
+      dl,
       baseMemory: b.peakRssMB,
       memory: h.peakRssMB,
       dm,
-      regressed: dt > thresholds.time || dm > thresholds.memory,
+      regressed: dt > thresholds.time || (dl ?? 0) > thresholds.time || dm > thresholds.memory,
     });
   }
   // A repo main measured that the PR didn't is a failure, not a pass: its
@@ -44,15 +50,15 @@ const mb = (m) => (m === undefined ? "–" : `${m.toFixed(0)} MB`);
 
 export function table(rows) {
   return [
-    "| Repo | Load + check (main → PR) | Δ | Peak RSS (main → PR) | Δ | |",
-    "| --- | --- | ---: | --- | ---: | --- |",
+    "| Repo | Load + check (main → PR) | Δ | Lower to IR (main → PR) | Δ | Peak RSS (main → PR) | Δ | |",
+    "| --- | --- | ---: | --- | ---: | --- | ---: | --- |",
     ...rows.map((r) =>
       r.missing
-        ? `| ${r.repo} | missing from this run | | | | regression |`
-        : `| ${r.repo} | ${s(r.baseTime)} → ${s(r.time)} | ${pct(r.dt)} | ${mb(r.baseMemory)} → ${mb(r.memory)} | ${pct(r.dm)} | ${r.regressed ? "regression" : ""} |`,
+        ? `| ${r.repo} | missing from this run | | | | | | regression |`
+        : `| ${r.repo} | ${s(r.baseTime)} → ${s(r.time)} | ${pct(r.dt)} | ${s(r.baseLower)} → ${s(r.lower)} | ${pct(r.dl)} | ${mb(r.baseMemory)} → ${mb(r.memory)} | ${pct(r.dm)} | ${r.regressed ? "regression" : ""} |`,
     ),
     "",
-    `Alarm: load + check more than ${thresholds.time * 100}% slower, or peak memory more than ${thresholds.memory * 100}% higher, on any repo.`,
+    `Alarm: load + check or lowering more than ${thresholds.time * 100}% slower, or peak memory more than ${thresholds.memory * 100}% higher, on any repo.`,
   ].join("\n");
 }
 

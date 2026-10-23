@@ -147,7 +147,7 @@ func (fb *fnBuilder) lowerEntityName(n tsbridge.NodeID) ValueID {
 		if len(kids) == 2 {
 			obj := fb.lowerEntityName(kids[0])
 			fb.mark(kids[1])
-			return fb.emitTyped(OpLoad, n, Aux{Name: Intern(t.Value(kids[1]))}, obj)
+			return fb.emitTyped(OpLoad, n, Aux{Name: fb.name(t.Value(kids[1]))}, obj)
 		}
 	}
 	return fb.lowerExpr(n)

@@ -99,7 +99,8 @@ type builder struct {
 	nsOf    map[tsbridge.NodeID]int         // namespace declaration -> its function
 
 	seenNs   map[int32]bool
-	marks    []uint8 // per node index: markLowered, markUnknown
+	names    map[string]Name // interned strings, cached per file
+	marks    []uint8         // per node index: markLowered, markUnknown
 	warnings []Warning
 	typeReqs []typeReq
 }
@@ -166,7 +167,7 @@ func (b *builder) panicBody(fi *fnInfo) {
 	fb := newFnBuilder(b, fi)
 	fb.f.Flags |= FuncPanicked
 	fb.markUnknown(fi.node)
-	v := fb.emit(OpUnknown, fi.node, Aux{Name: Intern("panic")})
+	v := fb.emit(OpUnknown, fi.node, Aux{Name: fb.name("panic")})
 	fb.terminate(OpReturn, fi.node, []ValueID{v})
 	fb.finish()
 }
@@ -179,18 +180,23 @@ func (b *builder) warn(code string, n tsbridge.NodeID, msg string) {
 }
 
 // resolveTypes asks tsbridge for the type of every value with a syntax node,
-// in one batch.
+// in one batch, asking once per node.
 func (b *builder) resolveTypes() {
-	nodes := make([]tsbridge.NodeID, len(b.typeReqs))
-	for i, r := range b.typeReqs {
-		nodes[i] = r.node
+	index := make(map[tsbridge.NodeID]int, len(b.typeReqs))
+	var nodes []tsbridge.NodeID
+	for _, r := range b.typeReqs {
+		if _, ok := index[r.node]; !ok {
+			index[r.node] = len(nodes)
+			nodes = append(nodes, r.node)
+		}
 	}
 	types := b.prog.TypesOf(nodes)
-	for i, r := range b.typeReqs {
+	for _, r := range b.typeReqs {
+		t := types[index[r.node]]
 		if r.v == NoValue {
-			r.fn.Type = types[i]
+			r.fn.Type = t
 		} else if v := r.fn.Value(r.v); v != nil {
-			v.Type = types[i]
+			v.Type = t
 		}
 	}
 	b.typeReqs = nil
@@ -215,16 +221,17 @@ type fnBuilder struct {
 	regions []region
 	chains  []BlockID // short-circuit blocks of the optional chains being lowered
 
-	undef   ValueID
-	this    ValueID
-	args    ValueID
-	newTgt  ValueID
-	self    ValueID
-	free    map[captureKey]ValueID
-	globals map[string]ValueID
-	intrins map[string]ValueID
-	exports map[int32]bool // module-level vars exported by declaration (Init only)
-	enums   []map[string]ValueID
+	undef    ValueID
+	this     ValueID
+	args     ValueID
+	newTgt   ValueID
+	self     ValueID
+	free     map[captureKey]ValueID
+	globals  map[string]ValueID
+	intrins  map[string]ValueID
+	exports  map[int32]bool // module-level vars exported by declaration (Init only)
+	typeReqs []typeReq      // values to type, moved to the builder when the function is finished
+	enums    []map[string]ValueID
 }
 
 type pendingPhi struct {
@@ -277,8 +284,28 @@ func newFnBuilder(b *builder, fi *fnInfo) *fnBuilder {
 	return fb
 }
 
-// newValue appends a value and returns its ID.
+// name interns s through the file's cache, which is cheaper than the
+// process-wide table for the many repeats in one file.
+func (fb *fnBuilder) name(s string) Name { return fb.b.intern(s) }
+
+func (b *builder) intern(s string) Name {
+	if n, ok := b.names[s]; ok {
+		return n
+	}
+	n := Intern(s)
+	if b.names == nil {
+		b.names = map[string]Name{}
+	}
+	b.names[n.String()] = n
+	return n
+}
+
+// newValue appends a value and returns its ID. Its name is interned, so the
+// IR does not keep the parsed source alive.
 func (fb *fnBuilder) newValue(v Value) ValueID {
+	if v.Name != "" {
+		v.Name = fb.name(v.Name).String()
+	}
 	v.ID = ValueID(len(fb.f.Values)) //nolint:gosec // a function has far fewer than 2^32 values
 	fb.f.Values = append(fb.f.Values, v)
 	return v.ID
@@ -357,7 +384,7 @@ func (fb *fnBuilder) emitTyped(op Op, n tsbridge.NodeID, aux Aux, args ...ValueI
 // typeOf asks for v's type to be n's.
 func (fb *fnBuilder) typeOf(v ValueID, n tsbridge.NodeID) {
 	if v != NoValue && n != 0 {
-		fb.b.typeReqs = append(fb.b.typeReqs, typeReq{fn: fb.f, v: v, node: n})
+		fb.typeReqs = append(fb.typeReqs, typeReq{fn: fb.f, v: v, node: n})
 	}
 }
 
@@ -436,7 +463,7 @@ func (fb *fnBuilder) branch(n tsbridge.NodeID, cond ValueID, t, f BlockID) {
 
 // constant emits a const.
 func (fb *fnBuilder) constant(n tsbridge.NodeID, lit AuxFlags, text string) ValueID {
-	return fb.emitTyped(OpConst, n, Aux{Name: Intern(text), Flags: lit})
+	return fb.emitTyped(OpConst, n, Aux{Name: fb.name(text), Flags: lit})
 }
 
 // global returns the value standing for a global name.
@@ -462,20 +489,20 @@ func (fb *fnBuilder) intrinsic(name string) ValueID {
 
 // loadGlobal reads a global by name.
 func (fb *fnBuilder) loadGlobal(n tsbridge.NodeID, name string) ValueID {
-	v := fb.emitTyped(OpLoad, n, Aux{Name: Intern(name), Flags: AuxGlobal}, fb.global(name))
+	v := fb.emitTyped(OpLoad, n, Aux{Name: fb.name(name), Flags: AuxGlobal}, fb.global(name))
 	fb.nameValue(v, name)
 	return v
 }
 
 // storeGlobal writes a global by name.
 func (fb *fnBuilder) storeGlobal(n tsbridge.NodeID, name string, v ValueID) {
-	fb.emit(OpStore, n, Aux{Name: Intern(name), Flags: AuxGlobal}, fb.global(name), v)
+	fb.emit(OpStore, n, Aux{Name: fb.name(name), Flags: AuxGlobal}, fb.global(name), v)
 }
 
 // nameValue gives an unnamed instruction result a source name.
 func (fb *fnBuilder) nameValue(v ValueID, name string) {
 	if val := fb.f.Value(v); val != nil && val.Name == "" && val.Kind == ValueInstr {
-		val.Name = name
+		val.Name = fb.name(name).String()
 	}
 }
 
@@ -774,17 +801,16 @@ func (fb *fnBuilder) compact(repl []ValueID) {
 			fb.b.mod.Exports[i].Value = remap(fb.b.mod.Exports[i].Value)
 		}
 	}
-	reqs := fb.b.typeReqs[:0]
-	for _, r := range fb.b.typeReqs {
-		if r.fn == f && r.v != NoValue {
+	for _, r := range fb.typeReqs {
+		if r.v != NoValue {
 			if repl[r.v] != NoValue {
 				continue // a removed phi: its replacement has its own type
 			}
 			r.v = newVal[r.v]
 		}
-		reqs = append(reqs, r)
+		fb.b.typeReqs = append(fb.b.typeReqs, r)
 	}
-	fb.b.typeReqs = reqs
+	fb.typeReqs = nil
 	f.Values, f.Instrs, f.args, f.order, f.edges = values, instrs, args, order, edges
 	f.Entry = 1
 	fb.blkInstr, fb.blkPhis, fb.defs, fb.pending, fb.phiVar = nil, nil, nil, nil, nil

@@ -117,7 +117,7 @@ func (fb *fnBuilder) setupEntry() {
 	}
 	switch f.Kind {
 	case FuncDeclaration, FuncArrow, FuncMethod, FuncGetter, FuncSetter, FuncConstructor:
-		fb.b.typeReqs = append(fb.b.typeReqs, typeReq{fn: f, v: NoValue, node: fi.node})
+		fb.typeReqs = append(fb.typeReqs, typeReq{fn: f, v: NoValue, node: fi.node})
 	}
 	fb.enterScope(fi.node)
 	if fi.selfVar >= 0 {
@@ -162,7 +162,7 @@ func (fb *fnBuilder) enterScope(n tsbridge.NodeID) {
 
 // newCell allocates a fresh cell for v.
 func (fb *fnBuilder) newCell(v int32, n tsbridge.NodeID) ValueID {
-	c := fb.emit(OpCell, n, Aux{Name: Intern(fb.b.vars[v].name)})
+	c := fb.emit(OpCell, n, Aux{Name: fb.name(fb.b.vars[v].name)})
 	fb.f.cells = append(fb.f.cells, cellVar{value: c, name: fb.b.vars[v].name})
 	fb.writeVariable(v, fb.cur, c)
 	return c
@@ -206,7 +206,7 @@ func (fb *fnBuilder) readVar(v int32, n tsbridge.NodeID) ValueID {
 		return fb.loadGlobal(n, vi.name)
 	case vi.nsMember > 0:
 		ns := fb.readVar(vi.nsMember-1, n)
-		r := fb.emitTyped(OpLoad, n, Aux{Name: Intern(vi.name)}, ns)
+		r := fb.emitTyped(OpLoad, n, Aux{Name: fb.name(vi.name)}, ns)
 		fb.nameValue(r, vi.name)
 		return r
 	case vi.captured:
@@ -227,7 +227,7 @@ func (fb *fnBuilder) writeVar(v int32, val ValueID, n tsbridge.NodeID) {
 		fb.storeGlobal(n, vi.name, val)
 	case vi.nsMember > 0:
 		ns := fb.readVar(vi.nsMember-1, n)
-		fb.emit(OpStore, n, Aux{Name: Intern(vi.name)}, ns, val)
+		fb.emit(OpStore, n, Aux{Name: fb.name(vi.name)}, ns, val)
 	case vi.captured:
 		c := fb.cellOf(v, n)
 		fb.emit(OpStore, n, Aux{Flags: AuxCell}, c, val)
@@ -248,7 +248,7 @@ func (fb *fnBuilder) named(val ValueID, name string, n tsbridge.NodeID) ValueID 
 	switch v.Kind {
 	case ValueInstr:
 		if v.Name == "" {
-			v.Name = name
+			v.Name = fb.name(name).String()
 			return val
 		}
 	case ValueParam, ValueThis, ValueFreeVar, ValueArguments, ValueSelf:
@@ -259,7 +259,7 @@ func (fb *fnBuilder) named(val ValueID, name string, n tsbridge.NodeID) ValueID 
 		return val
 	}
 	a := fb.emit(OpAssign, n, Aux{}, val)
-	fb.f.Values[a].Name = name
+	fb.f.Values[a].Name = fb.name(name).String()
 	fb.f.Values[a].Type = v.Type
 	if v.Kind == ValueInstr {
 		if r := fb.lastTypeReq(val); r != 0 {
@@ -399,7 +399,7 @@ func (fb *fnBuilder) lowerParams() {
 // withDefault returns v, or the value of init when v is undefined: an
 // explicit branch, so dataflow sees both.
 func (fb *fnBuilder) withDefault(v ValueID, init, n tsbridge.NodeID) ValueID {
-	isUndef := fb.emit(OpBinOp, n, Aux{Name: Intern("===")}, v, fb.undef)
+	isUndef := fb.emit(OpBinOp, n, Aux{Name: fb.name("===")}, v, fb.undef)
 	from := fb.cur
 	def := fb.newBlock("default")
 	join := fb.newBlock("default.done")
@@ -470,12 +470,12 @@ func (fb *fnBuilder) constructorPrologue(at tsbridge.NodeID) {
 			if name == 0 {
 				continue
 			}
-			fb.emit(OpStore, p, Aux{Name: Intern(t.Value(name))}, fb.thisValue(), pv)
+			fb.emit(OpStore, p, Aux{Name: fb.name(t.Value(name))}, fb.thisValue(), pv)
 		}
 	}
 	if ci.init >= 0 {
 		init := fb.closureOfFn(ci.init, at, 0)
-		fb.emit(OpCall, at, Aux{Name: Intern("<init>"), Flags: AuxWithThis}, init, fb.thisValue())
+		fb.emit(OpCall, at, Aux{Name: fb.name("<init>"), Flags: AuxWithThis}, init, fb.thisValue())
 	}
 }
 
