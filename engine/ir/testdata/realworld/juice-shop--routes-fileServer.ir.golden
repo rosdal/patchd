@@ -1,0 +1,239 @@
+module juice-shop--routes-fileServer.ts
+  import default as path from "node:path"
+  import Request from "express" (type)
+  import Response from "express" (type)
+  import NextFunction from "express" (type)
+  import * as security from "../lib/insecurity"
+  import challenges from "../data/datacache"
+  import * as challengeUtils from "../lib/challengeUtils"
+  export servePublicFiles = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; servePublicFiles
+  store global servePublicFiles = v2
+  return undefined
+
+func f2 servePublicFiles() function in f1
+b1.entry:
+  v1 = this
+  v2 = cell verify
+  v3 = cell verifySuccessfulPoisonNullByteExploit
+  v4 = cell endsWithAllowlistedFileType
+  v5 = closure f4 [v4, v3]                ; servePublicFiles.verify
+  store *v2 = v5
+  v6 = closure f6 []                      ; servePublicFiles.verifySuccessfulPoisonNullByteExploit
+  store *v3 = v6
+  v7 = closure f12 []                     ; servePublicFiles.endsWithAllowlistedFileType
+  store *v4 = v7
+  v8 = closure f3 [v2]                    ; servePublicFiles.<anon@16:10>
+  return v8
+
+func f3 servePublicFiles.<anon@16:10>(v1, res, next) arrow in f2
+b1.entry:
+  v1 = param
+  v2 = param res
+  v3 = param next
+  v4 = free verify (cell)
+  v5 = load v1.params
+  v6 = load v1.query
+  v7 = load v5.file
+  v8 = const "/"
+  v9 = call v7.includes(v8) this=v7
+  v10 = unop ! v9
+  branch v10 b2.if.then b3.if.else
+b2.if.then:  ; preds b1
+  v11 = load *v4
+  v12 = call v11(v7, v2, v3)
+  jump b4.if.done
+b3.if.else:  ; preds b1
+  v13 = const 403
+  v14 = call v2.status(v13) this=v2
+  v15 = load global Error
+  v16 = const "File names cannot contain forward slashes!"
+  v17 = new v15(v16)
+  v18 = call v3(v17)
+  jump b4.if.done
+b4.if.done:  ; preds b2 b3
+  return undefined
+
+func f4 servePublicFiles.verify(file, res, next) function in f2
+b1.entry:
+  v1 = param file
+  v2 = param res
+  v3 = param next
+  v4 = this
+  v5 = free endsWithAllowlistedFileType (cell)
+  v6 = free verifySuccessfulPoisonNullByteExploit (cell)
+  v7 = cell file
+  store *v7 = v1
+  v8 = load *v7
+  branch v8 b2.and.rhs b5.and.done
+b2.and.rhs:  ; preds b1
+  v9 = load *v5
+  v10 = load *v7
+  v11 = call v9(v10)
+  branch v11 b4.or.done b3.or.rhs
+b3.or.rhs:  ; preds b2
+  v12 = load *v7
+  v13 = const "incident-support.kdbx"
+  v14 = binop === v12 v13
+  jump b4.or.done
+b4.or.done:  ; preds b2 b3
+  v15 = phi [b2: v11, b3: v14]
+  jump b5.and.done
+b5.and.done:  ; preds b1 b4
+  v16 = phi [b1: v8, b4: v15]
+  branch v16 b6.if.then b7.if.else
+b6.if.then:  ; preds b5
+  v17 = load global security
+  v18 = load *v7
+  v19 = call v17.cutOffPoisonNullByte(v18) this=v17
+  store *v7 = v19
+  v20 = load global challengeUtils
+  v21 = load global challenges
+  v22 = load v21.directoryListingChallenge
+  v23 = closure f5 [v7]                   ; servePublicFiles.verify.<anon@31:68>
+  v24 = call v20.solveIf(v22, v23) this=v20
+  v25 = load *v6
+  v26 = load *v7
+  v27 = call v25(v26)
+  v28 = load global path
+  v29 = const "ftp/"
+  v30 = load *v7
+  v31 = call v28.resolve(v29, v30) this=v28
+  v32 = call v2.sendFile(v31) this=v2
+  jump b8.if.done
+b7.if.else:  ; preds b5
+  v33 = const 403
+  v34 = call v2.status(v33) this=v2
+  v35 = load global Error
+  v36 = const "Only .md and .pdf files are allowed!"
+  v37 = new v35(v36)
+  v38 = call v3(v37)
+  jump b8.if.done
+b8.if.done:  ; preds b6 b7
+  return undefined
+
+func f5 servePublicFiles.verify.<anon@31:68>() arrow in f4
+b1.entry:
+  v1 = free file (cell)
+  v2 = load *v1
+  v3 = call v2.toLowerCase() this=v2
+  v4 = const "acquisitions.md"
+  v5 = binop === v3 v4
+  return v5
+
+func f6 servePublicFiles.verifySuccessfulPoisonNullByteExploit(file) function in f2
+b1.entry:
+  v1 = param file
+  v2 = this
+  v3 = cell file
+  store *v3 = v1
+  v4 = load global challengeUtils
+  v5 = load global challenges
+  v6 = load v5.easterEggLevelOneChallenge
+  v7 = closure f7 [v3]                    ; servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@42:67>
+  v8 = call v4.solveIf(v6, v7) this=v4
+  v9 = load global challengeUtils
+  v10 = load global challenges
+  v11 = load v10.forgottenDevBackupChallenge
+  v12 = closure f8 [v3]                   ; servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@43:68>
+  v13 = call v9.solveIf(v11, v12) this=v9
+  v14 = load global challengeUtils
+  v15 = load global challenges
+  v16 = load v15.forgottenBackupChallenge
+  v17 = closure f9 [v3]                   ; servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@44:65>
+  v18 = call v14.solveIf(v16, v17) this=v14
+  v19 = load global challengeUtils
+  v20 = load global challenges
+  v21 = load v20.misplacedSignatureFileChallenge
+  v22 = closure f10 [v3]                  ; servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@45:72>
+  v23 = call v19.solveIf(v21, v22) this=v19
+  v24 = load global challengeUtils
+  v25 = load global challenges
+  v26 = load v25.nullByteChallenge
+  v27 = closure f11 [v3]                  ; servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@47:58>
+  v28 = call v24.solveIf(v26, v27) this=v24
+  return undefined
+
+func f7 servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@42:67>() arrow in f6
+b1.entry:
+  v1 = free file (cell)
+  v2 = load *v1
+  v3 = call v2.toLowerCase() this=v2
+  v4 = const "eastere.gg"
+  v5 = binop === v3 v4
+  return v5
+
+func f8 servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@43:68>() arrow in f6
+b1.entry:
+  v1 = free file (cell)
+  v2 = load *v1
+  v3 = call v2.toLowerCase() this=v2
+  v4 = const "package.json.bak"
+  v5 = binop === v3 v4
+  return v5
+
+func f9 servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@44:65>() arrow in f6
+b1.entry:
+  v1 = free file (cell)
+  v2 = load *v1
+  v3 = call v2.toLowerCase() this=v2
+  v4 = const "coupons_2013.md.bak"
+  v5 = binop === v3 v4
+  return v5
+
+func f10 servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@45:72>() arrow in f6
+b1.entry:
+  v1 = free file (cell)
+  v2 = load *v1
+  v3 = call v2.toLowerCase() this=v2
+  v4 = const "suspicious_errors.yml"
+  v5 = binop === v3 v4
+  return v5
+
+func f11 servePublicFiles.verifySuccessfulPoisonNullByteExploit.<anon@47:58>() arrow in f6
+b1.entry:
+  v1 = free file (cell)
+  v2 = load global challenges
+  v3 = load v2.easterEggLevelOneChallenge
+  v4 = load v3.solved
+  v5 = load global challenges
+  v6 = load v5.forgottenDevBackupChallenge
+  v7 = load v6.solved
+  v8 = load global challenges
+  v9 = load v8.forgottenBackupChallenge
+  v10 = load v9.solved
+  v11 = load global challenges
+  v12 = load v11.misplacedSignatureFileChallenge
+  v13 = load v12.solved
+  v14 = array [v4, v7, v10, v13]
+  v15 = load global Boolean
+  v16 = call v14.some(v15) this=v14
+  branch v16 b3.or.done b2.or.rhs
+b2.or.rhs:  ; preds b1
+  v17 = load *v1
+  v18 = call v17.toLowerCase() this=v17
+  v19 = const "encrypt.pyc"
+  v20 = binop === v18 v19
+  jump b3.or.done
+b3.or.done:  ; preds b1 b2
+  v21 = phi [b1: v16, b2: v20]
+  return v21
+
+func f12 servePublicFiles.endsWithAllowlistedFileType(param) function in f2
+b1.entry:
+  v1 = param param
+  v2 = this
+  v3 = const ".md"
+  v4 = call v1.endsWith(v3) this=v1
+  branch v4 b3.or.done b2.or.rhs
+b2.or.rhs:  ; preds b1
+  v5 = const ".pdf"
+  v6 = call v1.endsWith(v5) this=v1
+  jump b3.or.done
+b3.or.done:  ; preds b1 b2
+  v7 = phi [b1: v4, b2: v6]
+  return v7

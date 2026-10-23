@@ -1,0 +1,103 @@
+module execa--lib-methods-script.js
+  export setScriptSync = v2 (declaration)
+  export mapScriptAsync = v3 (declaration)
+  export deepScriptOptions = v8 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; setScriptSync
+  store global setScriptSync = v2
+  v3 = closure f3 []                      ; mapScriptAsync
+  store global mapScriptAsync = v3
+  v4 = closure f4 []                      ; mapScriptSync
+  store global mapScriptSync = v4
+  v5 = closure f5 []                      ; getScriptOptions
+  store global getScriptOptions = v5
+  v6 = closure f6 []                      ; getScriptStdinOption
+  store global getScriptStdinOption = v6
+  v7 = const true
+  v8 = object {preferLocal: v7}
+  store global deepScriptOptions = v8
+  return undefined
+
+func f2 setScriptSync(boundExeca, createNested, boundOptions) arrow in f1
+b1.entry:
+  v1 = param boundExeca
+  v2 = param createNested
+  v3 = param boundOptions
+  v4 = load global mapScriptSync
+  v5 = call v2(v4, v3)
+  store v1.sync = v5
+  v6 = load v1.sync
+  store v1.s = v6
+  return undefined
+
+func f3 mapScriptAsync(v1) arrow in f1
+b1.entry:
+  v1 = param
+  v2 = load v1.options
+  v3 = load global getScriptOptions
+  v4 = call v3(v2)
+  return v4
+
+func f4 mapScriptSync(v1) arrow in f1
+b1.entry:
+  v1 = param
+  v2 = load v1.options
+  v3 = load global getScriptOptions
+  v4 = call v3(v2)
+  v5 = const true
+  v6 = object {...v4, isSync: v5}
+  return v6
+
+func f5 getScriptOptions(options) arrow in f1
+b1.entry:
+  v1 = param options
+  v2 = const null
+  v3 = load global getScriptStdinOption
+  v4 = call v3(v1)
+  v5 = object {[[Prototype]]: v2, ...v1, ...v4}
+  v6 = object {options: v5}
+  return v6
+
+func f6 getScriptStdinOption(v1) arrow in f1
+b1.entry:
+  v1 = param
+  v2 = load v1.stdin
+  v3 = binop === v2 undefined
+  branch v3 b2.default b3.default.done
+b2.default:  ; preds b1
+  v4 = const "inherit"
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v5 = phi [b1: v2, b2: v4]
+  v6 = load v1.input
+  v7 = load v1.inputFile
+  v8 = load v1.stdio
+  v9 = const undefined
+  v10 = binop === v6 v9
+  branch v10 b4.and.rhs b5.and.done
+b4.and.rhs:  ; preds b3
+  v11 = const undefined
+  v12 = binop === v7 v11
+  jump b5.and.done
+b5.and.done:  ; preds b3 b4
+  v13 = phi [b3: v10, b4: v12]
+  branch v13 b6.and.rhs b7.and.done
+b6.and.rhs:  ; preds b5
+  v14 = const undefined
+  v15 = binop === v8 v14
+  jump b7.and.done
+b7.and.done:  ; preds b5 b6
+  v16 = phi [b5: v13, b6: v15]
+  branch v16 b8.cond.true b9.cond.false
+b8.cond.true:  ; preds b7
+  v17 = object {stdin: v5}
+  jump b10.cond.done
+b9.cond.false:  ; preds b7
+  v18 = object {}
+  jump b10.cond.done
+b10.cond.done:  ; preds b8 b9
+  v19 = phi [b8: v17, b9: v18]
+  return v19

@@ -1,0 +1,19 @@
+module awaited.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; awaited.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : () => Promise<number | undefined>  ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function async in f1  ; awaited.ts:2:1  : () => Promise<number | undefined>
+b1.entry:
+  v1 = this
+  v2 = load global load                  : () => Promise<Map<string, number>>
+  v3 = call v2()                         : Promise<Map<string, number>>
+  v4 = await v3                          : Map<string, number>
+  v5 = const "k"                         : "k"
+  v6 = call v4.get(v5) this=v4           : number | undefined
+  return v6

@@ -1,0 +1,60 @@
+module nodegoat--app-data-research-dao.js
+  export default = v5 (commonjs)
+  export ResearchDAO = v4 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; ResearchDAO
+  store global ResearchDAO = v2
+  v3 = load global module
+  v4 = load global ResearchDAO
+  v5 = object {ResearchDAO: v4}
+  store v3.exports = v5
+  return undefined
+
+func f2 ResearchDAO(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = const "use strict"
+  v4 = const false
+  v5 = load global ResearchDAO
+  v6 = binop instanceof v2 v5
+  v7 = binop === v4 v6
+  branch v7 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v8 = load global console
+  v9 = const "Warning: ResearchDAO constructor called without 'new' operator"
+  v10 = call v8.log(v9) this=v8
+  v11 = load global ResearchDAO
+  v12 = new v11(v1)
+  return v12
+b3.if.done:  ; preds b1
+  v13 = closure f3 []                     ; ResearchDAO.getBySymbol
+  store v2.getBySymbol = v13
+  return undefined
+
+func f3 ResearchDAO.getBySymbol(symbol, callback) arrow in f2
+b1.entry:
+  v1 = param symbol
+  v2 = param callback
+  v3 = cell symbol
+  store *v3 = v1
+  v4 = closure f4 [v3]                    ; ResearchDAO.getBySymbol.searchCriteria
+  return undefined
+
+func f4 ResearchDAO.getBySymbol.searchCriteria() arrow in f3
+b1.entry:
+  v1 = free symbol (cell)
+  v2 = load *v1
+  branch v2 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v3 = load global console
+  v4 = const "in if symbol"
+  v5 = call v3.log(v4) this=v3
+  v6 = load *v1
+  v7 = object {symbol: v6}
+  return v7
+b3.if.done:  ; preds b1
+  return undefined

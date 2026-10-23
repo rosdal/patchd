@@ -1,0 +1,127 @@
+module juice-shop--lib-webhook.ts
+  import default as os from "node:os"
+  import default as config from "config"
+  import default as colors from "colors/safe"
+  import default as logger from "./logger"
+  import * as utils from "./utils"
+  import totalCheatScore from "./antiCheat"
+  export notify = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; notify
+  store global notify = v2
+  return undefined
+
+func f2 notify(challenge, cheatScore, hintsAvailable, hintsUnlocked, webhook) arrow async in f1
+b1.entry:
+  v1 = param challenge
+  v2 = param cheatScore
+  v3 = param hintsAvailable
+  v4 = param hintsUnlocked
+  v5 = param webhook
+  v6 = binop === v2 undefined
+  branch v6 b2.default b3.default.done
+b2.default:  ; preds b1
+  v7 = const 1
+  v8 = unop - v7
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v9 = phi [b1: v2, b2: v8]
+  v10 = binop === v3 undefined
+  branch v10 b4.default b5.default.done
+b4.default:  ; preds b3
+  v11 = const 0
+  jump b5.default.done
+b5.default.done:  ; preds b3 b4
+  v12 = phi [b3: v3, b4: v11]
+  v13 = binop === v4 undefined
+  branch v13 b6.default b7.default.done
+b6.default:  ; preds b5
+  v14 = const 0
+  jump b7.default.done
+b7.default.done:  ; preds b5 b6
+  v15 = phi [b5: v4, b6: v14]
+  v16 = binop === v5 undefined
+  branch v16 b8.default b9.default.done
+b8.default:  ; preds b7
+  v17 = load global process
+  v18 = load v17.env
+  v19 = load v18.SOLUTIONS_WEBHOOK
+  jump b9.default.done
+b9.default.done:  ; preds b7 b8
+  v20 = phi [b7: v5, b8: v19]
+  v21 = unop ! v20
+  branch v21 b10.if.then b11.if.done
+b10.if.then:  ; preds b9
+  return undefined
+b11.if.done:  ; preds b9
+  v22 = load global fetch
+  v23 = const "POST"
+  v24 = const "application/json"
+  v25 = object {"Content-Type": v24}
+  v26 = load global JSON
+  v27 = load v1.key
+  v28 = load global totalCheatScore
+  v29 = call v28()
+  v30 = load global Date
+  v31 = new v30()
+  v32 = call v31.toISOString() this=v31
+  v33 = object {challenge: v27, hintsAvailable: v12, hintsUnlocked: v15, cheatScore: v9, totalCheatScore: v29, issuedOn: v32}
+  v34 = load global utils
+  v35 = load v1.name
+  v36 = call v34.ctfFlag(v35) this=v34
+  v37 = load global os
+  v38 = call v37.hostname() this=v37
+  v39 = load global os
+  v40 = call v39.type() this=v39
+  v41 = load global os
+  v42 = call v41.release() this=v41
+  v43 = template [v40, " (", v42, ")"]
+  v44 = load global config
+  v45 = const "application.name"
+  v46 = call v44.get(v45) this=v44
+  v47 = load global process
+  v48 = load v47.env
+  v49 = load v48.NODE_ENV
+  v50 = binop == v49 undefined
+  branch v50 b12.nullish.rhs b13.nullish.done
+b12.nullish.rhs:  ; preds b11
+  v51 = const "default"
+  jump b13.nullish.done
+b13.nullish.done:  ; preds b11 b12
+  v52 = phi [b11: v49, b12: v51]
+  v53 = load global utils
+  v54 = call v53.version() this=v53
+  v55 = object {hostName: v38, os: v43, appName: v46, config: v52, version: v54}
+  v56 = object {solution: v33, ctfFlag: v36, issuer: v55}
+  v57 = call v26.stringify(v56) this=v26
+  v58 = object {method: v23, headers: v25, body: v57}
+  v59 = call v22(v20, v58)
+  v60 = await v59
+  v61 = load global logger
+  v62 = load global colors
+  v63 = call v62.bold(v20) this=v62
+  v64 = load global colors
+  v65 = load v1.key
+  v66 = call v64.cyan(v65) this=v64
+  v67 = load v60.ok
+  branch v67 b14.cond.true b15.cond.false
+b14.cond.true:  ; preds b13
+  v68 = load global colors
+  v69 = load v60.status
+  v70 = call v69.toString() this=v69
+  v71 = call v68.green(v70) this=v68
+  jump b16.cond.done
+b15.cond.false:  ; preds b13
+  v72 = load global colors
+  v73 = load v60.status
+  v74 = call v73.toString() this=v73
+  v75 = call v72.red(v74) this=v72
+  jump b16.cond.done
+b16.cond.done:  ; preds b14 b15
+  v76 = phi [b14: v71, b15: v75]
+  v77 = template ["Webhook ", v63, " notified about ", v66, " being solved: ", v76]
+  v78 = call v61.info(v77) this=v61
+  return undefined

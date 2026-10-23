@@ -1,0 +1,276 @@
+module nodegoat--app-data-allocations-dao.js
+  import default from "./user-dao" (require)
+  export AllocationsDAO = v9 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global require
+  v3 = const "./user-dao"
+  v4 = call v2(v3)                        ; require
+  v5 = load v4.UserDAO
+  store global UserDAO = v5
+  v6 = closure f2 []                      ; AllocationsDAO
+  store global AllocationsDAO = v6
+  v7 = load global module
+  v8 = load v7.exports
+  v9 = load global AllocationsDAO
+  store v8.AllocationsDAO = v9
+  return undefined
+
+func f2 AllocationsDAO(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = cell allocationsCol
+  v4 = cell userDAO
+  v5 = const "use strict"
+  v6 = const false
+  v7 = load global AllocationsDAO
+  v8 = binop instanceof v2 v7
+  v9 = binop === v6 v8
+  branch v9 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v10 = load global console
+  v11 = const "Warning: AllocationsDAO constructor called without 'new' operator"
+  v12 = call v10.log(v11) this=v10
+  v13 = load global AllocationsDAO
+  v14 = new v13(v1)
+  return v14
+b3.if.done:  ; preds b1
+  v15 = const "allocations"
+  v16 = call v1.collection(v15) this=v1
+  store *v3 = v16
+  v17 = load global UserDAO
+  v18 = new v17(v1)
+  store *v4 = v18
+  v19 = closure f3 [v3, v4]               ; AllocationsDAO.update
+  store v2.update = v19
+  v20 = closure f6 [v3, v4]               ; AllocationsDAO.getByUserIdAndThreshold
+  store v2.getByUserIdAndThreshold = v20
+  return undefined
+
+func f3 AllocationsDAO.update(userId, stocks, funds, bonds, callback) arrow in f2
+b1.entry:
+  v1 = param userId
+  v2 = param stocks
+  v3 = param funds
+  v4 = param bonds
+  v5 = param callback
+  v6 = free allocationsCol (cell)
+  v7 = free userDAO (cell)
+  v8 = cell userId
+  v9 = cell callback
+  store *v8 = v1
+  store *v9 = v5
+  v10 = cell allocations
+  v11 = load global parseInt
+  v12 = load *v8
+  v13 = call v11(v12)
+  v14 = load *v8
+  v15 = object {userId: v14, stocks: v2, funds: v3, bonds: v4}
+  store *v10 = v15
+  v16 = load *v6
+  v17 = object {userId: v13}
+  v18 = load *v10
+  v19 = const true
+  v20 = object {upsert: v19}
+  v21 = closure f4 [v7, v8, v9, v10]      ; AllocationsDAO.update.<anon@35:12>
+  v22 = call v16.update(v17, v18, v20, v21) this=v16
+  return undefined
+
+func f4 AllocationsDAO.update.<anon@35:12>(err) arrow in f3
+b1.entry:
+  v1 = param err
+  v2 = free userDAO (cell)
+  v3 = free userId (cell)
+  v4 = free callback (cell)
+  v5 = free allocations (cell)
+  v6 = unop ! v1
+  branch v6 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v7 = load global console
+  v8 = const "Updated allocations"
+  v9 = call v7.log(v8) this=v7
+  v10 = load *v2
+  v11 = load *v3
+  v12 = closure f5 [v4, v5, v3]           ; AllocationsDAO.update.<anon@35:12>.<anon@41:45>
+  v13 = call v10.getUserById(v11, v12) this=v10
+  jump b3.if.done
+b3.if.done:  ; preds b1 b2
+  v14 = load *v4
+  v15 = const null
+  v16 = call v14(v1, v15)
+  return v16
+
+func f5 AllocationsDAO.update.<anon@35:12>.<anon@41:45>(err, user) arrow in f4
+b1.entry:
+  v1 = param err
+  v2 = param user
+  v3 = free callback (cell)
+  v4 = free allocations (cell)
+  v5 = free userId (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v6 = load *v3
+  v7 = const null
+  v8 = call v6(v1, v7)
+  return v8
+b3.if.done:  ; preds b1
+  v9 = load *v4
+  v10 = load *v5
+  store v9.userId = v10
+  v11 = load *v4
+  v12 = load v2.userName
+  store v11.userName = v12
+  v13 = load *v4
+  v14 = load v2.firstName
+  store v13.firstName = v14
+  v15 = load *v4
+  v16 = load v2.lastName
+  store v15.lastName = v16
+  v17 = load *v3
+  v18 = const null
+  v19 = load *v4
+  v20 = call v17(v18, v19)
+  return v20
+
+func f6 AllocationsDAO.getByUserIdAndThreshold(userId, threshold, callback) arrow in f2
+b1.entry:
+  v1 = param userId
+  v2 = param threshold
+  v3 = param callback
+  v4 = free allocationsCol (cell)
+  v5 = free userDAO (cell)
+  v6 = cell threshold
+  v7 = cell callback
+  store *v6 = v2
+  store *v7 = v3
+  v8 = cell parsedUserId
+  v9 = load global parseInt
+  v10 = call v9(v1)
+  store *v8 = v10
+  v11 = closure f7 [v6, v8]               ; AllocationsDAO.getByUserIdAndThreshold.searchCriteria
+  v12 = load *v4
+  v13 = call v11()
+  v14 = call v12.find(v13) this=v12
+  v15 = closure f8 [v7, v5]               ; AllocationsDAO.getByUserIdAndThreshold.<anon@88:55>
+  v16 = call v14.toArray(v15) this=v14
+  return undefined
+
+func f7 AllocationsDAO.getByUserIdAndThreshold.searchCriteria() arrow in f6
+b1.entry:
+  v1 = free threshold (cell)
+  v2 = free parsedUserId (cell)
+  v3 = load *v1
+  branch v3 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v4 = load *v2
+  v5 = load *v1
+  v6 = template ["this.userId == ", v4, " && this.stocks > '", v5, "'"]
+  v7 = object {$where: v6}
+  return v7
+b3.if.done:  ; preds b1
+  v8 = load *v2
+  v9 = object {userId: v8}
+  return v9
+
+func f8 AllocationsDAO.getByUserIdAndThreshold.<anon@88:55>(err, allocations) arrow in f6
+b1.entry:
+  v1 = param err
+  v2 = param allocations
+  v3 = free callback (cell)
+  v4 = free userDAO (cell)
+  v5 = cell allocations
+  store *v5 = v2
+  v6 = cell doneCounter
+  v7 = cell userAllocations
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v8 = load *v3
+  v9 = const null
+  v10 = call v8(v1, v9)
+  return v10
+b3.if.done:  ; preds b1
+  v11 = load *v5
+  v12 = load v11.length
+  v13 = unop ! v12
+  branch v13 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v14 = load *v3
+  v15 = const "ERROR: No allocations found for the user"
+  v16 = const null
+  v17 = call v14(v15, v16)
+  return v17
+b5.if.done:  ; preds b3
+  v18 = const 0
+  store *v6 = v18
+  v19 = array []
+  store *v7 = v19
+  v20 = load *v5
+  v21 = closure f9 [v4, v3, v6, v7, v5]   ; AllocationsDAO.getByUserIdAndThreshold.<anon@88:55>.<anon@95:34>
+  v22 = call v20.forEach(v21) this=v20
+  return undefined
+
+func f9 AllocationsDAO.getByUserIdAndThreshold.<anon@88:55>.<anon@95:34>(alloc) arrow in f8
+b1.entry:
+  v1 = param alloc
+  v2 = free userDAO (cell)
+  v3 = free callback (cell)
+  v4 = free doneCounter (cell)
+  v5 = free userAllocations (cell)
+  v6 = free allocations (cell)
+  v7 = cell alloc
+  store *v7 = v1
+  v8 = load *v2
+  v9 = load *v7
+  v10 = load v9.userId
+  v11 = closure f10 [v3, v7, v4, v5, v6]  ; AllocationsDAO.getByUserIdAndThreshold.<anon@88:55>.<anon@95:34>.<anon@96:51>
+  v12 = call v8.getUserById(v10, v11) this=v8
+  return undefined
+
+func f10 AllocationsDAO.getByUserIdAndThreshold.<anon@88:55>.<anon@95:34>.<anon@96:51>(err, user) arrow in f9
+b1.entry:
+  v1 = param err
+  v2 = param user
+  v3 = free callback (cell)
+  v4 = free alloc (cell)
+  v5 = free doneCounter (cell)
+  v6 = free userAllocations (cell)
+  v7 = free allocations (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v8 = load *v3
+  v9 = const null
+  v10 = call v8(v1, v9)
+  return v10
+b3.if.done:  ; preds b1
+  v11 = load *v4
+  v12 = load v2.userName
+  store v11.userName = v12
+  v13 = load *v4
+  v14 = load v2.firstName
+  store v13.firstName = v14
+  v15 = load *v4
+  v16 = load v2.lastName
+  store v15.lastName = v16
+  v17 = load *v5
+  v18 = const 1
+  v19 = binop + v17 v18
+  store *v5 = v19
+  v20 = load *v6
+  v21 = load *v4
+  v22 = call v20.push(v21) this=v20
+  v23 = load *v5
+  v24 = load *v7
+  v25 = load v24.length
+  v26 = binop === v23 v25
+  branch v26 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v27 = load *v3
+  v28 = const null
+  v29 = load *v6
+  v30 = call v27(v28, v29)
+  jump b5.if.done
+b5.if.done:  ; preds b3 b4
+  return undefined

@@ -1,0 +1,153 @@
+module express--lib-express.js
+  import default as bodyParser from "body-parser" (require)
+  import default from "node:events" (require)
+  import default as mixin from "merge-descriptors" (require)
+  import default as proto from "./application" (require)
+  import default as Router from "router" (require)
+  import default as req from "./request" (require)
+  import default as res from "./response" (require)
+  import default from "serve-static" (require)
+  export default = v27 (commonjs)
+  export application = v29 (commonjs)
+  export request = v31 (commonjs)
+  export response = v33 (commonjs)
+  export Route = v36 (commonjs)
+  export Router = v38 (commonjs)
+  export json = v41 (commonjs)
+  export raw = v44 (commonjs)
+  export static = v48 (commonjs)
+  export text = v51 (commonjs)
+  export urlencoded = v54 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; createApplication
+  store global createApplication = v2
+  v3 = const "use strict"
+  v4 = load global require
+  v5 = const "body-parser"
+  v6 = call v4(v5)                        ; require
+  store global bodyParser = v6
+  v7 = load global require
+  v8 = const "node:events"
+  v9 = call v7(v8)                        ; require
+  v10 = load v9.EventEmitter
+  store global EventEmitter = v10
+  v11 = load global require
+  v12 = const "merge-descriptors"
+  v13 = call v11(v12)                     ; require
+  store global mixin = v13
+  v14 = load global require
+  v15 = const "./application"
+  v16 = call v14(v15)                     ; require
+  store global proto = v16
+  v17 = load global require
+  v18 = const "router"
+  v19 = call v17(v18)                     ; require
+  store global Router = v19
+  v20 = load global require
+  v21 = const "./request"
+  v22 = call v20(v21)                     ; require
+  store global req = v22
+  v23 = load global require
+  v24 = const "./response"
+  v25 = call v23(v24)                     ; require
+  store global res = v25
+  v26 = load global module
+  v27 = load global createApplication
+  store v26.exports = v27
+  store global exports = v27
+  v28 = load global exports
+  v29 = load global proto
+  store v28.application = v29
+  v30 = load global exports
+  v31 = load global req
+  store v30.request = v31
+  v32 = load global exports
+  v33 = load global res
+  store v32.response = v33
+  v34 = load global exports
+  v35 = load global Router
+  v36 = load v35.Route
+  store v34.Route = v36
+  v37 = load global exports
+  v38 = load global Router
+  store v37.Router = v38
+  v39 = load global exports
+  v40 = load global bodyParser
+  v41 = load v40.json
+  store v39.json = v41
+  v42 = load global exports
+  v43 = load global bodyParser
+  v44 = load v43.raw
+  store v42.raw = v44
+  v45 = load global exports
+  v46 = load global require
+  v47 = const "serve-static"
+  v48 = call v46(v47)                     ; require
+  store v45.static = v48
+  v49 = load global exports
+  v50 = load global bodyParser
+  v51 = load v50.text
+  store v49.text = v51
+  v52 = load global exports
+  v53 = load global bodyParser
+  v54 = load v53.urlencoded
+  store v52.urlencoded = v54
+  return undefined
+
+func f2 createApplication() function in f1
+b1.entry:
+  v1 = this
+  v2 = cell app
+  v3 = closure f3 [v2]                    ; createApplication.app
+  store *v2 = v3
+  v4 = load global mixin
+  v5 = load *v2
+  v6 = load global EventEmitter
+  v7 = load v6.prototype
+  v8 = const false
+  v9 = call v4(v5, v7, v8)
+  v10 = load global mixin
+  v11 = load *v2
+  v12 = load global proto
+  v13 = const false
+  v14 = call v10(v11, v12, v13)
+  v15 = load *v2
+  v16 = load global Object
+  v17 = load global req
+  v18 = const true
+  v19 = const true
+  v20 = const true
+  v21 = load *v2
+  v22 = object {configurable: v18, enumerable: v19, writable: v20, value: v21}
+  v23 = object {app: v22}
+  v24 = call v16.create(v17, v23) this=v16
+  store v15.request = v24
+  v25 = load *v2
+  v26 = load global Object
+  v27 = load global res
+  v28 = const true
+  v29 = const true
+  v30 = const true
+  v31 = load *v2
+  v32 = object {configurable: v28, enumerable: v29, writable: v30, value: v31}
+  v33 = object {app: v32}
+  v34 = call v26.create(v27, v33) this=v26
+  store v25.response = v34
+  v35 = load *v2
+  v36 = call v35.init() this=v35
+  v37 = load *v2
+  return v37
+
+func f3 createApplication.app(req, res, next) function in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = this
+  v5 = free app (cell)
+  v6 = load *v5
+  v7 = call v6.handle(v1, v2, v3) this=v6
+  return undefined

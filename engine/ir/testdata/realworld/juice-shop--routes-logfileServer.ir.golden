@@ -1,0 +1,47 @@
+module juice-shop--routes-logfileServer.ts
+  import default as path from "node:path"
+  import Request from "express" (type)
+  import Response from "express" (type)
+  import NextFunction from "express" (type)
+  export serveLogFiles = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; serveLogFiles
+  store global serveLogFiles = v2
+  return undefined
+
+func f2 serveLogFiles() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; serveLogFiles.<anon@12:10>
+  return v2
+
+func f3 serveLogFiles.<anon@12:10>(v1, res, next) arrow in f2
+b1.entry:
+  v1 = param
+  v2 = param res
+  v3 = param next
+  v4 = load v1.params
+  v5 = load v4.file
+  v6 = const "/"
+  v7 = call v5.includes(v6) this=v5
+  v8 = unop ! v7
+  branch v8 b2.if.then b3.if.else
+b2.if.then:  ; preds b1
+  v9 = load global path
+  v10 = const "logs/"
+  v11 = call v9.resolve(v10, v5) this=v9
+  v12 = call v2.sendFile(v11) this=v2
+  jump b4.if.done
+b3.if.else:  ; preds b1
+  v13 = const 403
+  v14 = call v2.status(v13) this=v2
+  v15 = load global Error
+  v16 = const "File names cannot contain forward slashes!"
+  v17 = new v15(v16)
+  v18 = call v3(v17)
+  jump b4.if.done
+b4.if.done:  ; preds b2 b3
+  return undefined

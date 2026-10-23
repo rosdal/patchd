@@ -1,0 +1,56 @@
+module execa--lib-pipe-abort.js
+  import aborted from "node:util"
+  import createNonCommandError from "./throw.js"
+  import unpipeSubprocessStream from "./streaming.js"
+  export unpipeOnAbort = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; unpipeOnAbort
+  store global unpipeOnAbort = v2
+  v3 = closure f3 []                      ; unpipeOnSignalAbort
+  store global unpipeOnSignalAbort = v3
+  return undefined
+
+func f2 unpipeOnAbort(unpipeSignal, unpipeContext) arrow in f1
+b1.entry:
+  v1 = param unpipeSignal
+  v2 = param unpipeContext
+  v3 = const undefined
+  v4 = binop === v1 v3
+  branch v4 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v5 = array []
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v6 = load global unpipeOnSignalAbort
+  v7 = call v6(v1, v2)
+  v8 = array [v7]
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v9 = phi [b2: v5, b3: v8]
+  return v9
+
+func f3 unpipeOnSignalAbort(unpipeSignal, v2) arrow async in f1
+b1.entry:
+  v1 = param unpipeSignal
+  v2 = param
+  v3 = load v2.sourceStream
+  v4 = load v2.mergedStream
+  v5 = load v2.fileDescriptors
+  v6 = load v2.sourceOptions
+  v7 = load v2.startTime
+  v8 = load global aborted
+  v9 = call v8(v1, v3)
+  v10 = await v9
+  v11 = load global unpipeSubprocessStream
+  v12 = call v11(v4, v3)
+  v13 = await v12
+  v14 = load global Error
+  v15 = const "Pipe canceled by `unpipeSignal` option."
+  v16 = new v14(v15)
+  v17 = load global createNonCommandError
+  v18 = object {error: v16, fileDescriptors: v5, sourceOptions: v6, startTime: v7}
+  v19 = call v17(v18)
+  throw v19

@@ -1,0 +1,107 @@
+module nodegoat--app-routes-research.js
+  import default from "../data/research-dao" (require)
+  import default as needle from "needle" (require)
+  import default from "../../config/config" (require)
+  export default = v15 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; ResearchHandler
+  store global ResearchHandler = v2
+  v3 = load global require
+  v4 = const "../data/research-dao"
+  v5 = call v3(v4)                        ; require
+  v6 = load v5.ResearchDAO
+  store global ResearchDAO = v6
+  v7 = load global require
+  v8 = const "needle"
+  v9 = call v7(v8)                        ; require
+  store global needle = v9
+  v10 = load global require
+  v11 = const "../../config/config"
+  v12 = call v10(v11)                     ; require
+  v13 = load v12.environmentalScripts
+  store global environmentalScripts = v13
+  v14 = load global module
+  v15 = load global ResearchHandler
+  store v14.exports = v15
+  return undefined
+
+func f2 ResearchHandler(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = const "use strict"
+  v4 = load global ResearchDAO
+  v5 = new v4(v1)
+  v6 = closure f3 []                      ; ResearchHandler.displayResearch
+  store v2.displayResearch = v6
+  return undefined
+
+func f3 ResearchHandler.displayResearch(req, res) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = cell res
+  store *v3 = v2
+  v4 = load v1.query
+  v5 = load v4.symbol
+  branch v5 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v6 = load v1.query
+  v7 = load v6.url
+  v8 = load v1.query
+  v9 = load v8.symbol
+  v10 = binop + v7 v9
+  v11 = load global needle
+  v12 = closure f4 [v3]                   ; ResearchHandler.displayResearch.<anon@18:36>
+  v13 = call v11.get(v10, v12) this=v11
+  return v13
+b3.if.done:  ; preds b1
+  v14 = load *v3
+  v15 = const "research"
+  v16 = load global environmentalScripts
+  v17 = object {environmentalScripts: v16}
+  v18 = call v14.render(v15, v17) this=v14
+  return v18
+
+func f4 ResearchHandler.displayResearch.<anon@18:36>(error, newResponse, body) arrow in f3
+b1.entry:
+  v1 = param error
+  v2 = param newResponse
+  v3 = param body
+  v4 = free res (cell)
+  v5 = unop ! v1
+  branch v5 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v6 = load v2.statusCode
+  v7 = const 200
+  v8 = binop === v6 v7
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v9 = phi [b1: v5, b2: v8]
+  branch v9 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v10 = load *v4
+  v11 = const 200
+  v12 = const "text/html"
+  v13 = object {"Content-Type": v12}
+  v14 = call v10.writeHead(v11, v13) this=v10
+  jump b5.if.done
+b5.if.done:  ; preds b3 b4
+  v15 = load *v4
+  v16 = const "<h1>The following is the stock information you requested.</h1>\n\n"
+  v17 = call v15.write(v16) this=v15
+  v18 = load *v4
+  v19 = const "\n\n"
+  v20 = call v18.write(v19) this=v18
+  branch v3 b6.if.then b7.if.done
+b6.if.then:  ; preds b5
+  v21 = load *v4
+  v22 = call v21.write(v3) this=v21
+  jump b7.if.done
+b7.if.done:  ; preds b5 b6
+  v23 = load *v4
+  v24 = call v23.end() this=v23
+  return v24

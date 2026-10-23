@@ -344,6 +344,10 @@ func key(name string) string {
 	return "[" + strconv.Quote(name) + "]"
 }
 
+// noPrinter marks an op the printer has no case for; TestOps checks no op
+// prints it.
+const noPrinter = "<no printer> "
+
 // flagNote lists the flags of an instruction worth showing at the end of
 // its line.
 func flagNote(in *Instr, show AuxFlags) string {
@@ -459,7 +463,7 @@ func (p *printer) instr(in *Instr, blk *Block) {
 	case OpUnreachable:
 		text = "unreachable"
 	default:
-		text = res + in.Op.String()
+		text = res + noPrinter + in.Op.String()
 	}
 	if blk.Handler != NoBlock && in.Op.CanThrow() {
 		exc := "exceptional → " + p.blockName(blk.Handler)

@@ -1,0 +1,45 @@
+module execa--lib-arguments-command.js
+  import logCommand from "../verbose/start.js"
+  import getVerboseInfo from "../verbose/info.js"
+  import getStartTime from "../return/duration.js"
+  import joinCommand from "./escape.js"
+  import normalizeFdSpecificOption from "./specific.js"
+  export handleCommand = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; handleCommand
+  store global handleCommand = v2
+  return undefined
+
+func f2 handleCommand(filePath, rawArguments, rawOptions) arrow in f1
+b1.entry:
+  v1 = param filePath
+  v2 = param rawArguments
+  v3 = param rawOptions
+  v4 = load global getStartTime
+  v5 = call v4()
+  v6 = load global joinCommand
+  v7 = load v3.shell
+  branch v7 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v8 = load v3.node
+  v9 = unop ! v8
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v10 = phi [b1: v7, b2: v9]
+  v11 = call v6(v1, v2, v10)
+  v12 = load v11.command
+  v13 = load v11.escapedCommand
+  v14 = load global normalizeFdSpecificOption
+  v15 = const "verbose"
+  v16 = call v14(v3, v15)
+  v17 = load global getVerboseInfo
+  v18 = const null
+  v19 = object {[[Prototype]]: v18, ...v3}
+  v20 = call v17(v16, v13, v19)
+  v21 = load global logCommand
+  v22 = call v21(v13, v20)
+  v23 = object {command: v12, escapedCommand: v13, startTime: v5, verboseInfo: v20}
+  return v23

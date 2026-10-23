@@ -1,0 +1,25 @@
+module union-narrowing.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; union-narrowing.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (x: string | number) => string | number  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(x) function in f1  ; union-narrowing.ts:1:1  : (x: string | number) => string | number
+b1.entry:
+  v1 = param x                           : string | number
+  v2 = this
+  v3 = unop typeof v1                    : "bigint" | "boolean" | "function" | "number" | "object" | "string" | "symbol" | "undefined"
+  v4 = const "string"                    : "string"
+  v5 = binop === v3 v4                   : boolean
+  branch v5 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v6 = call v1.toUpperCase() this=v1     : string
+  return v6
+b3.if.done:  ; preds b1
+  v7 = const 1                           : 1
+  v8 = binop + v1 v7                     : number
+  return v8

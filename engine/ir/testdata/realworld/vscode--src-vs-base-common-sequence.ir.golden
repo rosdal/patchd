@@ -1,0 +1,55 @@
+module vscode--src-vs-base-common-sequence.ts
+  import Emitter from "./event.js"
+  import Event from "./event.js"
+  export Sequence = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Sequence.constructor class
+  store global Sequence = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Sequence.splice
+  store v3.splice = v4                    ; method
+  return undefined
+
+func f2 Sequence.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Sequence.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Sequence.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = array []
+  store v1.elements = v2
+  v3 = load global Emitter
+  v4 = new v3()
+  store v1._onDidSplice = v4
+  v5 = load v1._onDidSplice
+  v6 = load v5.event
+  store v1.onDidSplice = v6
+  return undefined
+
+func f4 Sequence.splice(start, deleteCount, toInsert) method in f1
+b1.entry:
+  v1 = param start
+  v2 = param deleteCount
+  v3 = param toInsert
+  v4 = this
+  v5 = binop === v3 undefined
+  branch v5 b2.default b3.default.done
+b2.default:  ; preds b1
+  v6 = array []
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v7 = phi [b1: v3, b2: v6]
+  v8 = load v4.elements
+  v9 = spread v7
+  v10 = call v8.splice(v1, v2, ...v9) this=v8
+  v11 = load v4._onDidSplice
+  v12 = object {start: v1, deleteCount: v2, toInsert: v7}
+  v13 = call v11.fire(v12) this=v11
+  return undefined

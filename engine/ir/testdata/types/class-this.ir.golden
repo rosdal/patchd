@@ -1,0 +1,27 @@
+module class-this.ts
+  export User = v2 (declaration)
+
+func f1 <module>() module  ; class-this.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; User.constructor class
+  store global User = v2
+  v3 = load v2.prototype
+  v4 = closure f3 []                     : () => string  ; User.greet
+  store v3.greet = v4                     ; method
+  return undefined
+
+func f2 User.constructor(name) constructor in f1  ; class-this.ts:2:3  : any
+b1.entry:
+  v1 = param name                        : string
+  v2 = this                              : User
+  store v2.name = v1
+  return undefined
+
+func f3 User.greet() method in f1  ; class-this.ts:3:3  : () => string
+b1.entry:
+  v1 = this                              : User
+  v2 = const "hi "                       : "hi "
+  v3 = load v1.name                      : string
+  v4 = binop + v2 v3                     : string
+  return v4

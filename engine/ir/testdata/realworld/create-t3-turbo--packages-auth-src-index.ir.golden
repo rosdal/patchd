@@ -1,0 +1,68 @@
+module create-t3-turbo--packages-auth-src-index.ts
+  import BetterAuthOptions from "better-auth" (type)
+  import BetterAuthPlugin from "better-auth" (type)
+  import expo from "@better-auth/expo"
+  import betterAuth from "better-auth"
+  import drizzleAdapter from "better-auth/adapters/drizzle"
+  import oAuthProxy from "better-auth/plugins"
+  import db from "@acme/db/client"
+  export initAuth = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; initAuth
+  store global initAuth = v2
+  return undefined
+
+func f2 initAuth(options) function in f1
+b1.entry:
+  v1 = param options
+  v2 = this
+  v3 = load global drizzleAdapter
+  v4 = load global db
+  v5 = const "pg"
+  v6 = object {provider: v5}
+  v7 = call v3(v4, v6)
+  v8 = load v1.baseUrl
+  v9 = load v1.secret
+  v10 = load global oAuthProxy
+  v11 = load v1.productionUrl
+  v12 = object {productionURL: v11}
+  v13 = call v10(v12)
+  v14 = load global expo
+  v15 = call v14()
+  v16 = load v1.extraPlugins
+  v17 = binop == v16 undefined
+  branch v17 b2.nullish.rhs b3.nullish.done
+b2.nullish.rhs:  ; preds b1
+  v18 = array []
+  jump b3.nullish.done
+b3.nullish.done:  ; preds b1 b2
+  v19 = phi [b1: v16, b2: v18]
+  v20 = spread v19
+  v21 = array [v13, v15, ...v20]
+  v22 = load v1.discordClientId
+  v23 = load v1.discordClientSecret
+  v24 = load v1.productionUrl
+  v25 = template [v24, "/api/auth/callback/discord"]
+  v26 = object {clientId: v22, clientSecret: v23, redirectURI: v25}
+  v27 = object {discord: v26}
+  v28 = const "expo://"
+  v29 = array [v28]
+  v30 = closure f3 []                     ; initAuth.config.onAPIError.onError
+  v31 = object {onError(): v30}
+  v32 = object {database: v7, baseURL: v8, secret: v9, plugins: v21, socialProviders: v27, trustedOrigins: v29, onAPIError: v31}
+  v33 = load global betterAuth
+  v34 = call v33(v32)
+  return v34
+
+func f3 initAuth.config.onAPIError.onError(error, ctx) method in f2
+b1.entry:
+  v1 = param error
+  v2 = param ctx
+  v3 = this
+  v4 = load global console
+  v5 = const "BETTER AUTH API ERROR"
+  v6 = call v4.error(v5, v1, v2) this=v4
+  return undefined

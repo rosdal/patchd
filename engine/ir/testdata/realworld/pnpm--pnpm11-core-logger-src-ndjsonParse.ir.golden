@@ -1,0 +1,71 @@
+module pnpm--pnpm11-core-logger-src-ndjsonParse.ts
+  import Transform from "node:stream" (type)
+  import default as split from "split2"
+  export parse = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; parse
+  store global parse = v2
+  v3 = const true
+  v4 = object {strict: v3}
+  store global opts = v4
+  return undefined
+
+func f2 parse() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; parse.parseRow
+  v3 = load global split
+  v4 = load global opts
+  v5 = call v3(v2, v4)
+  return v5
+
+func f3 parse.parseRow(row) function in f2
+b1.entry:
+  v1 = param row
+  v2 = this
+  jump b2.try
+b2.try:  ; preds b1
+  branch v1 b3.if.then b6.if.done
+b3.if.then:  ; preds b2
+  v3 = load global JSON                   ; exceptional → b7.catch
+  jump b4.if.then
+b4.if.then:  ; preds b3
+  v4 = call v3.parse(v1) this=v3          ; exceptional → b7.catch
+  jump b5.if.then
+b5.if.then:  ; preds b4
+  return v4
+b6.if.done:  ; preds b2
+  jump b13.try.done
+b7.catch:  ; preds b3 b4
+  v5 = catchval
+  v6 = load global opts
+  v7 = load v6.strict
+  branch v7 b8.if.then b12.if.done
+b8.if.then:  ; preds b7
+  v8 = const "error"
+  v9 = load global Error
+  v10 = load v1.length
+  v11 = const 50
+  v12 = binop > v10 v11
+  branch v12 b9.cond.true b10.cond.false
+b9.cond.true:  ; preds b8
+  v13 = const 0
+  v14 = const 50
+  v15 = call v1.slice(v13, v14) this=v1
+  v16 = template [v15, "..."]
+  jump b11.cond.done
+b10.cond.false:  ; preds b8
+  jump b11.cond.done
+b11.cond.done:  ; preds b9 b10
+  v17 = phi [b9: v16, b10: v1]
+  v18 = template ["Could not parse row \"", v17, "\""]
+  v19 = new v9(v18)
+  v20 = call v2.emit(v8, v19) this=v2
+  jump b12.if.done
+b12.if.done:  ; preds b7 b11
+  jump b13.try.done
+b13.try.done:  ; preds b6 b12
+  return undefined

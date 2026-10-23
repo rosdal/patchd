@@ -1,0 +1,119 @@
+module juice-shop--routes-redirect.ts
+  import Request from "express" (type)
+  import Response from "express" (type)
+  import NextFunction from "express" (type)
+  import * as challengeUtils from "../lib/challengeUtils"
+  import challenges from "../data/datacache"
+  import * as security from "../lib/insecurity"
+  export performRedirect = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; performRedirect
+  store global performRedirect = v2
+  v3 = closure f6 []                      ; isUnintendedRedirect
+  store global isUnintendedRedirect = v3
+  return undefined
+
+func f2 performRedirect() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; performRedirect.<anon@15:10>
+  return v2
+
+func f3 performRedirect.<anon@15:10>(v1, res, next) arrow in f2
+b1.entry:
+  v1 = param
+  v2 = param res
+  v3 = param next
+  v4 = load v1.query
+  v5 = cell toUrl
+  v6 = load v4.to
+  store *v5 = v6
+  v7 = load global security
+  v8 = load *v5
+  v9 = call v7.isRedirectAllowed(v8) this=v7
+  branch v9 b2.if.then b3.if.else
+b2.if.then:  ; preds b1
+  v10 = load global challengeUtils
+  v11 = load global challenges
+  v12 = load v11.redirectCryptoCurrencyChallenge
+  v13 = closure f4 [v5]                   ; performRedirect.<anon@15:10>.<anon@18:74>
+  v14 = call v10.solveIf(v12, v13) this=v10
+  v15 = load global challengeUtils
+  v16 = load global challenges
+  v17 = load v16.redirectChallenge
+  v18 = closure f5 [v5]                   ; performRedirect.<anon@15:10>.<anon@19:60>
+  v19 = call v15.solveIf(v17, v18) this=v15
+  v20 = load *v5
+  v21 = call v2.redirect(v20) this=v2
+  jump b4.if.done
+b3.if.else:  ; preds b1
+  v22 = const 406
+  v23 = call v2.status(v22) this=v2
+  v24 = load global Error
+  v25 = const "Unrecognized target URL for redirect: "
+  v26 = load *v5
+  v27 = binop + v25 v26
+  v28 = new v24(v27)
+  v29 = call v3(v28)
+  jump b4.if.done
+b4.if.done:  ; preds b2 b3
+  return undefined
+
+func f4 performRedirect.<anon@15:10>.<anon@18:74>() arrow in f3
+b1.entry:
+  v1 = free toUrl (cell)
+  v2 = load *v1
+  v3 = const "https://explorer.dash.org/address/Xr556RzuwX6hg5EGpkybbv5RanJoZN17kW"
+  v4 = binop === v2 v3
+  branch v4 b3.or.done b2.or.rhs
+b2.or.rhs:  ; preds b1
+  v5 = load *v1
+  v6 = const "https://blockchain.info/address/1AbKfgvw9psQ41NbLi8kufDQTezwG8DRZm"
+  v7 = binop === v5 v6
+  jump b3.or.done
+b3.or.done:  ; preds b1 b2
+  v8 = phi [b1: v4, b2: v7]
+  branch v8 b5.or.done b4.or.rhs
+b4.or.rhs:  ; preds b3
+  v9 = load *v1
+  v10 = const "https://etherscan.io/address/0x0f933ab9fcaaa782d0279c300d73750e1311eae6"
+  v11 = binop === v9 v10
+  jump b5.or.done
+b5.or.done:  ; preds b3 b4
+  v12 = phi [b3: v8, b4: v11]
+  return v12
+
+func f5 performRedirect.<anon@15:10>.<anon@19:60>() arrow in f3
+b1.entry:
+  v1 = free toUrl (cell)
+  v2 = load global isUnintendedRedirect
+  v3 = load *v1
+  v4 = call v2(v3)
+  return v4
+
+func f6 isUnintendedRedirect(toUrl) function in f1
+b1.entry:
+  v1 = param toUrl
+  v2 = this
+  v3 = const true
+  v4 = load global security
+  v5 = load v4.redirectAllowlist
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b5
+  v6 = phi [b1: v3, b5: v10]
+  branch * b3.forof.body b6.forof.done
+b3.forof.body:  ; preds b2
+  v7 = load v5[of]
+  branch v6 b4.and.rhs b5.and.done
+b4.and.rhs:  ; preds b3
+  v8 = call v1.startsWith(v7) this=v1
+  v9 = unop ! v8
+  jump b5.and.done
+b5.and.done:  ; preds b3 b4
+  v10 = phi [b3: v6, b4: v9]
+  jump b2.forof.head
+b6.forof.done:  ; preds b2
+  return v6

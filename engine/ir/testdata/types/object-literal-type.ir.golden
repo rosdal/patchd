@@ -1,0 +1,12 @@
+module object-literal-type.ts
+  export cfg = v5 (declaration)
+
+func f1 <module>() module  ; object-literal-type.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = const 8080                        : 8080
+  v3 = const "localhost"                 : "localhost"
+  v4 = const false                       : false
+  v5 = object {port: v2, host: v3, tls: v4} : { port: number; host: string; tls: boolean; }
+  store global cfg = v5
+  return undefined

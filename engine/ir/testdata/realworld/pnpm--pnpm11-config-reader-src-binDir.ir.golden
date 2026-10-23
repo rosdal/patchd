@@ -1,0 +1,42 @@
+module pnpm--pnpm11-config-reader-src-binDir.ts
+  import default as path from "node:path"
+  import pathAbsolute from "path-absolute"
+  export binDirOf = v2 (declaration)
+  export modulesDirOf = v3 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; binDirOf
+  store global binDirOf = v2
+  v3 = closure f3 []                      ; modulesDirOf
+  store global modulesDirOf = v3
+  return undefined
+
+func f2 binDirOf(projectDir, modulesDir) function in f1
+b1.entry:
+  v1 = param projectDir
+  v2 = param modulesDir
+  v3 = this
+  v4 = load global path
+  v5 = load global modulesDirOf
+  v6 = call v5(v1, v2)
+  v7 = const ".bin"
+  v8 = call v4.join(v6, v7) this=v4
+  return v8
+
+func f3 modulesDirOf(projectDir, modulesDir) function in f1
+b1.entry:
+  v1 = param projectDir
+  v2 = param modulesDir
+  v3 = this
+  v4 = load global pathAbsolute
+  v5 = binop == v2 undefined
+  branch v5 b2.nullish.rhs b3.nullish.done
+b2.nullish.rhs:  ; preds b1
+  v6 = const "node_modules"
+  jump b3.nullish.done
+b3.nullish.done:  ; preds b1 b2
+  v7 = phi [b1: v2, b2: v6]
+  v8 = call v4(v7, v1)
+  return v8

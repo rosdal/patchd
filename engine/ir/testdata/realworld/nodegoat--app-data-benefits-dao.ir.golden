@@ -1,0 +1,106 @@
+module nodegoat--app-data-benefits-dao.js
+  export default = v5 (commonjs)
+  export BenefitsDAO = v4 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; BenefitsDAO
+  store global BenefitsDAO = v2
+  v3 = load global module
+  v4 = load global BenefitsDAO
+  v5 = object {BenefitsDAO: v4}
+  store v3.exports = v5
+  return undefined
+
+func f2 BenefitsDAO(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = cell usersCol
+  v4 = const "use strict"
+  v5 = const false
+  v6 = load global BenefitsDAO
+  v7 = binop instanceof v2 v6
+  v8 = binop === v5 v7
+  branch v8 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v9 = load global console
+  v10 = const "Warning: BenefitsDAO constructor called without 'new' operator"
+  v11 = call v9.log(v10) this=v9
+  v12 = load global BenefitsDAO
+  v13 = new v12(v1)
+  return v13
+b3.if.done:  ; preds b1
+  v14 = const "users"
+  v15 = call v1.collection(v14) this=v1
+  store *v3 = v15
+  v16 = closure f3 [v3]                   ; BenefitsDAO.getAllNonAdminUsers
+  store v2.getAllNonAdminUsers = v16
+  v17 = closure f5 [v3]                   ; BenefitsDAO.updateBenefits
+  store v2.updateBenefits = v17
+  return undefined
+
+func f3 BenefitsDAO.getAllNonAdminUsers(callback) arrow in f2
+b1.entry:
+  v1 = param callback
+  v2 = free usersCol (cell)
+  v3 = cell callback
+  store *v3 = v1
+  v4 = load *v2
+  v5 = const true
+  v6 = object {$ne: v5}
+  v7 = object {isAdmin: v6}
+  v8 = call v4.find(v7) this=v4
+  v9 = closure f4 [v3]                    ; BenefitsDAO.getAllNonAdminUsers.<anon@22:20>
+  v10 = call v8.toArray(v9) this=v8
+  return undefined
+
+func f4 BenefitsDAO.getAllNonAdminUsers.<anon@22:20>(err, users) arrow in f3
+b1.entry:
+  v1 = param err
+  v2 = param users
+  v3 = free callback (cell)
+  v4 = load *v3
+  v5 = const null
+  v6 = call v4(v5, v2)
+  return v6
+
+func f5 BenefitsDAO.updateBenefits(userId, startDate, callback) arrow in f2
+b1.entry:
+  v1 = param userId
+  v2 = param startDate
+  v3 = param callback
+  v4 = free usersCol (cell)
+  v5 = cell callback
+  store *v5 = v3
+  v6 = load *v4
+  v7 = load global parseInt
+  v8 = call v7(v1)
+  v9 = object {_id: v8}
+  v10 = object {benefitStartDate: v2}
+  v11 = object {$set: v10}
+  v12 = closure f6 [v5]                   ; BenefitsDAO.updateBenefits.<anon@33:13>
+  v13 = call v6.update(v9, v11, v12) this=v6
+  return undefined
+
+func f6 BenefitsDAO.updateBenefits.<anon@33:13>(err, result) arrow in f5
+b1.entry:
+  v1 = param err
+  v2 = param result
+  v3 = free callback (cell)
+  v4 = unop ! v1
+  branch v4 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v5 = load global console
+  v6 = const "Updated benefits"
+  v7 = call v5.log(v6) this=v5
+  v8 = load *v3
+  v9 = const null
+  v10 = call v8(v9, v2)
+  return v10
+b3.if.done:  ; preds b1
+  v11 = load *v3
+  v12 = const null
+  v13 = call v11(v1, v12)
+  return v13

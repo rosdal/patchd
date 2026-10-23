@@ -1,0 +1,28 @@
+module for-of-element.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; for-of-element.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (m: Map<string, Date>) => void  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(m) function in f1  ; for-of-element.ts:1:1  : (m: Map<string, Date>) => void
+b1.entry:
+  v1 = param m                           : Map<string, Date>
+  v2 = this
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b3
+  branch * b3.forof.body b4.forof.done
+b3.forof.body:  ; preds b2
+  v3 = load v1[of]                       : [string, Date]
+  v4 = spread v3
+  v5 = load v4[0]                        : string
+  v6 = load v4[1]                        : Date
+  v7 = load global console               : Console
+  v8 = call v6.getTime() this=v6         : number
+  v9 = call v7.log(v5, v8) this=v7       : void
+  jump b2.forof.head
+b4.forof.done:  ; preds b2
+  return undefined

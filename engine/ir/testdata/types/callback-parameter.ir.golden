@@ -1,0 +1,24 @@
+module callback-parameter.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; callback-parameter.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (xs: number[]) => number[]  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1  ; callback-parameter.ts:1:1  : (xs: number[]) => number[]
+b1.entry:
+  v1 = param xs                          : number[]
+  v2 = this
+  v3 = closure f3 []                     : (x: number) => number  ; f.<anon@2:17>
+  v4 = call v1.map(v3) this=v1           : number[]
+  return v4
+
+func f3 f.<anon@2:17>(x) arrow in f2  ; callback-parameter.ts:2:17  : (x: number) => number
+b1.entry:
+  v1 = param x                           : number
+  v2 = const 2                           : 2
+  v3 = binop * v1 v2                     : number
+  return v3

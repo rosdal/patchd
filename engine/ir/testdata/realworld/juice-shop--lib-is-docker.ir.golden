@@ -1,0 +1,118 @@
+module juice-shop--lib-is-docker.ts
+  import default as fs from "node:fs"
+  export default = isDocker = v5 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; hasDockerEnv
+  store global hasDockerEnv = v2
+  v3 = closure f3 []                      ; hasDockerCGroup
+  store global hasDockerCGroup = v3
+  v4 = closure f4 []                      ; hasDockerMountInfo
+  store global hasDockerMountInfo = v4
+  v5 = closure f5 []                      ; isDocker
+  store global isDocker = v5
+  store global isDockerCached = undefined
+  return undefined
+
+func f2 hasDockerEnv() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v2 = load global fs                     ; exceptional → b5.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v3 = const "/.dockerenv"
+  v4 = call v2.statSync(v3) this=v2       ; exceptional → b5.catch
+  jump b4.try
+b4.try:  ; preds b3
+  v5 = const true
+  return v5
+b5.catch:  ; preds b2 b3
+  v6 = catchval
+  v7 = const false
+  return v7
+b6.try.done:  ; unreachable
+  return undefined
+
+func f3 hasDockerCGroup() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v2 = load global fs                     ; exceptional → b6.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v3 = const "/proc/self/cgroup"
+  v4 = const "utf8"
+  v5 = call v2.readFileSync(v3, v4) this=v2  ; exceptional → b6.catch
+  jump b4.try
+b4.try:  ; preds b3
+  v6 = const "docker"
+  v7 = call v5.includes(v6) this=v5       ; exceptional → b6.catch
+  jump b5.try
+b5.try:  ; preds b4
+  return v7
+b6.catch:  ; preds b2 b3 b4
+  v8 = catchval
+  v9 = const false
+  return v9
+b7.try.done:  ; unreachable
+  return undefined
+
+func f4 hasDockerMountInfo() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v2 = load global fs                     ; exceptional → b6.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v3 = const "/proc/self/mountinfo"
+  v4 = const "utf8"
+  v5 = call v2.readFileSync(v3, v4) this=v2  ; exceptional → b6.catch
+  jump b4.try
+b4.try:  ; preds b3
+  v6 = const "/docker/containers/"
+  v7 = call v5.includes(v6) this=v5       ; exceptional → b6.catch
+  jump b5.try
+b5.try:  ; preds b4
+  return v7
+b6.catch:  ; preds b2 b3 b4
+  v8 = catchval
+  v9 = const false
+  return v9
+b7.try.done:  ; unreachable
+  return undefined
+
+func f5 isDocker() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global isDockerCached
+  v3 = binop == v2 undefined
+  branch v3 b2.nullish.rhs b7.nullish.done
+b2.nullish.rhs:  ; preds b1
+  v4 = load global hasDockerEnv
+  v5 = call v4()
+  branch v5 b4.or.done b3.or.rhs
+b3.or.rhs:  ; preds b2
+  v6 = load global hasDockerCGroup
+  v7 = call v6()
+  jump b4.or.done
+b4.or.done:  ; preds b2 b3
+  v8 = phi [b2: v5, b3: v7]
+  branch v8 b6.or.done b5.or.rhs
+b5.or.rhs:  ; preds b4
+  v9 = load global hasDockerMountInfo
+  v10 = call v9()
+  jump b6.or.done
+b6.or.done:  ; preds b4 b5
+  v11 = phi [b4: v8, b5: v10]
+  store global isDockerCached = v11
+  jump b7.nullish.done
+b7.nullish.done:  ; preds b1 b6
+  v12 = phi [b1: v2, b6: v11]
+  v13 = load global isDockerCached
+  return v13

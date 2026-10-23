@@ -1,0 +1,82 @@
+module vscode--src-vs-base-common-functional.ts
+  export createSingleCallFunction = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; createSingleCallFunction
+  store global createSingleCallFunction = v2
+  return undefined
+
+func f2 createSingleCallFunction(fn, fnDidRunCallback) function in f1
+b1.entry:
+  v1 = param fn
+  v2 = param fnDidRunCallback
+  v3 = this
+  v4 = cell fn
+  v5 = cell fnDidRunCallback
+  store *v4 = v1
+  store *v5 = v2
+  v6 = cell _this
+  v7 = cell didCall
+  v8 = cell result
+  store *v6 = v3
+  v9 = const false
+  store *v7 = v9
+  store *v8 = undefined
+  v10 = closure f3 [v7, v8, v5, v4, v6]   ; createSingleCallFunction.<anon@16:9>
+  return v10
+
+func f3 createSingleCallFunction.<anon@16:9>() function in f2
+b1.entry:
+  v1 = this
+  v2 = free didCall (cell)
+  v3 = free result (cell)
+  v4 = free fnDidRunCallback (cell)
+  v5 = free fn (cell)
+  v6 = free _this (cell)
+  v7 = arguments
+  v8 = load *v2
+  branch v8 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v9 = load *v3
+  return v9
+b3.if.done:  ; preds b1
+  v10 = const true
+  store *v2 = v10
+  v11 = load *v4
+  branch v11 b4.if.then b12.if.else
+b4.if.then:  ; preds b3
+  jump b5.try
+b5.try:  ; preds b4
+  v12 = load *v5                          ; exceptional → b10.finally.throw
+  jump b6.try
+b6.try:  ; preds b5
+  v13 = load *v6                          ; exceptional → b10.finally.throw
+  jump b7.try
+b7.try:  ; preds b6
+  v14 = call v12.apply(v13, v7) this=v12  ; exceptional → b10.finally.throw
+  jump b8.try
+b8.try:  ; preds b7
+  store *v3 = v14                         ; exceptional → b10.finally.throw
+  jump b9.try
+b9.try:  ; preds b8
+  v15 = load *v4
+  v16 = call v15()
+  jump b11.try.done
+b10.finally.throw:  ; preds b5 b6 b7 b8
+  v17 = catchval
+  v18 = load *v4
+  v19 = call v18()
+  throw v17
+b11.try.done:  ; preds b9
+  jump b13.if.done
+b12.if.else:  ; preds b3
+  v20 = load *v5
+  v21 = load *v6
+  v22 = call v20.apply(v21, v7) this=v20
+  store *v3 = v22
+  jump b13.if.done
+b13.if.done:  ; preds b11 b12
+  v23 = load *v3
+  return v23

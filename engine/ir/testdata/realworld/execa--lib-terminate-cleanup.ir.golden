@@ -1,0 +1,55 @@
+module execa--lib-terminate-cleanup.js
+  import addAbortListener from "node:events"
+  import onExit from "signal-exit"
+  export cleanupOnExit = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; cleanupOnExit
+  store global cleanupOnExit = v2
+  return undefined
+
+func f2 cleanupOnExit(kill, v2, v3) arrow in f1
+b1.entry:
+  v1 = param kill
+  v2 = param
+  v3 = param
+  v4 = cell kill
+  store *v4 = v1
+  v5 = load v2.cleanup
+  v6 = load v2.detached
+  v7 = load v3.signal
+  v8 = cell removeExitHandler
+  v9 = unop ! v5
+  branch v9 b3.or.done b2.or.rhs
+b2.or.rhs:  ; preds b1
+  jump b3.or.done
+b3.or.done:  ; preds b1 b2
+  v10 = phi [b1: v9, b2: v6]
+  branch v10 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  return undefined
+b5.if.done:  ; preds b3
+  v11 = load global onExit
+  v12 = closure f3 [v4]                   ; cleanupOnExit.<anon@12:35>
+  v13 = call v11(v12)
+  store *v8 = v13
+  v14 = load global addAbortListener
+  v15 = closure f4 [v8]                   ; cleanupOnExit.<anon@15:27>
+  v16 = call v14(v7, v15)
+  return undefined
+
+func f3 cleanupOnExit.<anon@12:35>() arrow in f2
+b1.entry:
+  v1 = free kill (cell)
+  v2 = load *v1
+  v3 = call v2()
+  return undefined
+
+func f4 cleanupOnExit.<anon@15:27>() arrow in f2
+b1.entry:
+  v1 = free removeExitHandler (cell)
+  v2 = load *v1
+  v3 = call v2()
+  return undefined

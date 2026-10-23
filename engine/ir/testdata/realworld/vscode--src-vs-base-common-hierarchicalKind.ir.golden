@@ -1,0 +1,112 @@
+module vscode--src-vs-base-common-hierarchicalKind.ts
+  export HierarchicalKind = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; HierarchicalKind.constructor class
+  store global HierarchicalKind = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; HierarchicalKind.equals
+  store v3.equals = v4                    ; method
+  v5 = closure f5 []                      ; HierarchicalKind.contains
+  store v3.contains = v5                  ; method
+  v6 = closure f6 []                      ; HierarchicalKind.intersects
+  store v3.intersects = v6                ; method
+  v7 = closure f7 []                      ; HierarchicalKind.append
+  store v3.append = v7                    ; method
+  v8 = closure f3 []                      ; HierarchicalKind.<static>
+  v9 = call v8() this=v2
+  return undefined
+
+func f2 HierarchicalKind.constructor(value) constructor in f1
+b1.entry:
+  v1 = param value
+  v2 = this
+  store v2.value = v1
+  return undefined
+
+func f3 HierarchicalKind.<static>() staticinit in f1
+b1.entry:
+  v1 = this
+  v2 = const "."
+  store v1.sep = v2
+  v3 = load global HierarchicalKind
+  v4 = const "@@none@@"
+  v5 = new v3(v4)
+  store v1.None = v5
+  v6 = load global HierarchicalKind
+  v7 = const ""
+  v8 = new v6(v7)
+  store v1.Empty = v8
+  return undefined
+
+func f4 HierarchicalKind.equals(other) method in f1
+b1.entry:
+  v1 = param other
+  v2 = this
+  v3 = load v2.value
+  v4 = load v1.value
+  v5 = binop === v3 v4
+  return v5
+
+func f5 HierarchicalKind.contains(other) method in f1
+b1.entry:
+  v1 = param other
+  v2 = this
+  v3 = call v2.equals(v1) this=v2
+  branch v3 b3.or.done b2.or.rhs
+b2.or.rhs:  ; preds b1
+  v4 = load v2.value
+  v5 = const ""
+  v6 = binop === v4 v5
+  jump b3.or.done
+b3.or.done:  ; preds b1 b2
+  v7 = phi [b1: v3, b2: v6]
+  branch v7 b5.or.done b4.or.rhs
+b4.or.rhs:  ; preds b3
+  v8 = load v1.value
+  v9 = load v2.value
+  v10 = load global HierarchicalKind
+  v11 = load v10.sep
+  v12 = binop + v9 v11
+  v13 = call v8.startsWith(v12) this=v8
+  jump b5.or.done
+b5.or.done:  ; preds b3 b4
+  v14 = phi [b3: v7, b4: v13]
+  return v14
+
+func f6 HierarchicalKind.intersects(other) method in f1
+b1.entry:
+  v1 = param other
+  v2 = this
+  v3 = call v2.contains(v1) this=v2
+  branch v3 b3.or.done b2.or.rhs
+b2.or.rhs:  ; preds b1
+  v4 = call v1.contains(v2) this=v1
+  jump b3.or.done
+b3.or.done:  ; preds b1 b2
+  v5 = phi [b1: v3, b2: v4]
+  return v5
+
+func f7 HierarchicalKind.append(...parts) method in f1
+b1.entry:
+  v1 = param parts
+  v2 = this
+  v3 = load global HierarchicalKind
+  v4 = load v2.value
+  branch v4 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v5 = load v2.value
+  v6 = spread v1
+  v7 = array [v5, ...v6]
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v8 = phi [b2: v7, b3: v1]
+  v9 = load global HierarchicalKind
+  v10 = load v9.sep
+  v11 = call v8.join(v10) this=v8
+  v12 = new v3(v11)
+  return v12

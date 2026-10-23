@@ -1,0 +1,49 @@
+module juice-shop--routes-appConfiguration.ts
+  import default as config from "config"
+  import Request from "express" (type)
+  import Response from "express" (type)
+  export retrieveAppConfiguration = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; retrieveAppConfiguration
+  store global retrieveAppConfiguration = v2
+  return undefined
+
+func f2 retrieveAppConfiguration() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; retrieveAppConfiguration.<anon@12:10>
+  return v2
+
+func f3 retrieveAppConfiguration.<anon@12:10>(_req, res) arrow in f2
+b1.entry:
+  v1 = param _req
+  v2 = param res
+  v3 = load global structuredClone
+  v4 = load global config
+  v5 = load v4.util
+  v6 = load global config
+  v7 = call v5.toObject(v6) this=v5
+  v8 = call v3(v7)
+  v9 = load v8.application
+  v10 = binop == v9 undefined
+  branch v10 b3.opt.short b2.opt.cont
+b2.opt.cont:  ; preds b1
+  v11 = load v9.chatBot
+  jump b4.opt.done
+b3.opt.short:  ; preds b1
+  jump b4.opt.done
+b4.opt.done:  ; preds b2 b3
+  v12 = phi [b2: v11, b3: undefined]
+  branch v12 b5.if.then b6.if.done
+b5.if.then:  ; preds b4
+  v13 = load v8.application
+  v14 = load v13.chatBot
+  v15 = delete v14.llmApiUrl
+  jump b6.if.done
+b6.if.done:  ; preds b4 b5
+  v16 = object {config: v8}
+  v17 = call v2.json(v16) this=v2
+  return undefined

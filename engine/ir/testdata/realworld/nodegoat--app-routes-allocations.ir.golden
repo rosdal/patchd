@@ -1,0 +1,80 @@
+module nodegoat--app-routes-allocations.js
+  import default from "../data/allocations-dao" (require)
+  import default from "../../config/config" (require)
+  export default = v12 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; AllocationsHandler
+  store global AllocationsHandler = v2
+  v3 = load global require
+  v4 = const "../data/allocations-dao"
+  v5 = call v3(v4)                        ; require
+  v6 = load v5.AllocationsDAO
+  store global AllocationsDAO = v6
+  v7 = load global require
+  v8 = const "../../config/config"
+  v9 = call v7(v8)                        ; require
+  v10 = load v9.environmentalScripts
+  store global environmentalScripts = v10
+  v11 = load global module
+  v12 = load global AllocationsHandler
+  store v11.exports = v12
+  return undefined
+
+func f2 AllocationsHandler(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = cell allocationsDAO
+  v4 = const "use strict"
+  v5 = load global AllocationsDAO
+  v6 = new v5(v1)
+  store *v3 = v6
+  v7 = closure f3 [v3]                    ; AllocationsHandler.displayAllocations
+  store v2.displayAllocations = v7
+  return undefined
+
+func f3 AllocationsHandler.displayAllocations(req, res, next) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = free allocationsDAO (cell)
+  v5 = cell res
+  v6 = cell next
+  store *v5 = v2
+  store *v6 = v3
+  v7 = cell userId
+  v8 = load v1.params
+  v9 = load v8.userId
+  store *v7 = v9
+  v10 = load v1.query
+  v11 = load v10.threshold
+  v12 = load *v4
+  v13 = load *v7
+  v14 = closure f4 [v6, v5, v7]           ; AllocationsHandler.displayAllocations.<anon@25:67>
+  v15 = call v12.getByUserIdAndThreshold(v13, v11, v14) this=v12
+  return undefined
+
+func f4 AllocationsHandler.displayAllocations.<anon@25:67>(err, allocations) arrow in f3
+b1.entry:
+  v1 = param err
+  v2 = param allocations
+  v3 = free next (cell)
+  v4 = free res (cell)
+  v5 = free userId (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v6 = load *v3
+  v7 = call v6(v1)
+  return v7
+b3.if.done:  ; preds b1
+  v8 = load *v4
+  v9 = const "allocations"
+  v10 = load *v5
+  v11 = load global environmentalScripts
+  v12 = object {userId: v10, allocations: v2, environmentalScripts: v11}
+  v13 = call v8.render(v9, v12) this=v8
+  return v13

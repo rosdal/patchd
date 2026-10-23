@@ -1,0 +1,46 @@
+module execa--lib-verbose-complete.js
+  import default as prettyMs from "pretty-ms"
+  import isVerbose from "./values.js"
+  import verboseLog from "./log.js"
+  import logError from "./error.js"
+  export logResult = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; logResult
+  store global logResult = v2
+  v3 = closure f3 []                      ; logDuration
+  store global logDuration = v3
+  return undefined
+
+func f2 logResult(result, verboseInfo) arrow in f1
+b1.entry:
+  v1 = param result
+  v2 = param verboseInfo
+  v3 = load global isVerbose
+  v4 = call v3(v2)
+  v5 = unop ! v4
+  branch v5 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  return undefined
+b3.if.done:  ; preds b1
+  v6 = load global logError
+  v7 = call v6(v1, v2)
+  v8 = load global logDuration
+  v9 = call v8(v1, v2)
+  return undefined
+
+func f3 logDuration(result, verboseInfo) arrow in f1
+b1.entry:
+  v1 = param result
+  v2 = param verboseInfo
+  v3 = load global prettyMs
+  v4 = load v1.durationMs
+  v5 = call v3(v4)
+  v6 = template ["(done in ", v5, ")"]
+  v7 = load global verboseLog
+  v8 = const "duration"
+  v9 = object {type: v8, verboseMessage: v6, verboseInfo: v2, result: v1}
+  v10 = call v7(v9)
+  return undefined
