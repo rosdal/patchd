@@ -147,3 +147,22 @@ app.get("/n27", (req, res) => {
   exec("echo " + ids.length); // expect-none
   res.end();
 });
+
+// A local validation helper (v0.4 leaves repo functions to v0.5 summaries).
+function onlyHost(h: string): string {
+  return /^[a-z0-9.-]+$/i.test(h) ? h : "localhost";
+}
+
+app.get("/n28", (req, res) => {
+  exec("ping -c 1 " + onlyHost(String(req.query.host))); // expect-none
+  res.end();
+});
+
+// An allowlist map: the key only chooses among trusted commands.
+const COMMANDS: Record<string, string> = { disk: "df -h", load: "uptime" };
+
+app.get("/n29", (req, res) => {
+  const cmd = COMMANDS[String(req.query.op)];
+  if (cmd) exec(cmd); // expect-none
+  res.end();
+});

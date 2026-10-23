@@ -1,0 +1,104 @@
+# v0.4 triage: every finding on the reference repos and every finding on the
+# vulnerable targets that their expected list doesn't name. Lines are the sink
+# call at the pinned commit. pnpm eval:targets fails on any finding missing
+# here. Causes and decisions are summarised in docs/engine/rules/*.md.
+#
+# verdict: true-positive | false-positive | unclear
+# decision: fixed (the finding is gone; a negative fixture keeps it gone),
+#           defer <version>, or accept (documented as a known limitation)
+version: v0.4
+entries:
+  # OWASP Juice Shop (deliberately vulnerable; scored apart from real code)
+  - repo: juice-shop
+    rule: ts/path-traversal
+    file: routes/vulnCodeFixes.ts
+    line: 82
+    verdict: false-positive
+    cause: validation by lookup
+    decision: defer v0.5
+    note: readFixes(key) returns no fixes for an unknown key and the handler answers 404 first; the check is in another function and a branch.
+  - repo: juice-shop
+    rule: ts/path-traversal
+    file: routes/vulnCodeFixes.ts
+    line: 83
+    verdict: false-positive
+    cause: validation by lookup
+    decision: defer v0.5
+    note: Same handler as line 82.
+  - repo: juice-shop
+    rule: ts/path-traversal
+    file: routes/vulnCodeSnippet.ts
+    line: 89
+    verdict: false-positive
+    cause: validation by lookup
+    decision: defer v0.5
+    note: retrieveCodeSnippet(key) returns null for keys outside the known challenges and the handler returns 404 first.
+  - repo: juice-shop
+    rule: ts/path-traversal
+    file: routes/vulnCodeSnippet.ts
+    line: 90
+    verdict: false-positive
+    cause: validation by lookup
+    decision: defer v0.5
+    note: Same handler as line 89.
+  - repo: juice-shop
+    rule: ts/path-traversal
+    file: server.ts
+    line: 277
+    verdict: false-positive
+    cause: startsWith check after path.resolve
+    decision: defer v0.5
+    note: The resolved path is checked with startsWith(path.resolve('infrastructure')) and the handler returns 403 otherwise; needs path sensitivity.
+  - repo: juice-shop
+    rule: ts/path-traversal
+    file: routes/profileImageUrlUpload.ts
+    line: 29
+    verdict: false-positive
+    cause: allowlist check
+    decision: defer v0.5
+    note: The extension comes from the URL only when ['jpg', …].includes(it); the ternary's tainted arm is guarded by the allowlist.
+
+  # Reference repos (real code)
+  - repo: vscode
+    rule: ts/path-traversal
+    file: scripts/code-sessions-web.js
+    line: 61
+    verdict: false-positive
+    cause: URL normalisation
+    decision: accept
+    note: path.join(APP_ROOT, new URL(req.url).pathname); the URL parser removes dot segments, so the path stays under APP_ROOT. Modelling pathname as a sanitizer would miss decodeURIComponent(url.pathname), which is unsafe. A local dev server.
+  - repo: vscode
+    rule: ts/path-traversal
+    file: scripts/code-sessions-web.js
+    line: 80
+    verdict: false-positive
+    cause: URL normalisation
+    decision: accept
+    note: Same server as line 61.
+  - repo: vscode
+    rule: ts/path-traversal
+    file: src/vs/platform/localTranscription/test/node/foundryLocalRuntime.test.ts
+    line: 213
+    verdict: false-positive
+    cause: dynamic-key lookup in a trusted object
+    decision: fixed
+    fixed: true
+    note: files[name] picks a path from a test's own table. A tainted key no longer taints a load from an untainted object; negative fixture path-traversal/negative/safe.ts /n27.
+  - repo: vscode
+    rule: ts/path-traversal
+    file: src/vs/platform/localTranscription/test/node/foundryLocalRuntime.test.ts
+    line: 219
+    verdict: false-positive
+    cause: dynamic-key lookup in a trusted object
+    decision: fixed
+    fixed: true
+    note: Same test as line 213.
+  - repo: pnpm
+    rule: ts/path-traversal
+    file: pnpm/tasks/ecosystem-e2e/webcontainer/run.mjs
+    line: 273
+    verdict: false-positive
+    cause: validation in a local helper
+    decision: fixed
+    fixed: true
+    note: resolveServedFile(url) confines the path. Calls to functions in the repo no longer pass taint through (a cross-function flow, v0.5); negative fixture path-traversal/negative/safe.ts /n26.

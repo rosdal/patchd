@@ -121,7 +121,10 @@ func (p *projectScan) traceSteps(r *taint.FuncResult, origin *taint.Origin, path
 		} else {
 			step.Note, step.Kind = p.note(r, s.in)
 		}
-		if n := len(out); n > 0 && out[n-1].Note == step.Note && out[n-1].Location == step.Location {
+		// Steps that say the same thing in a row ("concatenated into a
+		// string" for each + of a chain) collapse into the last one.
+		if n := len(out); n > 0 && out[n-1].Note == step.Note && out[n-1].Kind == step.Kind {
+			out[n-1] = step
 			continue
 		}
 		out = append(out, step)
@@ -246,6 +249,11 @@ func calleeText(prog *tsbridge.Program, in *ir.Instr) string {
 	}
 	text = strings.Join(strings.Fields(text), "")
 	text = strings.TrimSuffix(text, "?.")
+	// In a chain (a.split(".").slice(-1)) the text before the first
+	// parenthesis is an earlier call; name the method itself.
+	if name := in.Aux.Name.String(); in.Op == ir.OpCall && in.Aux.Flags.Has(ir.AuxMethod) && name != "" && !strings.HasSuffix(text, name) {
+		return "." + name + "()"
+	}
 	if in.Op == ir.OpNew {
 		text = "new " + strings.TrimPrefix(text, "new")
 	}

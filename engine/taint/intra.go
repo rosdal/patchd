@@ -4,6 +4,7 @@ package taint
 
 import (
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/patchd/patchd/engine/dataflow"
@@ -406,8 +407,11 @@ func (b *builder) load(in *ir.Instr, args []ir.ValueID, rs *dataflow.ReachingSto
 		}
 	case in.Aux.Flags.Has(ir.AuxSuper):
 	case in.Aux.Flags.Has(ir.AuxDynamic):
-		for _, a := range args {
-			b.edge(a, res, in.ID)
+		// Only the object's taint: a tainted key chooses among the object's
+		// values but doesn't write them, so COMMANDS[req.query.op] is as
+		// trusted as COMMANDS (ADR 0010).
+		if len(args) > 0 {
+			b.edge(args[0], res, in.ID)
 		}
 	default:
 		if len(args) > 0 {
@@ -502,11 +506,27 @@ func (b *builder) call(in *ir.Instr) {
 			return
 		}
 	}
+	// Code in the repo is left to v0.5's function summaries: passing a value
+	// through a local helper is a flow across functions, outside v0.4's
+	// scope, and the helper may well validate it (ADR 0010).
+	if qn == "" && b.a.isRepoCall(in) {
+		return
+	}
 	// Default: the result carries the receiver's and the arguments' taint.
 	b.edge(recv, res, in.ID)
 	for _, a := range args {
 		b.edge(a, res, in.ID)
 	}
+}
+
+// isRepoCall reports a call that resolves to a function declared in the
+// analysed repo (a local: qualified name).
+func (a *Analyzer) isRepoCall(in *ir.Instr) bool {
+	if in.Aux.Flags&(ir.AuxRequire|ir.AuxImport|ir.AuxJSX|ir.AuxDecorator|ir.AuxSuperCall) != 0 {
+		return false
+	}
+	c, ok := a.prog.ResolveCall(in.Syntax)
+	return ok && strings.HasPrefix(c.QualifiedName, "local:")
 }
 
 // slotValues returns the values a slot names at one call.

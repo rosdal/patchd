@@ -33,9 +33,14 @@ func TestSelect(t *testing.T) {
 	if _, err := rules.Select([]string{"ts/nope"}); err == nil || !strings.Contains(err.Error(), "ts/nope") {
 		t.Errorf("unknown rule: %v", err)
 	}
-	all, _ := rules.Select(nil)
-	if len(all) < 3 {
-		t.Errorf("default selection has %d rules", len(all))
+	def, _ := rules.Select(nil)
+	for _, r := range def {
+		if r.Disabled {
+			t.Errorf("default selection includes disabled rule %s", r.ID)
+		}
+	}
+	if got, err := rules.Select([]string{"ts/path-traversal"}); err != nil || len(got) != 1 {
+		t.Errorf("a disabled rule can be selected by ID: %v %v", got, err)
 	}
 }
 

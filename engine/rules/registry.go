@@ -132,6 +132,15 @@ func All() []*Rule {
 	return out
 }
 
+// IDs returns the ID of every registered rule, enabled or not.
+func IDs() []string {
+	var out []string
+	for _, r := range All() {
+		out = append(out, r.ID)
+	}
+	return out
+}
+
 // Lookup returns a rule by ID.
 func Lookup(id string) (*Rule, bool) {
 	mu.RLock()

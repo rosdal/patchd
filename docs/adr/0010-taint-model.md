@@ -34,7 +34,8 @@ For traces, the analysis also records, for every value that gains a label, the o
 
 ### Sound where cheap, precise where it matters
 
-- A call to something no model describes passes the union of its receiver's and arguments' taint to its result (`trim`, `slice`, `join`, `replace`, `path.join`, `path.resolve` and any local helper). It never makes taint from nothing.
+- A call to library code no model describes passes the union of its receiver's and arguments' taint to its result (`trim`, `slice`, `join`, `replace`, `path.join`, `path.resolve`, and calls that don't resolve at all). It never makes taint from nothing.
+- A call to a function declared in the repo (a `local:` qualified name) passes nothing: a value going through a local helper is a flow across functions, which v0.5's summaries analyse, and helpers often validate (`resolveServedFile(url)` in pnpm). Decided during v0.4 triage.
 - Operators that can't carry an injection produce untainted values: comparisons, `in`, `instanceof`, `typeof`, `!`, `void`, unary `-`/`+`/`~`.
 - **Type pruning.** A value whose TypeScript type is `number`, `boolean`, `bigint` or a union of only those, and the results of `Number()`, `parseInt`, `parseFloat` and `Boolean()`, can't reach `sql`, `command`, `path` or `url` sinks. Their labels keep the origin (traces still pass through them) but lose those kinds and are marked numeric.
 - `catchval` is untainted, and so is a `closure` value (its captured cells carry their own taint).
@@ -42,7 +43,8 @@ For traces, the analysis also records, for every value that gains a label, the o
 ### Memory
 
 - **Cells and module globals** inside one function: a load sees the stores that reach it (a forward reaching-stores analysis per function, keyed by the cell value or the global's name; a store to the same key kills earlier ones). At function entry, cells and globals are untainted: v0.4 doesn't follow taint across functions.
-- **Properties are field-insensitive.** An object is tainted as a whole: `load o.p` and `load o[k]` get the object's taint (plus a tainted key's), and `store o.p = x` adds `x`'s taint to `o` (a weak update). One tainted property taints every other property of the object. This is a known source of false positives, fixed by field sensitivity in v0.5.
+- **Properties are field-insensitive.** An object is tainted as a whole: `load o.p` and `load o[k]` get the object's taint, and `store o.p = x` adds `x`'s taint to `o` (a weak update). One tainted property taints every other property of the object. This is a known source of false positives, fixed by field sensitivity in v0.5.
+- **A tainted key doesn't taint what it reads.** `COMMANDS[req.query.op]` picks one of the object's own values; the request chooses which, not what it says. (The v0.4 TODO's table had the key taint the result; triage on vscode showed lookup tables of trusted paths reported as path traversal, and allowlist maps are the usual safe idiom.)
 - Known mutators move taint into their receiver: `Array.prototype.push`, `unshift` and `splice` (a propagator from the arguments to the receiver).
 
 ### Reporting rule

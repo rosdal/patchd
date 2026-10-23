@@ -12,6 +12,7 @@ import (
 	"github.com/santhosh-tekuri/jsonschema/v6"
 
 	"github.com/patchd/patchd/engine"
+	"github.com/patchd/patchd/engine/rules"
 	"github.com/patchd/patchd/engine/tsbridge"
 )
 
@@ -37,7 +38,7 @@ module.exports.h = function (req, res) {
 			t.Fatal(err)
 		}
 	}
-	res, err := engine.Analyze(context.Background(), dir, engine.Options{Discover: tsbridge.DiscoverOptions{NoRepoConfig: true}})
+	res, err := engine.Analyze(context.Background(), dir, engine.Options{Rules: rules.IDs(), Discover: tsbridge.DiscoverOptions{NoRepoConfig: true}})
 	if err != nil {
 		t.Fatal(err)
 	}

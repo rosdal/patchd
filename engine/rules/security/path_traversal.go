@@ -33,5 +33,9 @@ func init() {
 			"v0.4 still reports the second safe form: the check is a branch, which needs path-sensitive analysis " +
 			"(see the rule's known limitations).",
 		Advice: "without being confined to a base directory",
+		// Off by default in v0.4: below the 80% precision gate on the
+		// reference repos (eval/triage/v0.4.yaml). patchd scan --rules
+		// ts/path-traversal turns it on.
+		Disabled: true,
 	})
 }

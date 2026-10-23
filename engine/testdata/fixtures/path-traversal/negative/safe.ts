@@ -122,3 +122,24 @@ app.get("/n25", (req, res) => {
   console.log(req.path);
   res.sendFile(path.join(BASE, "help.html")); // expect-none
 });
+
+// A local helper that confines the path: v0.4 doesn't follow values through
+// functions in the repo (found in pnpm's e2e server during v0.4 triage).
+function confine(p: string): string | undefined {
+  const file = path.join(BASE, p);
+  return file.startsWith(BASE + path.sep) ? file : undefined;
+}
+
+app.get("/n26", (req, res) => {
+  const file = confine(String(req.query.p));
+  if (file) res.sendFile(file); // expect-none
+});
+
+// A lookup table of served files (found in vscode's tests during v0.4
+// triage): the request picks an entry but can't write one.
+const SERVED: Record<string, string> = { "logo.png": "/srv/static/logo.png" };
+
+app.get("/n27", (req, res) => {
+  const file = SERVED[req.path.slice(1)];
+  if (file) fs.createReadStream(file).pipe(res); // expect-none
+});

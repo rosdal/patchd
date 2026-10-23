@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/patchd/patchd/engine/rules"
 	"github.com/patchd/patchd/engine/tsbridge"
 )
 
@@ -50,7 +51,8 @@ func TestFixtures(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(fixturesDir, "node_modules", "@types", "express")); err != nil {
 		t.Fatalf("fixture types are not installed: run `pnpm fixtures:install` (%v)", err)
 	}
-	res, err := Analyze(context.Background(), fixturesDir, Options{Discover: tsbridge.DiscoverOptions{NoRepoConfig: true}})
+	// Every rule, including the ones off by default.
+	res, err := Analyze(context.Background(), fixturesDir, Options{Rules: rules.IDs(), Discover: tsbridge.DiscoverOptions{NoRepoConfig: true}})
 	if err != nil {
 		t.Fatal(err)
 	}

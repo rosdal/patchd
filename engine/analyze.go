@@ -55,16 +55,18 @@ type Result struct {
 
 // Stats are counters and timings of a scan.
 type Stats struct {
-	Projects        int           `json:"projects"`
-	Files           int           `json:"files"`
-	Lines           int           `json:"lines"`
-	Functions       int           `json:"functions"`
-	Analysed        int           `json:"analysed"` // functions that could contain a source
-	Capped          int           `json:"capped"`   // functions whose solver hit the pass cap
-	Candidates      int           `json:"candidates"`
-	SyntaxNodes     int           `json:"syntax_nodes"`
-	UnknownNodes    int           `json:"unknown_nodes"`
-	MissingModules  int           `json:"projects_missing_node_modules"`
+	Projects       int `json:"projects"`
+	Files          int `json:"files"`
+	Lines          int `json:"lines"`
+	Functions      int `json:"functions"`
+	Analysed       int `json:"analysed"` // functions that could contain a source
+	Capped         int `json:"capped"`   // functions whose solver hit the pass cap
+	Candidates     int `json:"candidates"`
+	SyntaxNodes    int `json:"syntax_nodes"`
+	UnknownNodes   int `json:"unknown_nodes"`
+	MissingModules int `json:"projects_missing_node_modules"`
+	// Phase times are summed over projects, which run in parallel: they can
+	// add up to more than Elapsed, the wall-clock time of the scan.
 	Load            time.Duration `json:"load_ns"`
 	Lower           time.Duration `json:"lower_ns"`
 	Analyse         time.Duration `json:"analyse_ns"`
@@ -117,6 +119,7 @@ func Analyze(ctx context.Context, root string, opts Options) (*Result, error) {
 		res.Stats.Projects++
 		res.Stats.Files += ps.RootFiles
 		res.Stats.Lines += ps.Lines
+		res.Stats.Load += ps.Parse + ps.Bind + ps.Check
 		for _, w := range prog.Warnings() {
 			if w.Code == tsbridge.WarnPackageNotInstalled {
 				res.Stats.MissingModules++
@@ -125,7 +128,6 @@ func Analyze(ctx context.Context, root string, opts Options) (*Result, error) {
 		}
 		return nil
 	})
-	res.Stats.Load = stats.Elapsed - res.Stats.Lower - res.Stats.Analyse
 	res.Stats.FailedProjects = len(res.Errors)
 	res.Stats.PeakHeap = stats.PeakHeap
 	finish(res)
@@ -323,8 +325,8 @@ func summarise(res *Result) []string {
 	if s.MissingModules > 0 {
 		out = append(out, fmt.Sprintf("%d of %d projects had missing node_modules: calls into uninstalled packages are not resolved (run your package manager's install)", s.MissingModules, s.Projects))
 	}
-	if s.SyntaxNodes > 0 && s.UnknownNodes > 0 {
-		out = append(out, fmt.Sprintf("%.1f%% of syntax lowered as unknown", 100*float64(s.UnknownNodes)/float64(s.SyntaxNodes)))
+	if share := 100 * float64(s.UnknownNodes) / float64(max(s.SyntaxNodes, 1)); share >= 0.05 {
+		out = append(out, fmt.Sprintf("%.1f%% of syntax lowered as unknown", share))
 	}
 	if s.Capped > 0 {
 		out = append(out, fmt.Sprintf("%d functions hit the analysis pass cap; their results may be incomplete", s.Capped))

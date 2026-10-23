@@ -153,9 +153,9 @@ func runScan(ctx context.Context, stdout, stderr io.Writer, path string, f *scan
 		return &exitError{code: exitFailed, err: scanErr}
 	}
 	s := res.Stats
-	log.printf("load %s, lower %s, analyse %s (%d projects, %d files, %d of %d functions analysed)\n",
-		s.Load.Round(time.Millisecond), s.Lower.Round(time.Millisecond), s.Analyse.Round(time.Millisecond),
-		s.Projects, s.Files, s.Analysed, s.Functions)
+	log.printf("%d projects, %d files, %d of %d functions analysed in %s (summed over projects: load %s, lower %s, analyse %s)\n",
+		s.Projects, s.Files, s.Analysed, s.Functions, s.Elapsed.Round(time.Millisecond),
+		s.Load.Round(time.Millisecond), s.Lower.Round(time.Millisecond), s.Analyse.Round(time.Millisecond))
 
 	kept := res.Findings[:0:0]
 	for _, fd := range res.Findings {

@@ -61,6 +61,7 @@ func TestScanExitCodes(t *testing.T) {
 		{"clean", []string{"scan", clean}, exitClean},
 		{"fail-on above the findings", []string{"scan", vuln, "--rules", "ts/path-traversal", "--fail-on", "critical"}, exitClean},
 		{"severity threshold hides findings", []string{"scan", vuln, "--severity-threshold", "critical", "--rules", "ts/path-traversal"}, exitClean},
+		{"rules off by default stay off", []string{"scan", writeApp(t, `const fs = require("fs"); module.exports.h = function (req, res) { fs.readFileSync(req.query.f); };`)}, exitClean},
 		{"bad format", []string{"scan", vuln, "--format", "xml"}, exitUsage},
 		{"unknown rule", []string{"scan", vuln, "--rules", "ts/nope"}, exitUsage},
 		{"bad severity", []string{"scan", vuln, "--fail-on", "urgent"}, exitUsage},
@@ -78,7 +79,7 @@ func TestScanExitCodes(t *testing.T) {
 
 func TestScanFormats(t *testing.T) {
 	vuln := writeApp(t, vulnerableApp)
-	stdout, stderr, _ := runCLI(t, "scan", vuln, "--format", "json")
+	stdout, stderr, _ := runCLI(t, "scan", vuln, "--format", "json", "--rules", "ts/cmdi,ts/path-traversal")
 	var doc struct {
 		Schema   string `json:"schema"`
 		Findings []struct {
@@ -91,7 +92,7 @@ func TestScanFormats(t *testing.T) {
 	if doc.Schema != "patchd.findings/v1" || len(doc.Findings) != 2 {
 		t.Errorf("json = %+v", doc)
 	}
-	if !strings.Contains(stderr, "2 findings") || !strings.Contains(stderr, "load ") {
+	if !strings.Contains(stderr, "2 findings") || !strings.Contains(stderr, "functions analysed in") {
 		t.Errorf("stderr lacks progress or summary:\n%s", stderr)
 	}
 

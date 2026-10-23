@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/patchd/patchd/engine/rules"
 	"github.com/patchd/patchd/engine/tsbridge"
 )
 
@@ -22,7 +23,7 @@ func scanSource(t *testing.T, src string) *Result {
 	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"t"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	res, err := Analyze(context.Background(), dir, Options{Discover: tsbridge.DiscoverOptions{NoRepoConfig: true}})
+	res, err := Analyze(context.Background(), dir, Options{Rules: rules.IDs(), Discover: tsbridge.DiscoverOptions{NoRepoConfig: true}})
 	if err != nil {
 		t.Fatal(err)
 	}
