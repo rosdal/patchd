@@ -56,9 +56,12 @@ The questions a program answers:
 | Syntax                | `Root`, `Kind`, `Children`, `Parent`, `Range`, `Text`, `NodeAt`, `Walk`, `NodeCount`                                                            |
 | Positions (on `File`) | `Position` (1-based, UTF-16: GitHub, SARIF), `LSPPosition` (0-based, UTF-16), `Offset`, `OffsetLSP`                                             |
 | Symbols and types     | `SymbolOf`, `SymbolName`, `TypeOf`, `TypeString`, `TypeFlags`, `UnionMembers`, `IntersectionMembers`, `Properties`, `IsAssignable`, `Signature` |
-| Resolution            | `ResolveCall`, `ResolveAlias`, `Declarations`, `QualifiedName`                                                                                  |
+| Resolution            | `ResolveCall`, `ResolveAlias`, `Declarations`, `QualifiedName`, `ResolveModule`                                                                 |
+| Whole-file passes     | `Tree` (a lock-free syntax view), `TypesOf`, `ValueSymbols`                                                                                     |
 
 Handles (`FileID`, `NodeID`, `SymbolID`, `TypeID`) are small values valid only for their program. No method panics on bad input: it returns the zero value or `ok=false`. Methods are safe for concurrent use.
+
+**Whole-file passes.** A builder that visits every node (the IR builder) would take the program's lock millions of times. `Tree(file)` returns a read-only view of one file's syntax that answers `Kind`, `Children`, `Parent`, `Range`, `Text` without the lock, plus what lowering needs beyond them: `Value` (an identifier's name or a literal's cooked text), `Operator` (of a binary, prefix or postfix expression, token, modifier or heritage clause), `Flags` (`let`/`const`, optional chains and `?.`, modifiers, `function*`, `for await`, type-only imports, `export =`) and `Role` (which field of an ambiguous parent a child fills: a `for` statement's initializer, condition, incrementor and body; a binding element's property name, name and default; a specifier's property name and name). `TypesOf(nodes)` and `ValueSymbols(nodes)` answer for many nodes under one lock, without memoising per node. `ValueSymbols` names bindings as values: the `a` of a shorthand property `{a}` is the variable, the `a` of `export {a}` is the local. `ResolveModule(specifier)` returns the file, package or `declare module` an import, export, `require` or `import()` specifier resolves to.
 
 Positions are byte offsets. Lines end at `\n`, `\r\n` or a lone `\r`; columns count UTF-16 code units, a byte order mark is not a column, and a tab is one column. Ranges start at a node's first token, after its leading comments.
 
@@ -126,6 +129,8 @@ Before these, imports into referenced projects resolved to their build output; r
 | `patchd debug types <file>:<line>:<col>` | Node kind, symbol, qualified name, type, flags, declarations; `--batch positions.json` answers many (the oracle uses it)       |
 | `patchd debug resolve <file>`            | Every call in the file with its qualified name, or why it didn't resolve                                                       |
 | `patchd debug stats [path]`              | Files, nodes, call resolution rate by reason, type errors, warnings, timings, peak heap and RSS                                |
+| `patchd debug ir <file>[:<function>]`    | The file's Patchd IR, or one function's (`--types`, `--source`, `--names`, `--dot`); see [ir.md](ir.md)                        |
+| `patchd debug ir-coverage [path]`        | Share of syntax lowered to IR, top unsupported kinds, `--verify` to validate every function                                    |
 
 ## Testing
 

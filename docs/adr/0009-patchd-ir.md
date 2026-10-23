@@ -1,6 +1,6 @@
 # 0009. A high-level, SSA-for-locals IR with explicit exceptional edges
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-23
 
 ## Context
@@ -65,6 +65,16 @@ Values, instructions and blocks live in per-function slices and are referenced b
 - **Implicit exceptions** (any instruction may jump to the handler, as in Go's `Recover` block). Fewer blocks, but variables modified inside `try` would merge wrongly into `catch`.
 - **Desugaring `async`/generators into state machines.** What compilers do; it hides `await` from taint and multiplies blocks.
 - **Dominance-frontier SSA construction (Cytron).** Needs a complete CFG and liveness first; Braun builds SSA in the same pass as lowering.
+
+### Changes made during implementation
+
+Recorded at acceptance, after lowering the 10 reference repos:
+
+- **A `cell` instruction.** Captured variables need a cell created at a point in the CFG (a fresh one per iteration of a `for (let …)` loop), which a value kind can't express. The cell pointer itself is an SSA value, so per-iteration cells merge with ordinary phis.
+- **`branch` without a condition** for `for…of`/`for…in` heads, where the iteration protocol decides; the element is `load v[of]` (the key `load v[in]`).
+- **Dead code stays out of live dominance.** Code after `return`/`throw` is lowered into blocks marked dead; edges from them back into live code are ignored by the dominator tree, and phi operands arriving over them don't count.
+- **Exports are a list, not a map**, so re-exports, `export *` and CommonJS exports keep their shape and order.
+- **Destructuring iterates** every array-pattern source but an array literal (a `spread`), rather than asking for its type.
 
 ## Consequences
 
