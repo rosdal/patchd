@@ -22,6 +22,15 @@
         "max_comments": { "type": "integer", "minimum": 0 }
       }
     },
+    "typescript": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Project discovery for the engine (docs/engine/tsbridge.md).",
+      "properties": {
+        "projects": { "type": "array", "items": { "type": "string" } },
+        "ignore": { "type": "array", "items": { "type": "string" } }
+      }
+    },
     "rules": {
       "type": "object",
       "additionalProperties": { "enum": ["on", "off", "warn"] }

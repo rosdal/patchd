@@ -1,0 +1,28 @@
+# OWASP NodeGoat's injection issues (tutorial A1), read against the code at
+# the pinned commit. NodeGoat has no command injection, path traversal or SQL
+# injection: its A1 issues are server-side JavaScript injection (eval) and a
+# MongoDB $where injection, listed here with the rules that will find them.
+# Nothing is in v0.4's scope, so the v0.4 expectation is zero findings.
+repo: nodegoat
+commit: c5cb68a7084e4ae7dcc60e6a98768720a81841e8
+findings:
+  - rule: ts/code-injection
+    file: app/routes/contributions.js
+    line: 32
+    scope: v0.6 # eval(req.body.preTax): no code-injection rule before v0.6
+    source: tutorial A1 (server-side JS injection)
+  - rule: ts/code-injection
+    file: app/routes/contributions.js
+    line: 33
+    scope: v0.6 # eval(req.body.afterTax)
+    source: tutorial A1
+  - rule: ts/code-injection
+    file: app/routes/contributions.js
+    line: 34
+    scope: v0.6 # eval(req.body.roth)
+    source: tutorial A1
+  - rule: ts/nosqli
+    file: app/data/allocations-dao.js
+    line: 86
+    scope: v0.6 # threshold flows from routes/allocations.js into a $where string in the DAO: crosses files and needs a MongoDB model
+    source: tutorial A1 (NoSQL injection)

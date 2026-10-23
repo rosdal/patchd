@@ -37,11 +37,42 @@ jobs:
       - run: pnpm lint:ts
       - run: pnpm format:check
       - run: pnpm test
-      - name: tsbridge and the IR builder under the race detector
+      - name: tsbridge, the IR builder and taint analysis under the race detector
         if: runner.os == 'Linux'
-        run: go test -race ./engine/tsbridge/... ./engine/ir/...
+        run: go test -race ./engine/tsbridge/... ./engine/ir/... ./engine/dataflow/... ./engine/taint/... ./engine
       - run: pnpm build
       - run: ./bin/patchd version
+  patchd-scan:
+    # Patchd scans itself on every push and pull request. A finding on
+    # Patchd's own code is fixed, or triaged as a false positive with a
+    # negative fixture; patchd.yaml keeps the deliberately vulnerable test
+    # data out.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write # upload the SARIF to code scanning
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: pnpm install --frozen-lockfile # types for web/ and ide/
+      - run: go build -o bin/patchd ./cmd/patchd
+      - name: patchd scan
+        run: ./bin/patchd scan . --format sarif --output patchd.sarif --fail-on critical
+      - name: Upload to code scanning
+        if: always() && hashFiles('patchd.sarif') != '' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+        with:
+          sarif_file: patchd.sarif
+          category: patchd
   commitlint:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest

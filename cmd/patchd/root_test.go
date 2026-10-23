@@ -7,7 +7,7 @@ import (
 )
 
 func TestStubsReturnNotImplemented(t *testing.T) {
-	for _, name := range []string{"serve", "worker", "sandboxd", "scan", "review", "fix", "lsp", "mcp"} {
+	for _, name := range []string{"serve", "worker", "sandboxd", "review", "fix", "lsp", "mcp"} {
 		t.Run(name, func(t *testing.T) {
 			cmd := newRootCmd()
 			cmd.SetOut(io.Discard)

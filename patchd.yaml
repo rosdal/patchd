@@ -2,6 +2,16 @@
 # Patchd reviewing itself.
 version: 1
 
+# Engine test data is vulnerable on purpose: patchd scan . skips it.
+typescript:
+  ignore:
+    [
+      "engine/testdata/**",
+      "engine/ir/testdata/**",
+      "engine/tsbridge/testdata/**",
+      "eval/goldsets/**",
+    ]
+
 review:
   paths:
     include: ["web/src/**", "ide/vscode/src/**"]

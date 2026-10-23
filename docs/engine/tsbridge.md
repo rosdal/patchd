@@ -50,14 +50,14 @@ _, err = tsbridge.LoadAll(ctx, ws, tsbridge.LoadAllOptions{}, func(cfg tsbridge.
 
 The questions a program answers:
 
-| Area                  | Methods                                                                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Files                 | `Files`, `RootFiles`, `File`, `FileByPath`, `Diagnostics`, `Warnings`, `Stats`, `Close`                                                         |
-| Syntax                | `Root`, `Kind`, `Children`, `Parent`, `Range`, `Text`, `NodeAt`, `Walk`, `NodeCount`                                                            |
-| Positions (on `File`) | `Position` (1-based, UTF-16: GitHub, SARIF), `LSPPosition` (0-based, UTF-16), `Offset`, `OffsetLSP`                                             |
-| Symbols and types     | `SymbolOf`, `SymbolName`, `TypeOf`, `TypeString`, `TypeFlags`, `UnionMembers`, `IntersectionMembers`, `Properties`, `IsAssignable`, `Signature` |
-| Resolution            | `ResolveCall`, `ResolveAlias`, `Declarations`, `QualifiedName`, `ResolveModule`                                                                 |
-| Whole-file passes     | `Tree` (a lock-free syntax view), `TypesOf`, `ValueSymbols`                                                                                     |
+| Area                  | Methods                                                                                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Files                 | `Files`, `RootFiles`, `File`, `FileByPath`, `Diagnostics`, `Warnings`, `Stats`, `Close`                                                                              |
+| Syntax                | `Root`, `Kind`, `Children`, `Parent`, `Range`, `Text`, `NodeAt`, `Walk`, `NodeCount`                                                                                 |
+| Positions (on `File`) | `Position` (1-based, UTF-16: GitHub, SARIF), `LSPPosition` (0-based, UTF-16), `Offset`, `OffsetLSP`                                                                  |
+| Symbols and types     | `SymbolOf`, `SymbolName`, `TypeOf`, `TypeString`, `TypeFlags`, `TypeQualifiedName`, `UnionMembers`, `IntersectionMembers`, `Properties`, `IsAssignable`, `Signature` |
+| Resolution            | `ResolveCall`, `ResolveAlias`, `Declarations`, `QualifiedName`, `ResolveModule`                                                                                      |
+| Whole-file passes     | `Tree` (a lock-free syntax view), `TypesOf`, `ValueSymbols`                                                                                                          |
 
 Handles (`FileID`, `NodeID`, `SymbolID`, `TypeID`) are small values valid only for their program. No method panics on bad input: it returns the zero value or `ok=false`. Methods are safe for concurrent use.
 
@@ -77,6 +77,8 @@ The stable name framework models match on (spec in [ADR 0008](../adr/0008-tsbrid
 | Repo code     | `local:<file>#<path>`     | `local:src/db.ts#runQuery`, `local:src/db.ts#Repo.find`, `local:server.ts#(anonymous 150:32)`                    |
 
 A method call is named after the receiver's type as the code sees it; a static or global receiver after its value.
+
+`TypeQualifiedName(type)` names a type the same way (`express:Request` for `Request<ParamsDictionary, …> | undefined`; "" for anonymous and primitive types). Taint models use it for properties read through destructuring, which have no symbol of their own: `({ params }: Request) => …` reads `express:Request.params`.
 
 ## Warnings
 
