@@ -131,6 +131,8 @@ type irCoverageReport struct {
 	Lines     int            `json:"lines"`
 	Funcs     int            `json:"funcs"`
 	Instrs    int            `json:"instrs"`
+	FinCopies int            `json:"finally_copies"`
+	FinInstrs int            `json:"finally_instrs"`
 	Coverage  ir.Coverage    `json:"coverage"`
 	Percent   float64        `json:"percent"`
 	Top       []kindReport   `json:"top_unsupported"`
@@ -173,15 +175,18 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 				return err
 			}
 			if cpuProfile != "" {
-				pf, err := os.Create(cpuProfile)
+				pf, err := os.Create(cpuProfile) //nolint:gosec // a path the developer passed
 				if err != nil {
 					return err
 				}
-				defer pf.Close()
 				if err := pprof.StartCPUProfile(pf); err != nil {
+					_ = pf.Close()
 					return err
 				}
-				defer pprof.StopCPUProfile()
+				defer func() {
+					pprof.StopCPUProfile()
+					_ = pf.Close() // the profile is best effort
+				}()
 			}
 			start := time.Now()
 			root := "."
@@ -219,7 +224,7 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 					lower := time.Since(t0)
 					var irBytes uint64
 					var cov ir.Coverage
-					var funcs, instrs, invalid, verified, srcBytes int
+					var funcs, instrs, invalid, verified, srcBytes, finCopies, finInstrs int
 					var failures []string
 					warns := map[string]int{}
 					t1 := time.Now()
@@ -228,6 +233,8 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 							continue
 						}
 						cov.Add(m.Coverage)
+						finCopies += m.Stats.FinallyCopies
+						finInstrs += m.Stats.FinallyInstrs
 						irBytes += uint64(m.Bytes()) //nolint:gosec // sizes are non-negative
 						if sf := p.File(m.File); sf != nil {
 							srcBytes += len(sf.Text)
@@ -266,6 +273,8 @@ func newDebugIRCoverageCmd(f *debugFlags) *cobra.Command {
 					rep.Lines += st.Lines
 					rep.Funcs += funcs
 					rep.Instrs += instrs
+					rep.FinCopies += finCopies
+					rep.FinInstrs += finInstrs
 					rep.Coverage.Add(cov)
 					rep.Invalid += invalid
 					rep.Verified += verified
@@ -342,6 +351,8 @@ func printIRCoverage(w io.Writer, rep irCoverageReport, verify bool) error {
 	tw.printf("%d project(s) (%d failed), %d files, %d lines, %d functions, %d instructions\n",
 		rep.Projects, rep.Failed, rep.Files, rep.Lines, rep.Funcs, rep.Instrs)
 	tw.printf("coverage: %.2f%% of %d syntax nodes lowered (%d unknown, %d never reached)\n", c.Percent(), c.Nodes, c.Unknown, c.Skipped)
+	tw.printf("finally: %d extra copies add %d instructions (%.2f%% of all)\n", rep.FinCopies, rep.FinInstrs,
+		100*float64(rep.FinInstrs)/float64(max(1, rep.Instrs)))
 	if verify {
 		tw.printf("verify: %d of %d functions valid\n", rep.Verified-rep.Invalid, rep.Verified)
 		for _, fl := range rep.Failures {

@@ -255,9 +255,25 @@ func (fb *fnBuilder) exitRegions(depth int) {
 		fb.regions = fb.regions[:r:r]
 		depth := savedR[r].targets
 		fb.targets = fb.targets[:depth:depth]
-		fb.lowerBlock(fin)
+		fb.lowerFinally(fin)
 		fb.regions, fb.targets = savedR, savedT
 	}
+}
+
+// lowerFinally lowers one copy of a finally body, counting the instructions
+// every copy after the first adds (the cost of duplicating finally).
+func (fb *fnBuilder) lowerFinally(fin tsbridge.NodeID) {
+	before := len(fb.f.Instrs)
+	fb.lowerBlock(fin)
+	n := len(fb.f.Instrs) - before
+	if fb.finSeen == nil {
+		fb.finSeen = map[tsbridge.NodeID]bool{}
+	}
+	if fb.finSeen[fin] {
+		fb.b.mod.Stats.FinallyCopies++
+		fb.b.mod.Stats.FinallyInstrs += n
+	}
+	fb.finSeen[fin] = true
 }
 
 // lowerLoop lowers the five loop statements. labels are the labels written
@@ -664,7 +680,7 @@ func (fb *fnBuilder) lowerTry(n tsbridge.NodeID) {
 	fb.lowerBlock(tryB)
 	fb.regions = fb.regions[:len(fb.regions)-1]
 	if fb.reachable() && fin != 0 {
-		fb.lowerBlock(fin)
+		fb.lowerFinally(fin)
 	}
 	fb.jump(done)
 	if catchC != 0 {
@@ -700,7 +716,7 @@ func (fb *fnBuilder) lowerTry(n tsbridge.NodeID) {
 		if fin != 0 {
 			fb.regions = fb.regions[:len(fb.regions)-1]
 			if fb.reachable() {
-				fb.lowerBlock(fin)
+				fb.lowerFinally(fin)
 			}
 		}
 		fb.jump(done)
@@ -713,7 +729,7 @@ func (fb *fnBuilder) lowerTry(n tsbridge.NodeID) {
 			fb.terminate(OpUnreachable, fin, nil)
 		} else {
 			exc := fb.emit(OpCatchVal, fin, Aux{})
-			fb.lowerBlock(fin)
+			fb.lowerFinally(fin)
 			if fb.reachable() {
 				fb.terminate(OpThrow, fin, []ValueID{exc})
 			}

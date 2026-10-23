@@ -157,6 +157,15 @@ func (p *Program) typeOfLocked(n NodeID) TypeID {
 		p.stats.TypeOfHits++
 		return id
 	}
+	id := p.computeType(n)
+	if id != 0 {
+		p.typeOf[n] = id
+	}
+	return id
+}
+
+// computeType is TypeOf without the memo. Callers hold p.mu.
+func (p *Program) computeType(n NodeID) TypeID {
 	node, _ := p.node(n)
 	c := p.checkerFor(n.File())
 	if node == nil || c == nil {
@@ -179,9 +188,7 @@ func (p *Program) typeOfLocked(n NodeID) TypeID {
 	if t == nil {
 		t = c.GetTypeAtLocation(node)
 	}
-	id := p.internType(c, t)
-	p.typeOf[n] = id
-	return id
+	return p.internType(c, t)
 }
 
 // isTypeName reports an identifier naming a type in a type reference, an

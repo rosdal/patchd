@@ -231,6 +231,7 @@ type fnBuilder struct {
 	intrins  map[string]ValueID
 	exports  map[int32]bool // module-level vars exported by declaration (Init only)
 	typeReqs []typeReq      // values to type, moved to the builder when the function is finished
+	finSeen  map[tsbridge.NodeID]bool
 	enums    []map[string]ValueID
 }
 

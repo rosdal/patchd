@@ -2,7 +2,6 @@ package tsbridge
 
 import (
 	"github.com/microsoft/typescript-go/shim/ast"
-	"github.com/microsoft/typescript-go/shim/checker"
 )
 
 // Batch queries answer one question for many nodes under one lock, for
@@ -22,23 +21,12 @@ func (p *Program) TypesOf(nodes []NodeID) []TypeID {
 	return out
 }
 
-func (p *Program) typeOfUncached(n NodeID) (id TypeID) {
+func (p *Program) typeOfUncached(n NodeID) TypeID {
 	defer p.recoverQuery("TypesOf")
 	if id, ok := p.typeOf[n]; ok {
 		return id
 	}
-	node, _ := p.node(n)
-	c := p.checkerFor(n.File())
-	if node == nil || c == nil {
-		return 0
-	}
-	var t *checker.Type
-	if ast.IsDeclaration(node) && node.Name() != nil && node.Kind != ast.KindSourceFile {
-		t = c.GetTypeAtLocation(node.Name())
-	} else {
-		t = c.GetTypeAtLocation(node)
-	}
-	return p.internType(c, t)
+	return p.computeType(n)
 }
 
 // ValueSymbols returns, for each identifier, the symbol of the binding it

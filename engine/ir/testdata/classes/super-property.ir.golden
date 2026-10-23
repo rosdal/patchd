@@ -1,0 +1,79 @@
+module super-property.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Base.constructor class
+  store global Base = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Base.get label get
+  store v3.label = v4                     ; get
+  v5 = closure f3 []                      ; Base.<static>
+  v6 = call v5() this=v2
+  v7 = load global Base
+  v8 = closure f5 []                      ; Child.constructor class derived
+  store v8.__proto__ = v7                 ; proto
+  store global Child = v8
+  v9 = load v8.prototype
+  v10 = load v7.prototype
+  store v9.__proto__ = v10                ; proto
+  v11 = closure f6 []                     ; Child.get label get
+  store v9.label = v11                    ; get
+  v12 = closure f7 []                     ; Child.describe
+  store v8.describe = v12                 ; method static
+  v13 = closure f8 []                     ; Child.tag
+  store v9.tag = v13                      ; method
+  return undefined
+
+func f2 Base.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 Base.<static>() staticinit in f1
+b1.entry:
+  v1 = this
+  v2 = const "b"
+  store v1.kind = v2
+  return undefined
+
+func f4 Base.get label() getter in f1
+b1.entry:
+  v1 = this
+  v2 = const "base"
+  return v2
+
+func f5 Child.constructor(...args) constructor implicit derived in f1
+b1.entry:
+  v1 = param args
+  v2 = this
+  v3 = spread v1
+  v4 = call super(...v3) this=v2
+  return undefined
+
+func f6 Child.get label() getter in f1
+b1.entry:
+  v1 = this
+  v2 = load super.label this=v1
+  v3 = const "/child"
+  v4 = binop + v2 v3
+  return v4
+
+func f7 Child.describe() method static in f1
+b1.entry:
+  v1 = this
+  v2 = load super.kind this=v1
+  return v2
+
+func f8 Child.tag() method in f1
+b1.entry:
+  v1 = this
+  v2 = closure f9 [v1]                    ; Child.tag.read
+  v3 = call v2()
+  return v3
+
+func f9 Child.tag.read() arrow in f8
+b1.entry:
+  v1 = free this
+  v2 = load super.label this=v1
+  return v2

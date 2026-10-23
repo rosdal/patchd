@@ -60,6 +60,16 @@ type Module struct {
 	Imports  []Import
 	Warnings []Warning
 	Coverage Coverage
+	Stats    Stats
+}
+
+// Stats are counters about how a module was lowered.
+type Stats struct {
+	// FinallyCopies counts the extra copies of finally bodies (one per way
+	// out of a try beyond the first) and FinallyInstrs the instructions they
+	// add: the code-size cost of lowering finally by duplication.
+	FinallyCopies int `json:"finally_copies"`
+	FinallyInstrs int `json:"finally_instrs"`
 }
 
 // Func returns the function with an ID; nil for NoFunc or a bad ID.
