@@ -135,7 +135,7 @@ func addNodeCore(s *taint.Spec) {
 	// spelling is what import provenance produces.
 	s.AddSanitizer(taint.Sanitizer{
 		ID:     "node.path.basename",
-		Match:  call("node:path.basename", "global:path.basename", "node:path/posix.basename", "node:path/win32.basename"),
+		Match:  call("node:path.basename", "global:path.basename", "global:path.PlatformPath.basename", "node:path/posix.basename", "node:path/win32.basename"),
 		Clears: []taint.Kind{taint.KindPath},
 		Desc:   "strips directories, so the value can't climb out of a base directory",
 	})

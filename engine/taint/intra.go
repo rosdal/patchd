@@ -537,5 +537,5 @@ func Layout(f *ir.Func, call *ir.Instr) (recv ir.ValueID, args []ir.ValueID) {
 // IsHTTPRequestHandler reports whether a function looks like an untyped
 // (req, res) handler, the shape the untyped-handler heuristic accepts.
 func IsHTTPRequestHandler(prog *tsbridge.Program, f *ir.Func) bool {
-	return len(f.Params) >= 2 && isUntypedRequest(prog, f, f.Params[0])
+	return len(f.Params) >= 2 && untypedHandlerParam(prog, f, f.Params[0]) != ""
 }

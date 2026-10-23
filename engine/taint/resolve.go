@@ -130,8 +130,8 @@ func (n *funcNames) computeProvenance(v ir.ValueID) name {
 	}
 	switch val.Kind {
 	case ir.ValueParam:
-		if isUntypedRequest(n.r.prog, n.f, v) {
-			return name{qn: "express:Request", heuristic: true}
+		if qn := untypedHandlerParam(n.r.prog, n.f, v); qn != "" {
+			return name{qn: qn, heuristic: true}
 		}
 		return name{}
 	case ir.ValueInstr:
@@ -346,16 +346,30 @@ func constString(f *ir.Func, v ir.ValueID) (string, bool) {
 	return in.Aux.Name.String(), true
 }
 
-// isUntypedRequest reports the first parameter of an untyped Express-style
-// handler: named req or request, typed any (or untyped JavaScript), with a
-// second parameter named res or response (ADR 0010).
-func isUntypedRequest(prog *tsbridge.Program, f *ir.Func, v ir.ValueID) bool {
-	if len(f.Params) < 2 || f.Params[0] != v {
-		return false
+// untypedHandlerParam names the parameters of an untyped Express-style
+// handler (ADR 0010): a function whose first parameter is named req or
+// request and typed any (or untyped JavaScript), and whose second is named
+// res or response. The first stands for express:Request, the second (when
+// it is untyped too) for express:Response; anything else is "".
+func untypedHandlerParam(prog *tsbridge.Program, f *ir.Func, v ir.ValueID) string {
+	if len(f.Params) < 2 || (f.Params[0] != v && f.Params[1] != v) {
+		return ""
 	}
 	p0, p1 := f.Value(f.Params[0]), f.Value(f.Params[1])
 	if p0 == nil || p1 == nil || (p0.Name != "req" && p0.Name != "request") || (p1.Name != "res" && p1.Name != "response") {
-		return false
+		return ""
 	}
-	return p0.Type == 0 || prog.TypeFlags(p0.Type)&(tsbridge.TypeAny|tsbridge.TypeUnknown) != 0
+	untyped := func(p *ir.Value) bool {
+		return p.Type == 0 || prog.TypeFlags(p.Type)&(tsbridge.TypeAny|tsbridge.TypeUnknown) != 0
+	}
+	if !untyped(p0) {
+		return ""
+	}
+	if v == f.Params[0] {
+		return "express:Request"
+	}
+	if untyped(p1) {
+		return "express:Response"
+	}
+	return ""
 }

@@ -1,0 +1,10 @@
+{
+  "name": "patchd-fixtures",
+  "private": true,
+  "description": "Taint fixtures: analysed by engine/fixtures_test.go, never run. Install with pnpm fixtures:install.",
+  "devDependencies": {
+    "@types/express": "4.17.25",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1"
+  }
+}
