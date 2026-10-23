@@ -22,6 +22,7 @@ func newRootCmd() *cobra.Command {
 		newSandboxdCmd(),
 		newReviewCmd(),
 		newScanCmd(),
+		newRulesCmd(),
 		newFixCmd(),
 		newLSPCmd(),
 		newMCPCmd(),

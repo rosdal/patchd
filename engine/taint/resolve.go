@@ -38,6 +38,7 @@ type funcNames struct {
 	f       *ir.Func
 	prov    map[ir.ValueID]name // values that stand for a module, an export of one, or an Express request
 	visited map[ir.ValueID]bool
+	partial map[string]string // module body only: the module globals resolved so far, in source order
 }
 
 func (r *resolver) forFunc(m *ir.Module, f *ir.Func) *funcNames {
@@ -143,9 +144,11 @@ func (n *funcNames) computeProvenance(v ir.ValueID) name {
 	}
 	args := n.f.Args(in)
 	switch in.Op {
-	case ir.OpAssign:
+	case ir.OpAssign, ir.OpAwait:
 		return n.provOf(args[0])
-	case ir.OpAwait:
+	case ir.OpNew:
+		// An instance is named after its class: new Pool() from
+		// require("pg") is a pg:Pool, so pool.query is pg:Pool.query.
 		return n.provOf(args[0])
 	case ir.OpCall:
 		if in.Aux.Flags.Has(ir.AuxRequire) && len(args) >= 2 {
@@ -231,7 +234,7 @@ func (r *resolver) moduleGlobals(m *ir.Module) map[string]string {
 	if init != nil {
 		// initProvenance resolves the module body's own global loads
 		// through imports only, so this never recurses.
-		names := &funcNames{r: r, m: m, f: init}
+		names := &funcNames{r: r, m: m, f: init, partial: g}
 		for i := 1; i < len(init.Instrs); i++ {
 			in := &init.Instrs[i]
 			if in.Op != ir.OpStore || !in.Aux.Flags.Has(ir.AuxGlobal) {
@@ -276,7 +279,8 @@ func (n *funcNames) initProvenance(v ir.ValueID) string {
 				return moduleRoot(spec)
 			}
 		}
-	case ir.OpAwait, ir.OpAssign:
+	case ir.OpAwait, ir.OpAssign, ir.OpNew:
+		// new Pool() is named after its class, like in provenance.
 		return n.initProvenance(args[0])
 	case ir.OpLoad:
 		if in.Aux.Flags.Has(ir.AuxGlobal) {
@@ -289,7 +293,7 @@ func (n *funcNames) initProvenance(v ir.ValueID) string {
 					return joinMember(root, imp.Imported)
 				}
 			}
-			return ""
+			return n.partial[in.Aux.Name.String()]
 		}
 		if in.Aux.Flags&(ir.AuxDynamic|ir.AuxCell|ir.AuxSuper|ir.AuxIterKey|ir.AuxIterValue|ir.AuxRest) == 0 && len(args) > 0 {
 			if base := n.initProvenance(args[0]); base != "" {
