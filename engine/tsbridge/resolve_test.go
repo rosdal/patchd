@@ -125,3 +125,27 @@ func TestPublicPackageName(t *testing.T) {
 		}
 	}
 }
+
+func TestTypeQualifiedName(t *testing.T) {
+	p := loadFixture(t, "resolve", LoadOptions{})
+	f := fileNamed(t, p, "main.ts")
+	tests := []struct {
+		needle string
+		want   string
+	}{
+		{"req.query", "express:Request"},     // the receiver of req.query
+		{"res.redirect", "express:Response"}, // a callback parameter's contextual type
+		{"app.get", "express:Express"},
+		{"prisma.$query", "@prisma/client:PrismaClient"},
+		{`"ls"`, ""}, // a primitive
+	}
+	for _, tt := range tests {
+		n := p.NodeAt(f.ID, offsetOf(t, f, tt.needle, 0))
+		if got := p.TypeQualifiedName(p.TypeOf(n)); got != tt.want {
+			t.Errorf("%q (%s: %s): TypeQualifiedName = %q, want %q", tt.needle, p.Text(n), p.TypeString(p.TypeOf(n)), got, tt.want)
+		}
+	}
+	if got := p.TypeQualifiedName(0); got != "" {
+		t.Errorf("TypeQualifiedName(0) = %q", got)
+	}
+}

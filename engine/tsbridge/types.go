@@ -1,6 +1,8 @@
 package tsbridge
 
 import (
+	"strings"
+
 	"github.com/microsoft/typescript-go/shim/ast"
 	"github.com/microsoft/typescript-go/shim/checker"
 )
@@ -220,6 +222,50 @@ func (p *Program) TypeString(t TypeID) string {
 		return ""
 	}
 	return e.c.TypeToString(e.t)
+}
+
+// TypeQualifiedName returns the qualified name (QualifiedName's format) of
+// the named type behind t: its alias when it has one, else its class or
+// interface. null and undefined are dropped from a union first, so
+// `Request | undefined` names express:Request. Anonymous, primitive and
+// other union types return "".
+//
+// Taint models use it to name a member read through destructuring, where
+// the property has no symbol of its own: `({ params }: Request)` reads
+// express:Request.params.
+func (p *Program) TypeQualifiedName(t TypeID) string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	defer p.recoverQuery("TypeQualifiedName")
+	e, ok := p.typeEntry(t)
+	if !ok {
+		return ""
+	}
+	typ := e.t
+	if typ.Flags()&checker.TypeFlagsUnion != 0 {
+		var only *checker.Type
+		for _, m := range typ.Types() {
+			if m.Flags()&(checker.TypeFlagsNull|checker.TypeFlagsUndefined|checker.TypeFlagsVoid) != 0 {
+				continue
+			}
+			if only != nil {
+				return ""
+			}
+			only = m
+		}
+		if only == nil {
+			return ""
+		}
+		typ = only
+	}
+	owner := typ.Symbol()
+	if a := typ.Alias(); a != nil && a.Symbol() != nil {
+		owner = a.Symbol()
+	}
+	if owner == nil || owner.Name == ast.InternalSymbolNameType || owner.Name == ast.InternalSymbolNameObject || strings.HasPrefix(owner.Name, "__") {
+		return ""
+	}
+	return p.qualifiedName(e.c, owner, nil)
 }
 
 // TypeFlags classifies a type.

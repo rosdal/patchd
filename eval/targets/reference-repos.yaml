@@ -80,3 +80,12 @@
   shape: esm-exports
   install: pnpm install --ignore-scripts --ignore-workspace # no lockfile in the repo
   tsconfig: auto
+
+# Deliberately vulnerable (v0.4 integration target, with nodegoat and juice-shop):
+# never start it or expose it on a network.
+- id: dvna
+  url: https://github.com/appsecco/dvna
+  commit: 9ba473add536f66ac9007966acb2a775dd31277a
+  shape: vulnerable-plain-js
+  install: pnpm install --ignore-scripts --ignore-workspace # no lockfile in the repo
+  tsconfig: auto

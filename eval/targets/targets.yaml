@@ -1,11 +1,13 @@
-# Pinned vulnerable apps used as eval targets.
+# Pinned vulnerable apps used as eval targets: analysed, never run. The clones
+# live in .patchd/targets/<name> (pnpm targets:fetch, from reference-repos.yaml);
+# the injection issues each one documents are in expected/<name>.yaml.
 targets:
   - name: juice-shop
     repo: https://github.com/juice-shop/juice-shop
-    ref: TODO
+    ref: 399fba76194305a312693eee44f4df64bdf0c3ce
   - name: nodegoat
     repo: https://github.com/OWASP/NodeGoat
-    ref: TODO
+    ref: c5cb68a7084e4ae7dcc60e6a98768720a81841e8
   - name: dvna
     repo: https://github.com/appsecco/dvna
-    ref: TODO
+    ref: 9ba473add536f66ac9007966acb2a775dd31277a
