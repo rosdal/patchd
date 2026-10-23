@@ -1,0 +1,41 @@
+module loop-in-try.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  v3 = array []
+  jump b2.try
+b2.try:  ; preds b1
+  jump b3.forof.head
+b3.forof.head:  ; preds b2 b8
+  branch * b4.forof.body b9.forof.done
+b4.forof.body:  ; preds b3
+  v4 = load v1[of]                        ; exceptional → b10.catch
+  jump b5.forof.body
+b5.forof.body:  ; preds b4
+  v5 = load global JSON                   ; exceptional → b10.catch
+  jump b6.forof.body
+b6.forof.body:  ; preds b5
+  v6 = call v5.parse(v4) this=v5          ; exceptional → b10.catch
+  jump b7.forof.body
+b7.forof.body:  ; preds b6
+  v7 = call v3.push(v6) this=v3           ; exceptional → b10.catch
+  jump b8.forof.body
+b8.forof.body:  ; preds b7
+  jump b3.forof.head
+b9.forof.done:  ; preds b3
+  jump b11.try.done
+b10.catch:  ; preds b4 b5 b6 b7
+  v8 = catchval
+  v9 = array []
+  return v9
+b11.try.done:  ; preds b9
+  return v3

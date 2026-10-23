@@ -1,0 +1,28 @@
+module optional-chain-type.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; optional-chain-type.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (u?: { profile?: { email: string; } | undefined; } | undefined) => string | undefined  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(u) function in f1  ; optional-chain-type.ts:1:1  : (u?: { profile?: { email: string; } | undefined; } | undefined) => string | undefined
+b1.entry:
+  v1 = param u                           : { profile?: { email: string; } | undefined; } | undefined
+  v2 = this
+  v3 = binop == v1 undefined
+  branch v3 b4.opt.short b2.opt.cont
+b2.opt.cont:  ; preds b1
+  v4 = load v1.profile                   : { email: string; } | undefined
+  v5 = binop == v4 undefined
+  branch v5 b4.opt.short b3.opt.cont
+b3.opt.cont:  ; preds b2
+  v6 = load v4.email                     : string | undefined
+  jump b5.opt.done
+b4.opt.short:  ; preds b1 b2
+  jump b5.opt.done
+b5.opt.done:  ; preds b3 b4
+  v7 = phi [b3: v6, b4: undefined]       : string | undefined
+  return v7

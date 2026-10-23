@@ -1,0 +1,31 @@
+module object-defaults.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(opts) function in f1
+b1.entry:
+  v1 = param opts
+  v2 = this
+  v3 = load v1.port                       ; path v1.port
+  v4 = binop === v3 undefined
+  branch v4 b2.default b3.default.done
+b2.default:  ; preds b1
+  v5 = const 80
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v6 = phi [b1: v3, b2: v5]               ; port
+  v7 = load v1.host                       ; path v1.host
+  v8 = binop === v7 undefined
+  branch v8 b4.default b5.default.done
+b4.default:  ; preds b3
+  v9 = const "localhost"
+  jump b5.default.done
+b5.default.done:  ; preds b3 b4
+  v10 = phi [b3: v7, b4: v9]              ; host
+  v11 = template [v10, ":", v6]
+  return v11

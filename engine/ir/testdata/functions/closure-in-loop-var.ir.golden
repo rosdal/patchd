@@ -1,0 +1,40 @@
+module closure-in-loop-var.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = cell i
+  v3 = array []
+  v4 = const 0
+  store *v2 = v4
+  jump b2.for.head
+b2.for.head:  ; preds b1 b4
+  v5 = load *v2
+  v6 = const 3
+  v7 = binop < v5 v6
+  branch v7 b3.for.body b5.for.done
+b3.for.body:  ; preds b2
+  v8 = closure f3 [v2]                    ; f.<anon@3:40>
+  v9 = call v3.push(v8) this=v3
+  jump b4.for.update
+b4.for.update:  ; preds b3
+  v10 = load *v2
+  v11 = const 1
+  v12 = binop + v10 v11
+  store *v2 = v12
+  jump b2.for.head
+b5.for.done:  ; preds b2
+  return v3
+
+func f3 f.<anon@3:40>() arrow in f2
+b1.entry:
+  v1 = free i (cell)
+  v2 = load *v1
+  return v2

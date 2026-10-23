@@ -1,0 +1,16 @@
+module template.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; query
+  store global query = v2
+  return undefined
+
+func f2 query(id, table) function in f1
+b1.entry:
+  v1 = param id
+  v2 = param table
+  v3 = this
+  v4 = template ["SELECT * FROM ", v2, " WHERE id = ", v1]
+  return v4

@@ -1,0 +1,24 @@
+module object-accessors.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 1
+  v3 = closure f2 []                      ; o.get v get
+  v4 = closure f3 []                      ; o.set v set
+  v5 = object {_v: v2, get v: v3, set v: v4}
+  store global o = v5
+  return undefined
+
+func f2 o.get v() getter in f1
+b1.entry:
+  v1 = this
+  v2 = load v1._v
+  return v2
+
+func f3 o.set v(x) setter in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  store v2._v = v1
+  return undefined

@@ -1,0 +1,16 @@
+module template-type.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; template-type.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (id: number) => `id=${number}`  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(id) function in f1  ; template-type.ts:1:1  : (id: number) => `id=${number}`
+b1.entry:
+  v1 = param id                          : number
+  v2 = this
+  v3 = template ["id=", v1]              : `id=${number}`
+  return v3

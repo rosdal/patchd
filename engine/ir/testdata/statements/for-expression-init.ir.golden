@@ -1,0 +1,27 @@
+module for-expression-init.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = const 10
+  jump b2.for.head
+b2.for.head:  ; preds b1 b4
+  v3 = phi [b1: v2, b4: v7]
+  v4 = const 0
+  v5 = binop > v3 v4
+  branch v5 b3.for.body b5.for.done
+b3.for.body:  ; preds b2
+  jump b4.for.update
+b4.for.update:  ; preds b3
+  v6 = const 3
+  v7 = binop - v3 v6
+  jump b2.for.head
+b5.for.done:  ; preds b2
+  return v3

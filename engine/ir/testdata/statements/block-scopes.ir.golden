@@ -1,0 +1,19 @@
+module block-scopes.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = const 1
+  v3 = load global use
+  v4 = call v3(v2)
+  v5 = const 2
+  v6 = load global use
+  v7 = call v6(v5)
+  return undefined

@@ -1,0 +1,11 @@
+module import-default.ts
+  import default as Client from "./lib" → ./lib.ts
+  export c = v3 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global Client
+  v3 = new v2()
+  store global c = v3
+  return undefined

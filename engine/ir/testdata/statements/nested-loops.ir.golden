@@ -1,0 +1,45 @@
+module nested-loops.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(n) function in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = const 0
+  v4 = const 0
+  jump b2.for.head
+b2.for.head:  ; preds b1 b8
+  v5 = phi [b1: v4, b8: v17]
+  v6 = phi [b1: v3, b8: v10]
+  v7 = binop < v5 v1
+  branch v7 b3.for.body b9.for.done
+b3.for.body:  ; preds b2
+  v8 = const 0
+  jump b4.for.head
+b4.for.head:  ; preds b3 b6
+  v9 = phi [b3: v8, b6: v15]
+  v10 = phi [b3: v6, b6: v13]
+  v11 = binop < v9 v5
+  branch v11 b5.for.body b7.for.done
+b5.for.body:  ; preds b4
+  v12 = binop * v5 v9
+  v13 = binop + v10 v12
+  jump b6.for.update
+b6.for.update:  ; preds b5
+  v14 = const 1
+  v15 = binop + v9 v14
+  jump b4.for.head
+b7.for.done:  ; preds b4
+  jump b8.for.update
+b8.for.update:  ; preds b7
+  v16 = const 1
+  v17 = binop + v5 v16
+  jump b2.for.head
+b9.for.done:  ; preds b2
+  return v6

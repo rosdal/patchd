@@ -1,0 +1,24 @@
+module class-new-target.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Base.constructor class
+  store global Base = v2
+  v3 = load v2.prototype
+  return undefined
+
+func f2 Base.constructor() constructor in f1
+b1.entry:
+  v1 = this
+  v2 = new.target
+  v3 = closure f3 []                      ; Base.<init>
+  v4 = call v3() this=v1
+  v5 = load v2.name
+  store v1.kind = v5
+  return undefined
+
+func f3 Base.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  return undefined

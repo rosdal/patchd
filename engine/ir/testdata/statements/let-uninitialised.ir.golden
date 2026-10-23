@@ -1,0 +1,31 @@
+module let-uninitialised.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b5
+  branch * b3.forof.body b6.forof.done
+b3.forof.body:  ; preds b2
+  v3 = load v1[of]
+  v4 = const 0
+  v5 = binop > v3 v4
+  branch v5 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v6 = v3
+  jump b5.if.done
+b5.if.done:  ; preds b3 b4
+  v7 = phi [b3: undefined, b4: v6]
+  v8 = load global use
+  v9 = call v8(v7)
+  jump b2.forof.head
+b6.forof.done:  ; preds b2
+  return undefined

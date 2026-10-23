@@ -1,0 +1,21 @@
+module try-empty.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  jump b4.try.done
+b3.catch:  ; unreachable
+  v2 = catchval
+  jump b4.try.done
+b4.try.done:  ; preds b2 b3
+  v3 = const 1
+  return v3

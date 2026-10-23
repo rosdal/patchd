@@ -1,0 +1,20 @@
+module or.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a) function in f1
+b1.entry:
+  v1 = param a
+  v2 = this
+  branch v1 b3.or.done b2.or.rhs
+b2.or.rhs:  ; preds b1
+  v3 = const "default"
+  jump b3.or.done
+b3.or.done:  ; preds b1 b2
+  v4 = phi [b1: v1, b2: v3]
+  return v4

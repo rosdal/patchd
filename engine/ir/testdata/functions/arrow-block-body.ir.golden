@@ -1,0 +1,15 @@
+module arrow-block-body.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; greet
+  store global greet = v2
+  return undefined
+
+func f2 greet(name) arrow in f1
+b1.entry:
+  v1 = param name
+  v2 = const "hi "
+  v3 = binop + v2 v1
+  return v3

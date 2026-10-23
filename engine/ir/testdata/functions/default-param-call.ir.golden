@@ -1,0 +1,22 @@
+module default-param-call.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(opts) function in f1
+b1.entry:
+  v1 = param opts
+  v2 = this
+  v3 = binop === v1 undefined
+  branch v3 b2.default b3.default.done
+b2.default:  ; preds b1
+  v4 = load global defaults
+  v5 = call v4()
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v6 = phi [b1: v1, b2: v5]
+  return v6

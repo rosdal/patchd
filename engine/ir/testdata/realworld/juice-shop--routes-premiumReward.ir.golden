@@ -1,0 +1,40 @@
+module juice-shop--routes-premiumReward.ts
+  import default as path from "node:path"
+  import Request from "express" (type)
+  import Response from "express" (type)
+  import challenges from "../data/datacache"
+  import * as challengeUtils from "../lib/challengeUtils"
+  export servePremiumContent = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; servePremiumContent
+  store global servePremiumContent = v2
+  return undefined
+
+func f2 servePremiumContent() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; servePremiumContent.<anon@14:10>
+  return v2
+
+func f3 servePremiumContent.<anon@14:10>(req, res) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = load global challengeUtils
+  v4 = load global challenges
+  v5 = load v4.premiumPaywallChallenge
+  v6 = closure f4 []                      ; servePremiumContent.<anon@14:10>.<anon@15:64>
+  v7 = call v3.solveIf(v5, v6) this=v3
+  v8 = load global path
+  v9 = const "frontend/dist/frontend/assets/private/JuiceShop_Wallpaper_1920x1080_VR.jpg"
+  v10 = call v8.resolve(v9) this=v8
+  v11 = call v2.sendFile(v10) this=v2
+  return undefined
+
+func f4 servePremiumContent.<anon@14:10>.<anon@15:64>() arrow in f3
+b1.entry:
+  v1 = const true
+  return v1

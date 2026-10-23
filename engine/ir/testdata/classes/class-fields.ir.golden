@@ -1,0 +1,29 @@
+module class-fields.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Config.constructor class
+  store global Config = v2
+  v3 = load v2.prototype
+  return undefined
+
+func f2 Config.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Config.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Config.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const "localhost"
+  store v1.host = v2
+  v3 = const 8080
+  store v1.port = v3
+  v4 = load v1.host
+  v5 = load v1.port
+  v6 = template ["http://", v4, ":", v5]
+  store v1.url = v6
+  return undefined

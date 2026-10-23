@@ -1,0 +1,25 @@
+module require-in-function.js
+  import default as fs from "fs" (require)
+  export default = v5 (commonjs)
+  export lazy = v4 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; lazy
+  store global lazy = v2
+  v3 = load global module
+  v4 = load global lazy
+  v5 = object {lazy: v4}
+  store v3.exports = v5
+  return undefined
+
+func f2 lazy() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global require
+  v3 = const "fs"
+  v4 = call v2(v3)                        ; require
+  v5 = const "/etc/passwd"
+  v6 = call v4.readFileSync(v5) this=v4
+  return v6

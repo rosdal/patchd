@@ -1,0 +1,27 @@
+module for-of-destructure.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(entries) function in f1
+b1.entry:
+  v1 = param entries
+  v2 = this
+  v3 = const 0
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b3
+  v4 = phi [b1: v3, b3: v9]
+  branch * b3.forof.body b4.forof.done
+b3.forof.body:  ; preds b2
+  v5 = load v1[of]
+  v6 = spread v5
+  v7 = load v6[0]
+  v8 = load v6[1]
+  v9 = binop + v4 v8
+  jump b2.forof.head
+b4.forof.done:  ; preds b2
+  return v4

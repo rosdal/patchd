@@ -1,0 +1,17 @@
+module call-plain.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(g) function in f1
+b1.entry:
+  v1 = param g
+  v2 = this
+  v3 = const 1
+  v4 = const 2
+  v5 = call v1(v3, v4)
+  return v5

@@ -1,0 +1,24 @@
+module optional-method-call.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  v3 = load v1.run
+  v4 = binop == v3 undefined
+  branch v4 b3.opt.short b2.opt.cont
+b2.opt.cont:  ; preds b1
+  v5 = call v3() this=v1                  ; optional
+  jump b4.opt.done
+b3.opt.short:  ; preds b1
+  jump b4.opt.done
+b4.opt.done:  ; preds b2 b3
+  v6 = phi [b2: v5, b3: undefined]
+  return v6

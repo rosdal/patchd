@@ -1,0 +1,90 @@
+module commerce--lib-type-guards.ts
+  export isObject = v3 (declaration)
+  export isShopifyError = v4 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f4 []                      ; findError
+  store global findError = v2
+  v3 = closure f2 []                      ; isObject
+  store global isObject = v3
+  v4 = closure f3 []                      ; isShopifyError
+  store global isShopifyError = v4
+  return undefined
+
+func f2 isObject(object) arrow in f1
+b1.entry:
+  v1 = param object
+  v2 = unop typeof v1
+  v3 = const "object"
+  v4 = binop === v2 v3
+  branch v4 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v5 = const null
+  v6 = binop !== v1 v5
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v7 = phi [b1: v4, b2: v6]
+  branch v7 b4.and.rhs b5.and.done
+b4.and.rhs:  ; preds b3
+  v8 = load global Array
+  v9 = call v8.isArray(v1) this=v8
+  v10 = unop ! v9
+  jump b5.and.done
+b5.and.done:  ; preds b3 b4
+  v11 = phi [b3: v7, b4: v10]
+  return v11
+
+func f3 isShopifyError(error) arrow in f1
+b1.entry:
+  v1 = param error
+  v2 = load global isObject
+  v3 = call v2(v1)
+  v4 = unop ! v3
+  branch v4 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v5 = const false
+  return v5
+b3.if.done:  ; preds b1
+  v6 = load global Error
+  v7 = binop instanceof v1 v6
+  branch v7 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v8 = const true
+  return v8
+b5.if.done:  ; preds b3
+  v9 = load global findError
+  v10 = call v9(v1)
+  return v10
+
+func f4 findError(error) function in f1
+b1.entry:
+  v1 = param error
+  v2 = this
+  v3 = load global Object
+  v4 = load v3.prototype
+  v5 = load v4.toString
+  v6 = call v5.call(v1) this=v5
+  v7 = const "[object Error]"
+  v8 = binop === v6 v7
+  branch v8 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v9 = const true
+  return v9
+b3.if.done:  ; preds b1
+  v10 = load global Object
+  v11 = call v10.getPrototypeOf(v1) this=v10
+  v12 = const null
+  v13 = binop === v11 v12
+  branch v13 b4.cond.true b5.cond.false
+b4.cond.true:  ; preds b3
+  v14 = const false
+  jump b6.cond.done
+b5.cond.false:  ; preds b3
+  v15 = load global findError
+  v16 = call v15(v11)
+  jump b6.cond.done
+b6.cond.done:  ; preds b4 b5
+  v17 = phi [b4: v14, b5: v16]
+  return v17

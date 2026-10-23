@@ -8,7 +8,7 @@ typescript-go's internals are reached through generated shims ([ADR 0007](../adr
 
 1. **Discover** (`Discover`) walks the repo, skipping `node_modules`, VCS directories, build output (`dist`, `build`, `.next`, `out`, `coverage`, …) and everything `.gitignore` excludes. It collects `tsconfig.json`, `tsconfig.*.json` and `jsconfig.json`, detects workspace layouts (pnpm, npm and Yarn workspaces, Turborepo, Nx, Lerna), parses every config with typescript-go's own parser (following `extends`, including from npm packages, and `references`), and gives each source file to the **most specific** config that includes it: the deepest directory, then the config with fewer files. Configs that list `files` (Angular's `tsconfig.app.json`) also own the files their program reaches through imports. Base configs that only exist to be extended are not projects. Files no config covers go into a **synthesised project** per nearest `package.json`: `allowJs`, `checkJs: false`, `strict: false`, `target: es2024`, `module: nodenext`.
 2. **Load** (`Load`) builds one program: the files the project owns plus every `.d.ts` its config includes, on a read-only file system (Patchd never writes into the analysed repo). It parses, binds and type-checks the root files in parallel and collects diagnostics without ever failing on type errors.
-3. **LoadAll** runs projects in a worker pool (`Jobs`, default: CPU cores) inside a memory budget (`MaxMemory`, default 75% of available RAM; each project's cost is estimated from its source size), shares parsed `node_modules` declarations and lib files between programs, and closes each program after the caller's `visit` returns.
+3. **LoadAll** runs projects in a worker pool (`Jobs`, default: CPU cores) inside a memory budget (`MaxMemory`, default `DefaultMemoryBudget()`: 75% of available RAM; each project's cost is estimated from its source size), shares parsed `node_modules` declarations and lib files between programs, and closes each program after the caller's `visit` returns.
 
 Options TypeScript 7 removed are translated so TypeScript 5-era configs keep working: `baseUrl` becomes `paths` relative to the same directory, and `moduleResolution: node`/`classic` resolve as `bundler` (TSB009). Without `types` in a config, every `@types` package is included, as TypeScript 5 did.
 
@@ -56,9 +56,12 @@ The questions a program answers:
 | Syntax                | `Root`, `Kind`, `Children`, `Parent`, `Range`, `Text`, `NodeAt`, `Walk`, `NodeCount`                                                            |
 | Positions (on `File`) | `Position` (1-based, UTF-16: GitHub, SARIF), `LSPPosition` (0-based, UTF-16), `Offset`, `OffsetLSP`                                             |
 | Symbols and types     | `SymbolOf`, `SymbolName`, `TypeOf`, `TypeString`, `TypeFlags`, `UnionMembers`, `IntersectionMembers`, `Properties`, `IsAssignable`, `Signature` |
-| Resolution            | `ResolveCall`, `ResolveAlias`, `Declarations`, `QualifiedName`                                                                                  |
+| Resolution            | `ResolveCall`, `ResolveAlias`, `Declarations`, `QualifiedName`, `ResolveModule`                                                                 |
+| Whole-file passes     | `Tree` (a lock-free syntax view), `TypesOf`, `ValueSymbols`                                                                                     |
 
 Handles (`FileID`, `NodeID`, `SymbolID`, `TypeID`) are small values valid only for their program. No method panics on bad input: it returns the zero value or `ok=false`. Methods are safe for concurrent use.
+
+**Whole-file passes.** A builder that visits every node (the IR builder) would take the program's lock millions of times. `Tree(file)` returns a read-only view of one file's syntax that answers `Kind`, `Children`, `Parent`, `Range`, `Text` without the lock, plus what lowering needs beyond them: `Value` (an identifier's name or a literal's cooked text), `Operator` (of a binary, prefix or postfix expression, token, modifier or heritage clause), `Flags` (`let`/`const`, optional chains and `?.`, modifiers, `function*`, `for await`, type-only imports, `export =`) and `Role` (which field of an ambiguous parent a child fills: a `for` statement's initializer, condition, incrementor and body; a binding element's property name, name and default; a specifier's property name and name). `TypesOf(nodes)` and `ValueSymbols(nodes)` answer for many nodes under one lock, without memoising per node. `ValueSymbols` names bindings as values: the `a` of a shorthand property `{a}` is the variable, the `a` of `export {a}` is the local. `ResolveModule(specifier)` returns the file, package or `declare module` an import, export, `require` or `import()` specifier resolves to.
 
 Positions are byte offsets. Lines end at `\n`, `\r\n` or a lone `\r`; columns count UTF-16 code units, a byte order mark is not a column, and a tab is one column. Ranges start at a node's first token, after its leading comments.
 
@@ -126,6 +129,8 @@ Before these, imports into referenced projects resolved to their build output; r
 | `patchd debug types <file>:<line>:<col>` | Node kind, symbol, qualified name, type, flags, declarations; `--batch positions.json` answers many (the oracle uses it)       |
 | `patchd debug resolve <file>`            | Every call in the file with its qualified name, or why it didn't resolve                                                       |
 | `patchd debug stats [path]`              | Files, nodes, call resolution rate by reason, type errors, warnings, timings, peak heap and RSS                                |
+| `patchd debug ir <file>[:<function>]`    | The file's Patchd IR, or one function's (`--types`, `--source`, `--names`, `--dot`); see [ir.md](ir.md)                        |
+| `patchd debug ir-coverage [path]`        | Share of syntax lowered to IR, top unsupported kinds, `--verify` to validate every function                                    |
 
 ## Testing
 

@@ -52,10 +52,7 @@ func LoadAll(ctx context.Context, ws *Workspace, opts LoadAllOptions, visit func
 		stats.Jobs = defaultJobs()
 	}
 	if stats.Budget == 0 {
-		stats.Budget = sysmem.Available() / 4 * 3
-		if stats.Budget == 0 {
-			stats.Budget = 4 << 30
-		}
+		stats.Budget = DefaultMemoryBudget()
 	}
 	if !opts.NoSharedCache {
 		opts.cache = newParseCache()
@@ -138,6 +135,17 @@ feed:
 		firstErr = parent.Err()
 	}
 	return stats, firstErr
+}
+
+// DefaultMemoryBudget is the memory budget LoadAll uses when MaxMemory is 0:
+// 75% of the memory available now (4 GB when that can't be read). Callers
+// that keep more than the programs alive, like the IR builder's, use it to
+// size their own share and a GC memory limit.
+func DefaultMemoryBudget() uint64 {
+	if b := sysmem.Available() / 4 * 3; b > 0 {
+		return b
+	}
+	return 4 << 30
 }
 
 // estimateCost guesses a project's peak memory from its source size. The

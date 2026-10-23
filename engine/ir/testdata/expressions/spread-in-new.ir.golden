@@ -1,0 +1,17 @@
+module spread-in-new.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(args) function in f1
+b1.entry:
+  v1 = param args
+  v2 = this
+  v3 = load global URL
+  v4 = spread v1
+  v5 = new v3(...v4)
+  return v5

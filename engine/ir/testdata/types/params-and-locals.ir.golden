@@ -1,0 +1,20 @@
+module params-and-locals.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; params-and-locals.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (a: number, b: string) => number  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a, b) function in f1  ; params-and-locals.ts:1:1  : (a: number, b: string) => number
+b1.entry:
+  v1 = param a                           : number
+  v2 = param b                           : string
+  v3 = this
+  v4 = const 2                           : 2
+  v5 = call v1.toFixed(v4) this=v1       : string
+  v6 = binop + v5 v2                     : string
+  v7 = load v6.length                    : number
+  return v7

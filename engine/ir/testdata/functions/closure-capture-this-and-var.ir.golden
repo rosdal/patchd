@@ -1,0 +1,52 @@
+module closure-capture-this-and-var.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Svc.constructor class
+  store global Svc = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Svc.run
+  store v3.run = v4                       ; method
+  return undefined
+
+func f2 Svc.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Svc.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Svc.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const "svc"
+  store v1.name = v2
+  return undefined
+
+func f4 Svc.run(items) method in f1
+b1.entry:
+  v1 = param items
+  v2 = this
+  v3 = cell count
+  v4 = const 0
+  store *v3 = v4
+  v5 = closure f5 [v2, v3]                ; Svc.run.<anon@5:19>
+  v6 = call v1.forEach(v5) this=v1
+  v7 = load *v3
+  return v7
+
+func f5 Svc.run.<anon@5:19>(i) arrow in f4
+b1.entry:
+  v1 = param i
+  v2 = free this
+  v3 = free count (cell)
+  v4 = load *v3
+  v5 = const 1
+  v6 = binop + v4 v5
+  store *v3 = v6
+  v7 = load global console
+  v8 = load v2.name
+  v9 = load *v3
+  v10 = call v7.log(v8, v1, v9) this=v7
+  return undefined

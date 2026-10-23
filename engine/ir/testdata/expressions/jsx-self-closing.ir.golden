@@ -1,0 +1,20 @@
+module jsx-self-closing.tsx
+  export User = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; User
+  store global User = v2
+  return undefined
+
+func f2 User(p) function in f1
+b1.entry:
+  v1 = param p
+  v2 = this
+  v3 = load global Avatar
+  v4 = load v1.url
+  v5 = object {src: v4}
+  v6 = array []
+  v7 = call %jsx(v3, v5, v6)              ; jsx
+  return v7

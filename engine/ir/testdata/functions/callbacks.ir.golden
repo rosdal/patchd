@@ -1,0 +1,42 @@
+module callbacks.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  v3 = closure f3 []                      ; f.<anon@3:13>
+  v4 = call v1.filter(v3) this=v1
+  v5 = closure f4 []                      ; f.<anon@4:10>
+  v6 = call v4.map(v5) this=v4
+  v7 = closure f5 []                      ; f.<anon@5:13>
+  v8 = const 0
+  v9 = call v6.reduce(v7, v8) this=v6
+  return v9
+
+func f3 f.<anon@3:13>(x) arrow in f2
+b1.entry:
+  v1 = param x
+  v2 = const 0
+  v3 = binop > v1 v2
+  return v3
+
+func f4 f.<anon@4:10>(x) arrow in f2
+b1.entry:
+  v1 = param x
+  v2 = const 2
+  v3 = binop * v1 v2
+  return v3
+
+func f5 f.<anon@5:13>(a, b) arrow in f2
+b1.entry:
+  v1 = param a
+  v2 = param b
+  v3 = binop + v1 v2
+  return v3

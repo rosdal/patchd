@@ -1,0 +1,16 @@
+module top-level-await.ts
+  export body = v8 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global fetch
+  v3 = const "https://example.com"
+  v4 = call v2(v3)
+  v5 = await v4
+  store global res = v5
+  v6 = load global res
+  v7 = call v6.text() this=v6
+  v8 = await v7
+  store global body = v8
+  return undefined

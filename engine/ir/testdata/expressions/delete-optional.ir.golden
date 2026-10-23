@@ -1,0 +1,24 @@
+module delete-optional.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  v3 = binop == v1 undefined
+  branch v3 b3.opt.short b2.opt.cont
+b2.opt.cont:  ; preds b1
+  v4 = delete v1.a
+  jump b4.opt.done
+b3.opt.short:  ; preds b1
+  v5 = const true
+  jump b4.opt.done
+b4.opt.done:  ; preds b2 b3
+  v6 = phi [b2: v4, b3: v5]
+  return v6

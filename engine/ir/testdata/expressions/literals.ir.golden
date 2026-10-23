@@ -1,0 +1,26 @@
+module literals.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "a\tb"
+  store global s = v2
+  v3 = const 31
+  store global n = v3
+  v4 = const 1500
+  store global f = v4
+  v5 = const 10n
+  store global big = v5
+  v6 = const true
+  store global t = v6
+  v7 = const false
+  store global no = v7
+  v8 = const null
+  store global nil = v8
+  v9 = const undefined
+  store global u = v9
+  v10 = const /ab+c/gi
+  store global re = v10
+  v11 = const "plain"
+  store global ns = v11
+  return undefined

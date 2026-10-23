@@ -1,0 +1,40 @@
+module try-catch-variable-merge.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = const "start"
+  jump b2.try
+b2.try:  ; preds b1
+  v3 = const "read"
+  v4 = load global read                   ; exceptional → b7.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v5 = call v4()                          ; exceptional → b7.catch
+  jump b4.try
+b4.try:  ; preds b3
+  v6 = const "parse"
+  v7 = load global parse                  ; exceptional → b7.catch
+  jump b5.try
+b5.try:  ; preds b4
+  v8 = call v7()                          ; exceptional → b7.catch
+  jump b6.try
+b6.try:  ; preds b5
+  v9 = const "done"
+  jump b8.try.done
+b7.catch:  ; preds b2 b3 b4 b5
+  v10 = phi [b2: v3, b3: v3, b4: v6, b5: v6]
+  v11 = catchval
+  v12 = load global report
+  v13 = call v12(v10)
+  jump b8.try.done
+b8.try.done:  ; preds b6 b7
+  v14 = phi [b6: v9, b7: v10]
+  return v14

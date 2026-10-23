@@ -1,0 +1,85 @@
+module execa--lib-methods-command.js
+  export parseCommandString = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; parseCommandString
+  store global parseCommandString = v2
+  v3 = const /(?:\\ |[^ ])+/g
+  store global TOKEN_REGEXP = v3
+  v4 = closure f4 []                      ; trimCommand
+  store global trimCommand = v4
+  return undefined
+
+func f2 parseCommandString(command) arrow in f1
+b1.entry:
+  v1 = param command
+  v2 = unop typeof v1
+  v3 = const "string"
+  v4 = binop !== v2 v3
+  branch v4 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v5 = load global TypeError
+  v6 = load global String
+  v7 = call v6(v1)
+  v8 = template ["The command must be a string: ", v7, "."]
+  v9 = new v5(v8)
+  throw v9
+b3.if.done:  ; preds b1
+  v10 = load global trimCommand
+  v11 = call v10(v1)
+  v12 = load global TOKEN_REGEXP
+  v13 = call v11.match(v12) this=v11
+  v14 = binop == v13 undefined
+  branch v14 b5.opt.short b4.opt.cont
+b4.opt.cont:  ; preds b3
+  v15 = closure f3 []                     ; parseCommandString.<anon@10:55>
+  v16 = call v13.map(v15) this=v13
+  jump b6.opt.done
+b5.opt.short:  ; preds b3
+  jump b6.opt.done
+b6.opt.done:  ; preds b4 b5
+  v17 = phi [b4: v16, b5: undefined]
+  v18 = binop == v17 undefined
+  branch v18 b7.nullish.rhs b8.nullish.done
+b7.nullish.rhs:  ; preds b6
+  v19 = array []
+  jump b8.nullish.done
+b8.nullish.done:  ; preds b6 b7
+  v20 = phi [b6: v17, b7: v19]
+  return v20
+
+func f3 parseCommandString.<anon@10:55>(token) arrow in f2
+b1.entry:
+  v1 = param token
+  v2 = const "\\ "
+  v3 = const " "
+  v4 = call v1.replaceAll(v2, v3) this=v1
+  return v4
+
+func f4 trimCommand(command) arrow in f1
+b1.entry:
+  v1 = param command
+  v2 = call v1.trim() this=v1
+  v3 = call v1.trimEnd() this=v1
+  v4 = const "\\"
+  v5 = call v3.endsWith(v4) this=v3
+  branch v5 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v6 = load v3.length
+  v7 = load v1[v6]
+  v8 = const " "
+  v9 = binop === v7 v8
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v10 = phi [b1: v5, b2: v9]
+  branch v10 b4.cond.true b5.cond.false
+b4.cond.true:  ; preds b3
+  v11 = template [v2, " "]
+  jump b6.cond.done
+b5.cond.false:  ; preds b3
+  jump b6.cond.done
+b6.cond.done:  ; preds b4 b5
+  v12 = phi [b4: v11, b5: v2]
+  return v12

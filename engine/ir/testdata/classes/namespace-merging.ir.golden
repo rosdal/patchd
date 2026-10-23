@@ -1,0 +1,29 @@
+module namespace-merging.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = object {}
+  store global N = v2
+  v3 = closure f2 []                      ; N
+  v4 = call v3(v2)
+  v5 = load global N
+  v6 = closure f3 []                      ; N
+  v7 = call v6(v5)
+  return undefined
+
+func f2 N(N) namespace in f1
+b1.entry:
+  v1 = param N
+  v2 = this
+  v3 = const 1
+  store v1.a = v3
+  return undefined
+
+func f3 N(N) namespace in f1
+b1.entry:
+  v1 = param N
+  v2 = this
+  v3 = const 2
+  store v1.b = v3
+  return undefined

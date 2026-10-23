@@ -1,0 +1,57 @@
+module forof-continue-reassign.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; lookup
+  store global lookup = v2
+  return undefined
+
+func f2 lookup(root, path, silent) function in f1
+b1.entry:
+  v1 = param root
+  v2 = param path
+  v3 = param silent
+  v4 = this
+  v5 = const "/"
+  v6 = call v2.split(v5) this=v2
+  v7 = v1
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b4 b12
+  v8 = phi [b1: v7, b4: v8, b12: v21]
+  branch * b3.forof.body b13.forof.done
+b3.forof.body:  ; preds b2
+  v9 = load v6[of]
+  v10 = unop ! v9
+  branch v10 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  jump b2.forof.head
+b5.if.done:  ; preds b3
+  v11 = load v8.entries
+  branch v11 b6.if.then b7.if.done
+b6.if.then:  ; preds b5
+  v12 = load v8.entries
+  v13 = call v12.get(v9) this=v12
+  jump b7.if.done
+b7.if.done:  ; preds b5 b6
+  v14 = phi [b5: undefined, b6: v13]
+  v15 = unop ! v14
+  branch v15 b8.if.then b12.if.done
+b8.if.then:  ; preds b7
+  v16 = unop ! v3
+  branch v16 b9.if.then b10.if.else
+b9.if.then:  ; preds b8
+  v17 = load global Error
+  v18 = const "not found"
+  v19 = new v17(v18)
+  throw v19
+b10.if.else:  ; preds b8
+  v20 = const undefined
+  return v20
+b11.if.done:  ; unreachable
+  jump b12.if.done
+b12.if.done:  ; preds b7 b11
+  v21 = v14
+  jump b2.forof.head
+b13.forof.done:  ; preds b2
+  return v8

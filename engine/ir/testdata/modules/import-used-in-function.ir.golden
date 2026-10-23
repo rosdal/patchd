@@ -1,0 +1,16 @@
+module import-used-in-function.ts
+  import version from "./lib" → ./lib.ts
+  export v = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; v
+  store global v = v2
+  return undefined
+
+func f2 v() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global version
+  return v2

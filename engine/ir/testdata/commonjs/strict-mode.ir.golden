@@ -1,0 +1,9 @@
+module strict-mode.js
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "use strict"
+  v3 = const 1
+  store global x = v3
+  return undefined

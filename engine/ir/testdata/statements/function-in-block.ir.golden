@@ -1,0 +1,27 @@
+module function-in-block.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(c) function in f1
+b1.entry:
+  v1 = param c
+  v2 = this
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v3 = closure f3 []                      ; f.g
+  v4 = call v3()
+  return v4
+b3.if.done:  ; preds b1
+  v5 = const 0
+  return v5
+
+func f3 f.g() function in f2
+b1.entry:
+  v1 = this
+  v2 = const 1
+  return v2

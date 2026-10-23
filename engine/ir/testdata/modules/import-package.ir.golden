@@ -1,0 +1,35 @@
+module import-package.ts
+  import default as express from "express" → package express
+  import readFile from "node:fs"
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global express
+  v3 = call v2()
+  store global app = v3
+  v4 = load global app
+  v5 = const "/"
+  v6 = closure f2 []                      ; <anon@4:14>
+  v7 = call v4.get(v5, v6) this=v4
+  return undefined
+
+func f2 <anon@4:14>(req, res) arrow in f1
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = cell res
+  store *v3 = v2
+  v4 = load global readFile
+  v5 = load v1.query
+  v6 = load v5.f
+  v7 = closure f3 [v3]                    ; <anon@4:14>.<anon@4:60>
+  v8 = call v4(v6, v7)
+  return v8
+
+func f3 <anon@4:14>.<anon@4:60>() arrow in f2
+b1.entry:
+  v1 = free res (cell)
+  v2 = load *v1
+  v3 = call v2.end() this=v2
+  return v3

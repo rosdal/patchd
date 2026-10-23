@@ -1,0 +1,13 @@
+module create-t3-turbo--packages-api-src-index.ts
+  import inferRouterInputs from "@trpc/server" (type)
+  import inferRouterOutputs from "@trpc/server" (type)
+  import AppRouter from "./root" (type)
+  import appRouter from "./root" (re-export)
+  import createTRPCContext from "./trpc" (re-export)
+  export appRouter = appRouter from "./root" (re-export)
+  export createTRPCContext = createTRPCContext from "./trpc" (re-export)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  return undefined

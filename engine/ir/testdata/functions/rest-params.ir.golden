@@ -1,0 +1,16 @@
+module rest-params.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(first, ...rest) function in f1
+b1.entry:
+  v1 = param first
+  v2 = param rest
+  v3 = this
+  v4 = load v2.length
+  return v4

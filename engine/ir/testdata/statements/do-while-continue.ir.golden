@@ -1,0 +1,36 @@
+module do-while-continue.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  v3 = const 0
+  jump b2.do.body
+b2.do.body:  ; preds b1 b5
+  v4 = phi [b1: v3, b5: v6]
+  v5 = const 1
+  v6 = binop + v4 v5
+  v7 = load v1[v6]
+  v8 = const 0
+  v9 = binop < v7 v8
+  branch v9 b3.if.then b4.if.done
+b3.if.then:  ; preds b2
+  jump b5.do.test
+b4.if.done:  ; preds b2
+  v10 = load global use
+  v11 = load v1[v6]
+  v12 = call v10(v11)
+  jump b5.do.test
+b5.do.test:  ; preds b3 b4
+  v13 = load v1.length
+  v14 = binop < v6 v13
+  branch v14 b2.do.body b6.do.done
+b6.do.done:  ; preds b5
+  return undefined

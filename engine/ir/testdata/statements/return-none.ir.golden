@@ -1,0 +1,21 @@
+module return-none.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(c) function in f1
+b1.entry:
+  v1 = param c
+  v2 = this
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  return undefined
+b3.if.done:  ; preds b1
+  v3 = load global console
+  v4 = const "go"
+  v5 = call v3.log(v4) this=v3
+  return undefined

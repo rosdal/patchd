@@ -1,0 +1,20 @@
+module jsx-member-tag.tsx
+  export C = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; C
+  store global C = v2
+  return undefined
+
+func f2 C() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global UI
+  v3 = load v2.Card
+  v4 = const "x"
+  v5 = object {title: v4}
+  v6 = array []
+  v7 = call %jsx(v3, v5, v6)              ; jsx
+  return v7

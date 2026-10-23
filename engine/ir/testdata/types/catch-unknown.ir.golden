@@ -1,0 +1,28 @@
+module catch-unknown.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; catch-unknown.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : () => unknown  ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1  ; catch-unknown.ts:1:1  : () => unknown
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v2 = load global JSON                  : JSON  ; exceptional → b5.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v3 = const "x"                         : "x"
+  v4 = call v2.parse(v3) this=v2         : any  ; exceptional → b5.catch
+  jump b4.try
+b4.try:  ; preds b3
+  jump b6.try.done
+b5.catch:  ; preds b2 b3
+  v5 = catchval                          : unknown
+  return v5
+b6.try.done:  ; preds b4
+  return undefined

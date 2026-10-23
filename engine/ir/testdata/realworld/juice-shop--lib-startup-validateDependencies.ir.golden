@@ -1,0 +1,112 @@
+module juice-shop--lib-startup-validateDependencies.ts
+  import default as colors from "colors/safe"
+  import * as utils from "../utils"
+  import default as logger from "../logger"
+  import default as dependencyChecker from "check-dependencies"
+  export default = v3 (default)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; validateDependencies
+  store global validateDependencies = v2
+  v3 = load global validateDependencies
+  return undefined
+
+func f2 validateDependencies(v1) arrow async in f1
+b1.entry:
+  v1 = param
+  v2 = binop === v1 undefined
+  branch v2 b2.default b3.default.done
+b2.default:  ; preds b1
+  v3 = object {}
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v4 = phi [b1: v1, b2: v3]
+  v5 = load v4.packageDir
+  v6 = binop === v5 undefined
+  branch v6 b4.default b5.default.done
+b4.default:  ; preds b3
+  v7 = const "."
+  jump b5.default.done
+b5.default.done:  ; preds b3 b4
+  v8 = phi [b3: v5, b4: v7]
+  v9 = object {}
+  jump b6.try
+b6.try:  ; preds b5
+  v10 = load global dependencyChecker     ; exceptional → b12.catch
+  jump b7.try
+b7.try:  ; preds b6
+  v11 = const "dependencies"
+  v12 = array [v11]                       ; exceptional → b12.catch
+  jump b8.try
+b8.try:  ; preds b7
+  v13 = object {packageDir: v8, scopeList: v12}  ; exceptional → b12.catch
+  jump b9.try
+b9.try:  ; preds b8
+  v14 = call v10(v13)                     ; exceptional → b12.catch
+  jump b10.try
+b10.try:  ; preds b9
+  v15 = await v14                         ; exceptional → b12.catch
+  jump b11.try
+b11.try:  ; preds b10
+  jump b13.try.done
+b12.catch:  ; preds b6 b7 b8 b9 b10
+  v16 = catchval
+  v17 = load global logger
+  v18 = load global colors
+  v19 = const "/package.json"
+  v20 = binop + v8 v19
+  v21 = call v18.bold(v20) this=v18
+  v22 = load global utils
+  v23 = call v22.getErrorMessage(v16) this=v22
+  v24 = load global colors
+  v25 = const "ERROR"
+  v26 = call v24.red(v25) this=v24
+  v27 = template ["Dependencies in ", v21, " could not be checked due to \"", v23, "\" error (", v26, ")"]
+  v28 = call v17.warn(v27) this=v17
+  jump b13.try.done
+b13.try.done:  ; preds b11 b12
+  v29 = phi [b11: v15, b12: v9]
+  v30 = load v29.depsWereOk
+  v31 = const true
+  v32 = binop === v30 v31
+  branch v32 b14.if.then b15.if.else
+b14.if.then:  ; preds b13
+  v33 = load global logger
+  v34 = load global colors
+  v35 = const "/package.json"
+  v36 = binop + v8 v35
+  v37 = call v34.bold(v36) this=v34
+  v38 = load global colors
+  v39 = const "SUCCESS"
+  v40 = call v38.green(v39) this=v38
+  v41 = template ["All dependencies in ", v37, " are satisfied (", v40, ")"]
+  v42 = call v33.info(v41) this=v33
+  v43 = const true
+  return v43
+b15.if.else:  ; preds b13
+  v44 = load global logger
+  v45 = load global colors
+  v46 = const "/package.json"
+  v47 = binop + v8 v46
+  v48 = call v45.bold(v47) this=v45
+  v49 = load global colors
+  v50 = const "ERROR"
+  v51 = call v49.red(v50) this=v49
+  v52 = template ["Dependencies in ", v48, " are not rightly satisfied (", v51, ")"]
+  v53 = call v44.warn(v52) this=v44
+  v54 = load v29.error
+  jump b16.forof.head
+b16.forof.head:  ; preds b15 b17
+  branch * b17.forof.body b18.forof.done
+b17.forof.body:  ; preds b16
+  v55 = load v54[of]
+  v56 = load global logger
+  v57 = call v56.warn(v55) this=v56
+  jump b16.forof.head
+b18.forof.done:  ; preds b16
+  v58 = const false
+  return v58
+b19.if.done:  ; unreachable
+  return undefined

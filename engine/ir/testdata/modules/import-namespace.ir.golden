@@ -1,0 +1,11 @@
+module import-namespace.ts
+  import * as lib from "./lib" → ./lib.ts
+  export v = v3 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global lib
+  v3 = load v2.version
+  store global v = v3
+  return undefined

@@ -1,0 +1,13 @@
+module enum-string.ts
+  export Level = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = object {}
+  v3 = const "debug"
+  store v2.Debug = v3
+  v4 = const "info"
+  store v2.Info = v4
+  store global Level = v2
+  return undefined

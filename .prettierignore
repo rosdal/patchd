@@ -7,6 +7,7 @@ store/gen/
 api/gen/
 engine/testdata/
 engine/tsbridge/testdata/
+engine/ir/testdata/
 .patchd/
 **/*.go
 # exported from the design docs; edited at the source, not here

@@ -1,0 +1,23 @@
+module dynamic-import.ts
+  import * from "./lib" (dynamic) → ./lib.ts
+  export load = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; load
+  store global load = v2
+  return undefined
+
+func f2 load(name) function async in f1
+b1.entry:
+  v1 = param name
+  v2 = this
+  v3 = const "./lib"
+  v4 = call %import(v3)                   ; import
+  v5 = await v4
+  v6 = call %import(v1)                   ; import
+  v7 = await v6
+  v8 = load v5.version
+  v9 = array [v8, v7]
+  return v9

@@ -1,0 +1,13 @@
+module jsdoc-typedef.js
+  export default = v5 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "x"
+  v3 = object {id: v2}
+  store global u = v3
+  v4 = load global module
+  v5 = load global u
+  store v4.exports = v5
+  return undefined

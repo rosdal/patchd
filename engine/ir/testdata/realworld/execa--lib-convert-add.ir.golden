@@ -1,0 +1,64 @@
+module execa--lib-convert-add.js
+  import initializeConcurrentStreams from "./concurrent.js"
+  import createReadable from "./readable.js"
+  import createWritable from "./writable.js"
+  import createDuplex from "./duplex.js"
+  import createReadableStream from "./web.js"
+  import createWritableStream from "./web.js"
+  import createTransformStream from "./web.js"
+  import createIterable from "./iterable.js"
+  export addConvertedStreams = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; addConvertedStreams
+  store global addConvertedStreams = v2
+  return undefined
+
+func f2 addConvertedStreams(subprocess, v2) arrow in f1
+b1.entry:
+  v1 = param subprocess
+  v2 = param
+  v3 = load v2.encoding
+  v4 = load global initializeConcurrentStreams
+  v5 = call v4()
+  v6 = load global createReadable
+  v7 = const undefined
+  v8 = object {subprocess: v1, concurrentStreams: v5, encoding: v3}
+  v9 = call v6.bind(v7, v8) this=v6
+  store v1.readable = v9
+  v10 = load global createWritable
+  v11 = const undefined
+  v12 = object {subprocess: v1, concurrentStreams: v5}
+  v13 = call v10.bind(v11, v12) this=v10
+  store v1.writable = v13
+  v14 = load global createDuplex
+  v15 = const undefined
+  v16 = object {subprocess: v1, concurrentStreams: v5, encoding: v3}
+  v17 = call v14.bind(v15, v16) this=v14
+  store v1.duplex = v17
+  v18 = load global createReadableStream
+  v19 = const undefined
+  v20 = call v18.bind(v19, v1) this=v18
+  store v1.readableStream = v20
+  v21 = load global createWritableStream
+  v22 = const undefined
+  v23 = call v21.bind(v22, v1) this=v21
+  store v1.writableStream = v23
+  v24 = load global createTransformStream
+  v25 = const undefined
+  v26 = call v24.bind(v25, v1) this=v24
+  store v1.transformStream = v26
+  v27 = load global createIterable
+  v28 = const undefined
+  v29 = call v27.bind(v28, v1, v3) this=v27
+  store v1.iterable = v29
+  v30 = load global Symbol
+  v31 = load v30.asyncIterator
+  v32 = load global createIterable
+  v33 = const undefined
+  v34 = object {}
+  v35 = call v32.bind(v33, v1, v3, v34) this=v32
+  store v1[v31] = v35
+  return undefined

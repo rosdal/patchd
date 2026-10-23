@@ -1,0 +1,32 @@
+module async-method.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Repo.constructor class
+  store global Repo = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Repo.find
+  store v3.find = v4                      ; method
+  return undefined
+
+func f2 Repo.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Repo.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Repo.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  return undefined
+
+func f4 Repo.find(id) method async in f1
+b1.entry:
+  v1 = param id
+  v2 = this
+  v3 = load v2.db
+  v4 = call v3.get(v1) this=v3
+  v5 = await v4
+  return v5

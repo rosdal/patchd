@@ -1,0 +1,28 @@
+module try-catch.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; parse
+  store global parse = v2
+  return undefined
+
+func f2 parse(s) function in f1
+b1.entry:
+  v1 = param s
+  v2 = this
+  jump b2.try
+b2.try:  ; preds b1
+  v3 = load global JSON                   ; exceptional → b5.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v4 = call v3.parse(v1) this=v3          ; exceptional → b5.catch
+  jump b4.try
+b4.try:  ; preds b3
+  return v4
+b5.catch:  ; preds b2 b3
+  v5 = catchval
+  v6 = const null
+  return v6
+b6.try.done:  ; unreachable
+  return undefined

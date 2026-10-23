@@ -1,0 +1,20 @@
+module and.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a, b) function in f1
+b1.entry:
+  v1 = param a
+  v2 = param b
+  v3 = this
+  branch v1 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v4 = phi [b1: v1, b2: v2]
+  return v4

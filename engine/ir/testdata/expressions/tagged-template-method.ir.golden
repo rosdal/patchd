@@ -1,0 +1,17 @@
+module tagged-template-method.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(name) function in f1
+b1.entry:
+  v1 = param name
+  v2 = this
+  v3 = load global Prisma
+  v4 = const strings ["SELECT * FROM t WHERE name = ", ""]
+  v5 = call v3.sql(v4, v1) this=v3        ; tagged
+  return v5

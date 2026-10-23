@@ -1,0 +1,35 @@
+module module-statements.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 0
+  store global count = v2
+  v3 = load global count
+  v4 = const 1
+  v5 = binop + v3 v4
+  store global count = v5
+  v6 = load global count
+  v7 = const 0
+  v8 = binop > v6 v7
+  branch v8 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v9 = load global console
+  v10 = load global count
+  v11 = call v9.log(v10) this=v9
+  jump b3.if.done
+b3.if.done:  ; preds b1 b2
+  v12 = const 1
+  v13 = const 2
+  v14 = array [v12, v13]
+  jump b4.forof.head
+b4.forof.head:  ; preds b3 b5
+  branch * b5.forof.body b6.forof.done
+b5.forof.body:  ; preds b4
+  v15 = load v14[of]
+  v16 = load global count
+  v17 = binop + v16 v15
+  store global count = v17
+  jump b4.forof.head
+b6.forof.done:  ; preds b4
+  return undefined

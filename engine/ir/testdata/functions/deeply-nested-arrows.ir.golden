@@ -1,0 +1,36 @@
+module deeply-nested-arrows.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a) arrow in f1
+b1.entry:
+  v1 = param a
+  v2 = cell a
+  store *v2 = v1
+  v3 = closure f3 [v2]                    ; f.<anon@1:26>
+  return v3
+
+func f3 f.<anon@1:26>(b) arrow in f2
+b1.entry:
+  v1 = param b
+  v2 = free a (cell)
+  v3 = cell b
+  store *v3 = v1
+  v4 = closure f4 [v2, v3]                ; f.<anon@1:26>.<anon@1:41>
+  return v4
+
+func f4 f.<anon@1:26>.<anon@1:41>(c) arrow in f3
+b1.entry:
+  v1 = param c
+  v2 = free a (cell)
+  v3 = free b (cell)
+  v4 = load *v2
+  v5 = load *v3
+  v6 = binop + v4 v5
+  v7 = binop + v6 v1
+  return v7

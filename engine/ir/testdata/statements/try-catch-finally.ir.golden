@@ -1,0 +1,45 @@
+module try-catch-finally.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = const 0
+  jump b2.try
+b2.try:  ; preds b1
+  v3 = load global compute                ; exceptional → b5.catch
+  jump b3.try
+b3.try:  ; preds b2
+  v4 = call v3()                          ; exceptional → b5.catch
+  jump b4.try
+b4.try:  ; preds b3
+  v5 = load global cleanup
+  v6 = call v5()
+  jump b9.try.done
+b5.catch:  ; preds b2 b3
+  v7 = catchval
+  v8 = const 1
+  v9 = unop - v8
+  v10 = load global log                   ; exceptional → b8.finally.throw
+  jump b6.catch
+b6.catch:  ; preds b5
+  v11 = call v10(v7)                      ; exceptional → b8.finally.throw
+  jump b7.catch
+b7.catch:  ; preds b6
+  v12 = load global cleanup
+  v13 = call v12()
+  jump b9.try.done
+b8.finally.throw:  ; preds b5 b6
+  v14 = catchval
+  v15 = load global cleanup
+  v16 = call v15()
+  throw v14
+b9.try.done:  ; preds b4 b7
+  v17 = phi [b4: v4, b7: v9]
+  return v17

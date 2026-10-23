@@ -1,0 +1,28 @@
+module generator.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; count
+  store global count = v2
+  return undefined
+
+func f2 count(n) function generator in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = const 0
+  jump b2.for.head
+b2.for.head:  ; preds b1 b4
+  v4 = phi [b1: v3, b4: v8]
+  v5 = binop < v4 v1
+  branch v5 b3.for.body b5.for.done
+b3.for.body:  ; preds b2
+  v6 = yield v4
+  jump b4.for.update
+b4.for.update:  ; preds b3
+  v7 = const 1
+  v8 = binop + v4 v7
+  jump b2.for.head
+b5.for.done:  ; preds b2
+  return undefined

@@ -1,0 +1,30 @@
+module captured-destructured.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o) function in f1
+b1.entry:
+  v1 = param o
+  v2 = this
+  v3 = cell a
+  v4 = cell b
+  v5 = load v1.a                          ; path v1.a
+  store *v3 = v5
+  v6 = load v1.b                          ; path v1.b
+  store *v4 = v6
+  v7 = closure f3 [v3, v4]                ; f.<anon@3:10>
+  return v7
+
+func f3 f.<anon@3:10>() arrow in f2
+b1.entry:
+  v1 = free a (cell)
+  v2 = free b (cell)
+  v3 = load *v1                           ; a
+  v4 = load *v2                           ; b
+  v5 = binop + v3 v4
+  return v5

@@ -1,0 +1,24 @@
+module compound-property.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o, xs, i) function in f1
+b1.entry:
+  v1 = param o
+  v2 = param xs
+  v3 = param i
+  v4 = this
+  v5 = load v1.n
+  v6 = const 1
+  v7 = binop + v5 v6
+  store v1.n = v7
+  v8 = load v2[v3]
+  v9 = const 2
+  v10 = binop * v8 v9
+  store v2[v3] = v10
+  return undefined

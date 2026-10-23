@@ -1,0 +1,145 @@
+module commerce--lib-utils.ts
+  import ReadonlyURLSearchParams from "next/navigation"
+  export baseUrl = v10 (declaration)
+  export createUrl = v11 (declaration)
+  export ensureStartsWith = v12 (declaration)
+  export validateEnvironmentVariables = v13 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global process
+  v3 = load v2.env
+  v4 = load v3.VERCEL_PROJECT_PRODUCTION_URL
+  branch v4 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v5 = load global process
+  v6 = load v5.env
+  v7 = load v6.VERCEL_PROJECT_PRODUCTION_URL
+  v8 = template ["https://", v7]
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v9 = const "http://localhost:3000"
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v10 = phi [b2: v8, b3: v9]
+  store global baseUrl = v10
+  v11 = closure f2 []                     ; createUrl
+  store global createUrl = v11
+  v12 = closure f3 []                     ; ensureStartsWith
+  store global ensureStartsWith = v12
+  v13 = closure f4 []                     ; validateEnvironmentVariables
+  store global validateEnvironmentVariables = v13
+  return undefined
+
+func f2 createUrl(pathname, params) arrow in f1
+b1.entry:
+  v1 = param pathname
+  v2 = param params
+  v3 = call v2.toString() this=v2
+  v4 = load v3.length
+  branch v4 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v5 = const "?"
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v6 = const ""
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v7 = phi [b2: v5, b3: v6]
+  v8 = template [v7, v3]
+  v9 = template [v1, v8]
+  return v9
+
+func f3 ensureStartsWith(stringToCheck, startsWith) arrow in f1
+b1.entry:
+  v1 = param stringToCheck
+  v2 = param startsWith
+  v3 = call v1.startsWith(v2) this=v1
+  branch v3 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v4 = template [v2, v1]
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v5 = phi [b2: v1, b3: v4]
+  return v5
+
+func f4 validateEnvironmentVariables() arrow in f1
+b1.entry:
+  v1 = cell missingEnvironmentVariables
+  v2 = const "SHOPIFY_STORE_DOMAIN"
+  v3 = const "SHOPIFY_STOREFRONT_ACCESS_TOKEN"
+  v4 = array [v2, v3]
+  v5 = array []
+  store *v1 = v5
+  v6 = closure f5 [v1]                    ; validateEnvironmentVariables.<anon@31:40>
+  v7 = call v4.forEach(v6) this=v4
+  v8 = load *v1
+  v9 = load v8.length
+  branch v9 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v10 = load global Error
+  v11 = load *v1
+  v12 = const "\n"
+  v13 = call v11.join(v12) this=v11
+  v14 = template ["The following environment variables are missing. Your site will not work without them. Read more: https://vercel.com/docs/integrations/shopify#configure-environment-variables\n\n", v13, "\n"]
+  v15 = new v10(v14)
+  throw v15
+b3.if.done:  ; preds b1
+  v16 = load global process
+  v17 = load v16.env
+  v18 = load v17.SHOPIFY_STORE_DOMAIN
+  v19 = binop == v18 undefined
+  branch v19 b5.opt.short b4.opt.cont
+b4.opt.cont:  ; preds b3
+  v20 = const "["
+  v21 = call v18.includes(v20) this=v18
+  jump b6.opt.done
+b5.opt.short:  ; preds b3
+  jump b6.opt.done
+b6.opt.done:  ; preds b4 b5
+  v22 = phi [b4: v21, b5: undefined]
+  branch v22 b11.or.done b7.or.rhs
+b7.or.rhs:  ; preds b6
+  v23 = load global process
+  v24 = load v23.env
+  v25 = load v24.SHOPIFY_STORE_DOMAIN
+  v26 = binop == v25 undefined
+  branch v26 b9.opt.short b8.opt.cont
+b8.opt.cont:  ; preds b7
+  v27 = const "]"
+  v28 = call v25.includes(v27) this=v25
+  jump b10.opt.done
+b9.opt.short:  ; preds b7
+  jump b10.opt.done
+b10.opt.done:  ; preds b8 b9
+  v29 = phi [b8: v28, b9: undefined]
+  jump b11.or.done
+b11.or.done:  ; preds b6 b10
+  v30 = phi [b6: v22, b10: v29]
+  branch v30 b12.if.then b13.if.done
+b12.if.then:  ; preds b11
+  v31 = load global Error
+  v32 = const "Your `SHOPIFY_STORE_DOMAIN` environment variable includes brackets (ie. `[` and / or `]`). Your site will not work with them there. Please remove them."
+  v33 = new v31(v32)
+  throw v33
+b13.if.done:  ; preds b11
+  return undefined
+
+func f5 validateEnvironmentVariables.<anon@31:40>(envVar) arrow in f4
+b1.entry:
+  v1 = param envVar
+  v2 = free missingEnvironmentVariables (cell)
+  v3 = load global process
+  v4 = load v3.env
+  v5 = load v4[v1]
+  v6 = unop ! v5
+  branch v6 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v7 = load *v2
+  v8 = call v7.push(v1) this=v7
+  jump b3.if.done
+b3.if.done:  ; preds b1 b2
+  return undefined

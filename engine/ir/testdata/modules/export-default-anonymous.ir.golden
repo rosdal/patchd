@@ -1,0 +1,14 @@
+module export-default-anonymous.ts
+  export default = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; default
+  return undefined
+
+func f2 default() function in f1
+b1.entry:
+  v1 = this
+  v2 = const 1
+  return v2

@@ -1,0 +1,36 @@
+module break-continue.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  v3 = const 0
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b4 b7
+  v4 = phi [b1: v3, b4: v4, b7: v10]
+  branch * b3.forof.body b8.forof.done
+b3.forof.body:  ; preds b2
+  v5 = load v1[of]
+  v6 = const 0
+  v7 = binop < v5 v6
+  branch v7 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  jump b2.forof.head
+b5.if.done:  ; preds b3
+  v8 = const 100
+  v9 = binop > v5 v8
+  branch v9 b6.if.then b7.if.done
+b6.if.then:  ; preds b5
+  jump b8.forof.done
+b7.if.done:  ; preds b5
+  v10 = binop + v4 v5
+  jump b2.forof.head
+b8.forof.done:  ; preds b2 b6
+  return v4

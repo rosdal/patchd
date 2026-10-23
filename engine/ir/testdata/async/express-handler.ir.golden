@@ -1,0 +1,23 @@
+module express-handler.ts
+  export handler = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; handler
+  store global handler = v2
+  return undefined
+
+func f2 handler(req, res) function async in f1
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = this
+  v4 = load global db
+  v5 = load v1.query
+  v6 = load v5.id
+  v7 = template ["SELECT * FROM users WHERE id = ", v6]
+  v8 = call v4.query(v7) this=v4
+  v9 = await v8
+  v10 = call v2.json(v9) this=v2
+  return undefined

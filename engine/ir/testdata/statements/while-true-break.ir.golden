@@ -1,0 +1,29 @@
+module while-true-break.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(q) function in f1
+b1.entry:
+  v1 = param q
+  v2 = this
+  jump b2.while.head
+b2.while.head:  ; preds b1 b5
+  v3 = const true
+  branch v3 b3.while.body b6.while.done
+b3.while.body:  ; preds b2
+  v4 = call v1.pop() this=v1
+  v5 = unop ! v4
+  branch v5 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  jump b6.while.done
+b5.if.done:  ; preds b3
+  v6 = load global use
+  v7 = call v6(v4)
+  jump b2.while.head
+b6.while.done:  ; preds b2 b4
+  return undefined

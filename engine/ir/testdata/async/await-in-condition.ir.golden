@@ -1,0 +1,22 @@
+module await-in-condition.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(check) function async in f1
+b1.entry:
+  v1 = param check
+  v2 = this
+  v3 = call v1()
+  v4 = await v3
+  branch v4 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v5 = const "ok"
+  return v5
+b3.if.done:  ; preds b1
+  v6 = const "no"
+  return v6

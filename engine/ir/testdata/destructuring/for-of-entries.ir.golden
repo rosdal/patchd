@@ -1,0 +1,29 @@
+module for-of-entries.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(m) function in f1
+b1.entry:
+  v1 = param m
+  v2 = this
+  v3 = const 0                            ; total
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b3
+  v4 = phi [b1: v3, b3: v11]              ; total
+  branch * b3.forof.body b4.forof.done
+b3.forof.body:  ; preds b2
+  v5 = load v1[of]
+  v6 = spread v5
+  v7 = load v6[0]                         ; k, path v5[0]
+  v8 = load v6[1]                         ; v, path v5[1]
+  v9 = load v7.length
+  v10 = binop + v8 v9
+  v11 = binop + v4 v10                    ; total
+  jump b2.forof.head
+b4.forof.done:  ; preds b2
+  return v4

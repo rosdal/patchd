@@ -1,0 +1,20 @@
+module call-apply-bind.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(fn, self, args) function in f1
+b1.entry:
+  v1 = param fn
+  v2 = param self
+  v3 = param args
+  v4 = this
+  v5 = const 1
+  v6 = call v1.call(v2, v5) this=v1
+  v7 = call v1.apply(v2, v3) this=v1
+  v8 = call v1.bind(v2) this=v1
+  return v8

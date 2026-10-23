@@ -1,0 +1,19 @@
+module new-function-callee.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Point
+  store global Point = v2
+  v3 = load global Point
+  v4 = const 1
+  v5 = new v3(v4)
+  store global p = v5
+  return undefined
+
+func f2 Point(x) function in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  store v2.x = v1
+  return undefined

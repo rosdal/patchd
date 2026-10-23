@@ -1,0 +1,175 @@
+module nodegoat--app-routes-contributions.js
+  import default from "../data/contributions-dao" (require)
+  import default from "../../config/config" (require)
+  export default = v12 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; ContributionsHandler
+  store global ContributionsHandler = v2
+  v3 = load global require
+  v4 = const "../data/contributions-dao"
+  v5 = call v3(v4)                        ; require
+  v6 = load v5.ContributionsDAO
+  store global ContributionsDAO = v6
+  v7 = load global require
+  v8 = const "../../config/config"
+  v9 = call v7(v8)                        ; require
+  v10 = load v9.environmentalScripts
+  store global environmentalScripts = v10
+  v11 = load global module
+  v12 = load global ContributionsHandler
+  store v11.exports = v12
+  return undefined
+
+func f2 ContributionsHandler(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = cell contributionsDAO
+  v4 = const "use strict"
+  v5 = load global ContributionsDAO
+  v6 = new v5(v1)
+  store *v3 = v6
+  v7 = closure f3 [v3]                    ; ContributionsHandler.displayContributions
+  store v2.displayContributions = v7
+  v8 = closure f5 [v3]                    ; ContributionsHandler.handleContributionsUpdate
+  store v2.handleContributionsUpdate = v8
+  return undefined
+
+func f3 ContributionsHandler.displayContributions(req, res, next) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = free contributionsDAO (cell)
+  v5 = cell res
+  v6 = cell next
+  store *v5 = v2
+  store *v6 = v3
+  v7 = cell userId
+  v8 = load v1.session
+  v9 = load v8.userId
+  store *v7 = v9
+  v10 = load *v4
+  v11 = load *v7
+  v12 = closure f4 [v6, v7, v5]           ; ContributionsHandler.displayContributions.<anon@19:46>
+  v13 = call v10.getByUserId(v11, v12) this=v10
+  return undefined
+
+func f4 ContributionsHandler.displayContributions.<anon@19:46>(error, contrib) arrow in f3
+b1.entry:
+  v1 = param error
+  v2 = param contrib
+  v3 = free next (cell)
+  v4 = free userId (cell)
+  v5 = free res (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v6 = load *v3
+  v7 = call v6(v1)
+  return v7
+b3.if.done:  ; preds b1
+  v8 = load *v4
+  store v2.userId = v8
+  v9 = load *v5
+  v10 = const "contributions"
+  v11 = load global environmentalScripts
+  v12 = object {...v2, environmentalScripts: v11}
+  v13 = call v9.render(v10, v12) this=v9
+  return v13
+
+func f5 ContributionsHandler.handleContributionsUpdate(req, res, next) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = free contributionsDAO (cell)
+  v5 = cell res
+  v6 = cell next
+  store *v5 = v2
+  store *v6 = v3
+  v7 = load global eval
+  v8 = load v1.body
+  v9 = load v8.preTax
+  v10 = call v7(v9)                       ; eval
+  v11 = load global eval
+  v12 = load v1.body
+  v13 = load v12.afterTax
+  v14 = call v11(v13)                     ; eval
+  v15 = load global eval
+  v16 = load v1.body
+  v17 = load v16.roth
+  v18 = call v15(v17)                     ; eval
+  v19 = load v1.session
+  v20 = load v19.userId
+  v21 = load global isNaN
+  v22 = call v21(v10)
+  v23 = load global isNaN
+  v24 = call v23(v14)
+  v25 = load global isNaN
+  v26 = call v25(v18)
+  v27 = const 0
+  v28 = binop < v10 v27
+  v29 = const 0
+  v30 = binop < v14 v29
+  v31 = const 0
+  v32 = binop < v18 v31
+  v33 = array [v22, v24, v26, v28, v30, v32]
+  v34 = closure f6 []                     ; ContributionsHandler.handleContributionsUpdate.<anon@50:44>
+  v35 = call v33.some(v34) this=v33
+  branch v35 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v36 = load *v5
+  v37 = const "contributions"
+  v38 = const "Invalid contribution percentages"
+  v39 = load global environmentalScripts
+  v40 = object {updateError: v38, userId: v20, environmentalScripts: v39}
+  v41 = call v36.render(v37, v40) this=v36
+  return v41
+b3.if.done:  ; preds b1
+  v42 = binop + v10 v14
+  v43 = binop + v42 v18
+  v44 = const 30
+  v45 = binop > v43 v44
+  branch v45 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v46 = load *v5
+  v47 = const "contributions"
+  v48 = const "Contribution percentages cannot exceed 30 %"
+  v49 = load global environmentalScripts
+  v50 = object {updateError: v48, userId: v20, environmentalScripts: v49}
+  v51 = call v46.render(v47, v50) this=v46
+  return v51
+b5.if.done:  ; preds b3
+  v52 = load *v4
+  v53 = closure f7 [v6, v5]               ; ContributionsHandler.handleContributionsUpdate.<anon@67:65>
+  v54 = call v52.update(v20, v10, v14, v18, v53) this=v52
+  return undefined
+
+func f6 ContributionsHandler.handleContributionsUpdate.<anon@50:44>(validation) arrow in f5
+b1.entry:
+  v1 = param validation
+  return v1
+
+func f7 ContributionsHandler.handleContributionsUpdate.<anon@67:65>(err, contributions) arrow in f5
+b1.entry:
+  v1 = param err
+  v2 = param contributions
+  v3 = free next (cell)
+  v4 = free res (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v5 = load *v3
+  v6 = call v5(v1)
+  return v6
+b3.if.done:  ; preds b1
+  v7 = const true
+  store v2.updateSuccess = v7
+  v8 = load *v4
+  v9 = const "contributions"
+  v10 = load global environmentalScripts
+  v11 = object {...v2, environmentalScripts: v10}
+  v12 = call v8.render(v9, v11) this=v8
+  return v12

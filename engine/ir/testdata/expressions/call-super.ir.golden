@@ -1,0 +1,47 @@
+module call-super.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; A.constructor class
+  store global A = v2
+  v3 = load v2.prototype
+  v4 = closure f3 []                      ; A.greet
+  store v3.greet = v4                     ; method
+  v5 = load global A
+  v6 = closure f4 []                      ; B.constructor class derived
+  store v6.__proto__ = v5                 ; proto
+  store global B = v6
+  v7 = load v6.prototype
+  v8 = load v5.prototype
+  store v7.__proto__ = v8                 ; proto
+  v9 = closure f5 []                      ; B.greet
+  store v7.greet = v9                     ; method
+  return undefined
+
+func f2 A.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  return undefined
+
+func f3 A.greet() method in f1
+b1.entry:
+  v1 = this
+  v2 = const "a"
+  return v2
+
+func f4 B.constructor(...args) constructor implicit derived in f1
+b1.entry:
+  v1 = param args
+  v2 = this
+  v3 = spread v1
+  v4 = call super(...v3) this=v2
+  return undefined
+
+func f5 B.greet() method in f1
+b1.entry:
+  v1 = this
+  v2 = call super.greet() this=v1
+  v3 = const "b"
+  v4 = binop + v2 v3
+  return v4

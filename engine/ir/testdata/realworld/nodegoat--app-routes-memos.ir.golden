@@ -1,0 +1,120 @@
+module nodegoat--app-routes-memos.js
+  import default from "../data/memos-dao" (require)
+  import default from "../../config/config" (require)
+  export default = v12 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; MemosHandler
+  store global MemosHandler = v2
+  v3 = load global require
+  v4 = const "../data/memos-dao"
+  v5 = call v3(v4)                        ; require
+  v6 = load v5.MemosDAO
+  store global MemosDAO = v6
+  v7 = load global require
+  v8 = const "../../config/config"
+  v9 = call v7(v8)                        ; require
+  v10 = load v9.environmentalScripts
+  store global environmentalScripts = v10
+  v11 = load global module
+  v12 = load global MemosHandler
+  store v11.exports = v12
+  return undefined
+
+func f2 MemosHandler(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = cell memosDAO
+  v4 = const "use strict"
+  v5 = load global MemosDAO
+  v6 = new v5(v1)
+  store *v3 = v6
+  v7 = closure f3 [v2, v3]                ; MemosHandler.addMemos
+  store v2.addMemos = v7
+  v8 = closure f5 [v3]                    ; MemosHandler.displayMemos
+  store v2.displayMemos = v8
+  return undefined
+
+func f3 MemosHandler.addMemos(req, res, next) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = free this
+  v5 = free memosDAO (cell)
+  v6 = cell req
+  v7 = cell res
+  v8 = cell next
+  store *v6 = v1
+  store *v7 = v2
+  store *v8 = v3
+  v9 = load *v5
+  v10 = load *v6
+  v11 = load v10.body
+  v12 = load v11.memo
+  v13 = closure f4 [v4, v8, v6, v7]       ; MemosHandler.addMemos.<anon@15:40>
+  v14 = call v9.insert(v12, v13) this=v9
+  return undefined
+
+func f4 MemosHandler.addMemos.<anon@15:40>(err, docs) arrow in f3
+b1.entry:
+  v1 = param err
+  v2 = param docs
+  v3 = free this
+  v4 = free next (cell)
+  v5 = free req (cell)
+  v6 = free res (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v7 = load *v4
+  v8 = call v7(v1)
+  return v8
+b3.if.done:  ; preds b1
+  v9 = load *v5
+  v10 = load *v6
+  v11 = load *v4
+  v12 = call v3.displayMemos(v9, v10, v11) this=v3
+  return undefined
+
+func f5 MemosHandler.displayMemos(req, res, next) arrow in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = free memosDAO (cell)
+  v5 = cell res
+  v6 = cell next
+  store *v5 = v2
+  store *v6 = v3
+  v7 = cell userId
+  v8 = load v1.session
+  v9 = load v8.userId
+  store *v7 = v9
+  v10 = load *v4
+  v11 = closure f6 [v6, v5, v7]           ; MemosHandler.displayMemos.<anon@27:30>
+  v12 = call v10.getAllMemos(v11) this=v10
+  return undefined
+
+func f6 MemosHandler.displayMemos.<anon@27:30>(err, docs) arrow in f5
+b1.entry:
+  v1 = param err
+  v2 = param docs
+  v3 = free next (cell)
+  v4 = free res (cell)
+  v5 = free userId (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v6 = load *v3
+  v7 = call v6(v1)
+  return v7
+b3.if.done:  ; preds b1
+  v8 = load *v4
+  v9 = const "memos"
+  v10 = load *v5
+  v11 = load global environmentalScripts
+  v12 = object {memosList: v2, userId: v10, environmentalScripts: v11}
+  v13 = call v8.render(v9, v12) this=v8
+  return v13

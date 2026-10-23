@@ -1,0 +1,84 @@
+module execa--lib-methods-bind.js
+  import default as isPlainObject from "is-plain-obj"
+  import FD_SPECIFIC_OPTIONS from "../arguments/specific.js"
+  export mergeOptions = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; mergeOptions
+  store global mergeOptions = v2
+  v3 = closure f4 []                      ; mergeOption
+  store global mergeOption = v3
+  v4 = load global Set
+  v5 = const "env"
+  v6 = load global FD_SPECIFIC_OPTIONS
+  v7 = spread v6
+  v8 = array [v5, ...v7]
+  v9 = new v4(v8)
+  store global DEEP_OPTIONS = v9
+  return undefined
+
+func f2 mergeOptions(boundOptions, options) arrow in f1
+b1.entry:
+  v1 = param boundOptions
+  v2 = param options
+  v3 = cell safeBoundOptions
+  v4 = const null
+  v5 = object {[[Prototype]]: v4, ...v1}
+  store *v3 = v5
+  v6 = load global Object
+  v7 = load global Object
+  v8 = call v7.entries(v2) this=v7
+  v9 = closure f3 [v3]                    ; mergeOptions.<anon@10:71>
+  v10 = call v8.map(v9) this=v8
+  v11 = call v6.fromEntries(v10) this=v6
+  v12 = const null
+  v13 = load *v3
+  v14 = object {[[Prototype]]: v12, ...v13, ...v11}
+  return v14
+
+func f3 mergeOptions.<anon@10:71>(v1) arrow in f2
+b1.entry:
+  v1 = param
+  v2 = free safeBoundOptions (cell)
+  v3 = spread v1
+  v4 = load v3[0]
+  v5 = load v3[1]
+  v6 = load global mergeOption
+  v7 = load *v2
+  v8 = load v7[v4]
+  v9 = call v6(v4, v8, v5)
+  v10 = array [v4, v9]
+  return v10
+
+func f4 mergeOption(optionName, boundOptionValue, optionValue) arrow in f1
+b1.entry:
+  v1 = param optionName
+  v2 = param boundOptionValue
+  v3 = param optionValue
+  v4 = load global DEEP_OPTIONS
+  v5 = call v4.has(v1) this=v4
+  branch v5 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v6 = load global isPlainObject
+  v7 = call v6(v2)
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v8 = phi [b1: v5, b2: v7]
+  branch v8 b4.and.rhs b5.and.done
+b4.and.rhs:  ; preds b3
+  v9 = load global isPlainObject
+  v10 = call v9(v3)
+  jump b5.and.done
+b5.and.done:  ; preds b3 b4
+  v11 = phi [b3: v8, b4: v10]
+  branch v11 b6.cond.true b7.cond.false
+b6.cond.true:  ; preds b5
+  v12 = object {...v2, ...v3}
+  jump b8.cond.done
+b7.cond.false:  ; preds b5
+  jump b8.cond.done
+b8.cond.done:  ; preds b6 b7
+  v13 = phi [b6: v12, b7: v3]
+  return v13

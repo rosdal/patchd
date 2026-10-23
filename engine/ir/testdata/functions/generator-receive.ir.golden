@@ -1,0 +1,23 @@
+module generator-receive.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; echo
+  store global echo = v2
+  return undefined
+
+func f2 echo() function generator in f1
+b1.entry:
+  v1 = this
+  v2 = yield undefined
+  jump b2.while.head
+b2.while.head:  ; preds b1 b3
+  v3 = phi [b1: v2, b3: v5]
+  v4 = const true
+  branch v4 b3.while.body b4.while.done
+b3.while.body:  ; preds b2
+  v5 = yield v3
+  jump b2.while.head
+b4.while.done:  ; preds b2
+  return undefined

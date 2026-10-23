@@ -1,0 +1,364 @@
+module juice-shop--routes-search.ts
+  import Request from "express" (type)
+  import Response from "express" (type)
+  import NextFunction from "express" (type)
+  import * as utils from "../lib/utils"
+  import * as models from "../models/index"
+  import UserModel from "../models/user"
+  import challenges from "../data/datacache"
+  import * as challengeUtils from "../lib/challengeUtils"
+  export searchProducts = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f4 []                      ; searchProducts
+  store global searchProducts = v2
+  v3 = load global Error
+  v4 = closure f2 []                      ; ErrorWithParent.constructor class derived
+  store v4.__proto__ = v3                 ; proto
+  store global ErrorWithParent = v4
+  v5 = load v4.prototype
+  v6 = load v3.prototype
+  store v5.__proto__ = v6                 ; proto
+  return undefined
+
+func f2 ErrorWithParent.constructor(...args) constructor implicit derived in f1
+b1.entry:
+  v1 = param args
+  v2 = this
+  v3 = spread v1
+  v4 = call super(...v3) this=v2
+  v5 = closure f3 []                      ; ErrorWithParent.<init>
+  v6 = call v5() this=v2
+  return undefined
+
+func f3 ErrorWithParent.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  return undefined
+
+func f4 searchProducts() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f5 []                      ; searchProducts.<anon@22:10>
+  return v2
+
+func f5 searchProducts.<anon@22:10>(req, res, next) arrow in f4
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = param next
+  v4 = cell req
+  v5 = cell res
+  v6 = cell next
+  store *v4 = v1
+  store *v5 = v2
+  store *v6 = v3
+  v7 = load *v4
+  v8 = load v7.query
+  v9 = load v8.q
+  v10 = const "undefined"
+  v11 = binop === v9 v10
+  branch v11 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v12 = const ""
+  jump b6.cond.done
+b3.cond.false:  ; preds b1
+  v13 = load *v4
+  v14 = load v13.query
+  v15 = load v14.q
+  v16 = binop == v15 undefined
+  branch v16 b4.nullish.rhs b5.nullish.done
+b4.nullish.rhs:  ; preds b3
+  v17 = const ""
+  jump b5.nullish.done
+b5.nullish.done:  ; preds b3 b4
+  v18 = phi [b3: v15, b4: v17]
+  jump b6.cond.done
+b6.cond.done:  ; preds b2 b5
+  v19 = phi [b2: v12, b5: v18]
+  v20 = load v19.length
+  v21 = const 200
+  v22 = binop <= v20 v21
+  branch v22 b7.cond.true b8.cond.false
+b7.cond.true:  ; preds b6
+  jump b9.cond.done
+b8.cond.false:  ; preds b6
+  v23 = const 0
+  v24 = const 200
+  v25 = call v19.substring(v23, v24) this=v19
+  jump b9.cond.done
+b9.cond.done:  ; preds b7 b8
+  v26 = phi [b7: v19, b8: v25]
+  v27 = load global models
+  v28 = load v27.sequelize
+  v29 = template ["SELECT * FROM Products WHERE ((name LIKE '%", v26, "%' OR description LIKE '%", v26, "%') AND deletedAt IS NULL) ORDER BY name"]
+  v30 = call v28.query(v29) this=v28
+  v31 = closure f6 [v6, v4, v5]           ; searchProducts.<anon@22:10>.<anon@26:13>
+  v32 = call v30.then(v31) this=v30
+  v33 = closure f10 [v6]                  ; searchProducts.<anon@22:10>.<anon@74:16>
+  v34 = call v32.catch(v33) this=v32
+  return undefined
+
+func f6 searchProducts.<anon@22:10>.<anon@26:13>(v1) arrow in f5
+b1.entry:
+  v1 = param
+  v2 = free next (cell)
+  v3 = free req (cell)
+  v4 = free res (cell)
+  v5 = spread v1
+  v6 = load v5[0]
+  v7 = cell dataString
+  v8 = load global JSON
+  v9 = call v8.stringify(v6) this=v8
+  store *v7 = v9
+  v10 = load global challengeUtils
+  v11 = load global challenges
+  v12 = load v11.unionSqlInjectionChallenge
+  v13 = call v10.notSolved(v12) this=v10
+  branch v13 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v14 = cell solved
+  v15 = const true
+  store *v14 = v15
+  v16 = load global UserModel
+  v17 = call v16.findAll() this=v16
+  v18 = closure f7 [v14, v7]              ; searchProducts.<anon@22:10>.<anon@26:13>.<anon@30:36>
+  v19 = call v17.then(v18) this=v17
+  v20 = closure f8 [v2]                   ; searchProducts.<anon@22:10>.<anon@26:13>.<anon@43:20>
+  v21 = call v19.catch(v20) this=v19
+  jump b3.if.done
+b3.if.done:  ; preds b1 b2
+  v22 = load global challengeUtils
+  v23 = load global challenges
+  v24 = load v23.dbSchemaChallenge
+  v25 = call v22.notSolved(v24) this=v22
+  branch v25 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v26 = cell solved
+  v27 = const true
+  store *v26 = v27
+  v28 = load global models
+  v29 = load v28.sequelize
+  v30 = const "SELECT sql FROM sqlite_master"
+  v31 = call v29.query(v30) this=v29
+  v32 = closure f9 [v26, v7]              ; searchProducts.<anon@22:10>.<anon@26:13>.<anon@49:77>
+  v33 = call v31.then(v32) this=v31
+  v34 = unop void v33
+  jump b5.if.done
+b5.if.done:  ; preds b3 b4
+  v35 = const 0
+  jump b6.for.head
+b6.for.head:  ; preds b5 b10
+  v36 = phi [b5: v35, b10: v60]
+  v37 = load v6.length
+  v38 = binop < v36 v37
+  branch v38 b7.for.body b11.for.done
+b7.for.body:  ; preds b6
+  v39 = load v6[v36]
+  v40 = load *v3
+  v41 = load v6[v36]
+  v42 = load v41.name
+  v43 = call v40.__(v42) this=v40
+  store v39.name = v43
+  v44 = load v6[v36]
+  v45 = load *v3
+  v46 = load v6[v36]
+  v47 = load v46.description
+  v48 = call v45.__(v47) this=v45
+  store v44.description = v48
+  v49 = load v6[v36]
+  v50 = load v49.alternateImages
+  v51 = unop typeof v50
+  v52 = const "string"
+  v53 = binop === v51 v52
+  branch v53 b8.if.then b9.if.done
+b8.if.then:  ; preds b7
+  v54 = load v6[v36]
+  v55 = load global JSON
+  v56 = load v6[v36]
+  v57 = load v56.alternateImages
+  v58 = call v55.parse(v57) this=v55
+  store v54.alternateImages = v58
+  jump b9.if.done
+b9.if.done:  ; preds b7 b8
+  jump b10.for.update
+b10.for.update:  ; preds b9
+  v59 = const 1
+  v60 = binop + v36 v59
+  jump b6.for.head
+b11.for.done:  ; preds b6
+  v61 = load *v4
+  v62 = load global utils
+  v63 = call v62.queryResultToJson(v6) this=v62
+  v64 = call v61.json(v63) this=v61
+  return undefined
+
+func f7 searchProducts.<anon@22:10>.<anon@26:13>.<anon@30:36>(data) arrow in f6
+b1.entry:
+  v1 = param data
+  v2 = free solved (cell)
+  v3 = free dataString (cell)
+  v4 = load global utils
+  v5 = call v4.queryResultToJson(v1) this=v4
+  v6 = load v5.data
+  v7 = binop == v6 undefined
+  branch v7 b3.opt.short b2.opt.cont
+b2.opt.cont:  ; preds b1
+  v8 = load v6.length
+  jump b4.opt.done
+b3.opt.short:  ; preds b1
+  jump b4.opt.done
+b4.opt.done:  ; preds b2 b3
+  v9 = phi [b2: v8, b3: undefined]
+  branch v9 b5.if.then b18.if.done
+b5.if.then:  ; preds b4
+  v10 = const 0
+  jump b6.for.head
+b6.for.head:  ; preds b5 b14
+  v11 = phi [b5: v10, b14: v32]
+  v12 = load v5.data
+  v13 = load v12.length
+  v14 = binop < v11 v13
+  branch v14 b7.for.body b15.for.done
+b7.for.body:  ; preds b6
+  v15 = load *v2
+  branch v15 b8.and.rhs b9.and.done
+b8.and.rhs:  ; preds b7
+  v16 = load global utils
+  v17 = load *v3
+  v18 = load v5.data
+  v19 = load v18[v11]
+  v20 = load v19.email
+  v21 = call v16.containsOrEscaped(v17, v20) this=v16
+  jump b9.and.done
+b9.and.done:  ; preds b7 b8
+  v22 = phi [b7: v15, b8: v21]
+  branch v22 b10.and.rhs b11.and.done
+b10.and.rhs:  ; preds b9
+  v23 = load *v3
+  v24 = load v5.data
+  v25 = load v24[v11]
+  v26 = load v25.password
+  v27 = call v23.includes(v26) this=v23
+  jump b11.and.done
+b11.and.done:  ; preds b9 b10
+  v28 = phi [b9: v22, b10: v27]
+  store *v2 = v28
+  v29 = load *v2
+  v30 = unop ! v29
+  branch v30 b12.if.then b13.if.done
+b12.if.then:  ; preds b11
+  jump b15.for.done
+b13.if.done:  ; preds b11
+  jump b14.for.update
+b14.for.update:  ; preds b13
+  v31 = const 1
+  v32 = binop + v11 v31
+  jump b6.for.head
+b15.for.done:  ; preds b6 b12
+  v33 = load *v2
+  branch v33 b16.if.then b17.if.done
+b16.if.then:  ; preds b15
+  v34 = load global challengeUtils
+  v35 = load global challenges
+  v36 = load v35.unionSqlInjectionChallenge
+  v37 = call v34.solve(v36) this=v34
+  jump b17.if.done
+b17.if.done:  ; preds b15 b16
+  jump b18.if.done
+b18.if.done:  ; preds b4 b17
+  return undefined
+
+func f8 searchProducts.<anon@22:10>.<anon@26:13>.<anon@43:20>(error) arrow in f6
+b1.entry:
+  v1 = param error
+  v2 = free next (cell)
+  v3 = load *v2
+  v4 = call v3(v1)
+  return undefined
+
+func f9 searchProducts.<anon@22:10>.<anon@26:13>.<anon@49:77>(v1) arrow in f6
+b1.entry:
+  v1 = param
+  v2 = free solved (cell)
+  v3 = free dataString (cell)
+  v4 = spread v1
+  v5 = load v4[0]
+  v6 = load global utils
+  v7 = call v6.queryResultToJson(v5) this=v6
+  v8 = load v7.data
+  v9 = binop == v8 undefined
+  branch v9 b3.opt.short b2.opt.cont
+b2.opt.cont:  ; preds b1
+  v10 = load v8.length
+  jump b4.opt.done
+b3.opt.short:  ; preds b1
+  jump b4.opt.done
+b4.opt.done:  ; preds b2 b3
+  v11 = phi [b2: v10, b3: undefined]
+  branch v11 b5.if.then b18.if.done
+b5.if.then:  ; preds b4
+  v12 = const 0
+  jump b6.for.head
+b6.for.head:  ; preds b5 b14
+  v13 = phi [b5: v12, b14: v31]
+  v14 = load v7.data
+  v15 = load v14.length
+  v16 = binop < v13 v15
+  branch v16 b7.for.body b15.for.done
+b7.for.body:  ; preds b6
+  v17 = load v7.data
+  v18 = load v17[v13]
+  v19 = load v18.sql
+  branch v19 b8.if.then b13.if.done
+b8.if.then:  ; preds b7
+  v20 = load *v2
+  branch v20 b9.and.rhs b10.and.done
+b9.and.rhs:  ; preds b8
+  v21 = load global utils
+  v22 = load *v3
+  v23 = load v7.data
+  v24 = load v23[v13]
+  v25 = load v24.sql
+  v26 = call v21.containsOrEscaped(v22, v25) this=v21
+  jump b10.and.done
+b10.and.done:  ; preds b8 b9
+  v27 = phi [b8: v20, b9: v26]
+  store *v2 = v27
+  v28 = load *v2
+  v29 = unop ! v28
+  branch v29 b11.if.then b12.if.done
+b11.if.then:  ; preds b10
+  jump b15.for.done
+b12.if.done:  ; preds b10
+  jump b13.if.done
+b13.if.done:  ; preds b7 b12
+  jump b14.for.update
+b14.for.update:  ; preds b13
+  v30 = const 1
+  v31 = binop + v13 v30
+  jump b6.for.head
+b15.for.done:  ; preds b6 b11
+  v32 = load *v2
+  branch v32 b16.if.then b17.if.done
+b16.if.then:  ; preds b15
+  v33 = load global challengeUtils
+  v34 = load global challenges
+  v35 = load v34.dbSchemaChallenge
+  v36 = call v33.solve(v35) this=v33
+  jump b17.if.done
+b17.if.done:  ; preds b15 b16
+  jump b18.if.done
+b18.if.done:  ; preds b4 b17
+  return undefined
+
+func f10 searchProducts.<anon@22:10>.<anon@74:16>(error) arrow in f5
+b1.entry:
+  v1 = param error
+  v2 = free next (cell)
+  v3 = load *v2
+  v4 = load v1.parent
+  v5 = call v3(v4)
+  return undefined

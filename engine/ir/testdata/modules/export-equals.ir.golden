@@ -1,0 +1,11 @@
+module export-equals.ts
+  export default = v4 (export=)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 1
+  v3 = object {x: v2}
+  store global api = v3
+  v4 = load global api
+  return undefined

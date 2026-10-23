@@ -1,0 +1,36 @@
+module async-callback-capture.ts
+  export register = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; register
+  store global register = v2
+  return undefined
+
+func f2 register(app, db) function in f1
+b1.entry:
+  v1 = param app
+  v2 = param db
+  v3 = this
+  v4 = cell db
+  store *v4 = v2
+  v5 = const "/u/:id"
+  v6 = closure f3 [v4]                    ; register.<anon@2:21>
+  v7 = call v1.get(v5, v6) this=v1
+  return undefined
+
+func f3 register.<anon@2:21>(req, res) arrow async in f2
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = free db (cell)
+  v4 = load *v3
+  v5 = load v4.users
+  v6 = load v1.params
+  v7 = load v6.id
+  v8 = call v5.find(v7) this=v5
+  v9 = await v8
+  v10 = load v9.name
+  v11 = call v2.send(v10) this=v2
+  return undefined

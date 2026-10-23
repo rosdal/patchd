@@ -1,0 +1,42 @@
+module promise-chain.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(url) function in f1
+b1.entry:
+  v1 = param url
+  v2 = this
+  v3 = load global fetch
+  v4 = call v3(v1)
+  v5 = closure f3 []                      ; f.<anon@3:11>
+  v6 = call v4.then(v5) this=v4
+  v7 = closure f4 []                      ; f.<anon@4:12>
+  v8 = call v6.catch(v7) this=v6
+  v9 = closure f5 []                      ; f.<anon@5:14>
+  v10 = call v8.finally(v9) this=v8
+  return v10
+
+func f3 f.<anon@3:11>(r) arrow in f2
+b1.entry:
+  v1 = param r
+  v2 = call v1.json() this=v1
+  return v2
+
+func f4 f.<anon@4:12>(e) arrow in f2
+b1.entry:
+  v1 = param e
+  v2 = load global console
+  v3 = call v2.error(v1) this=v2
+  return v3
+
+func f5 f.<anon@5:14>() arrow in f2
+b1.entry:
+  v1 = load global console
+  v2 = const "done"
+  v3 = call v1.log(v2) this=v1
+  return v3

@@ -1,0 +1,47 @@
+module try-nested.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  jump b2.try
+b2.try:  ; preds b1
+  jump b3.try
+b3.try:  ; preds b2
+  v2 = load global a                      ; exceptional → b6.catch
+  jump b4.try
+b4.try:  ; preds b3
+  v3 = call v2()                          ; exceptional → b6.catch
+  jump b5.try
+b5.try:  ; preds b4
+  jump b9.try.done
+b6.catch:  ; preds b3 b4
+  v4 = catchval
+  v5 = load global b                      ; exceptional → b12.catch
+  jump b7.catch
+b7.catch:  ; preds b6
+  v6 = call v5(v4)                        ; exceptional → b12.catch
+  jump b8.catch
+b8.catch:  ; preds b7
+  jump b9.try.done
+b9.try.done:  ; preds b5 b8
+  v7 = load global c                      ; exceptional → b12.catch
+  jump b10.try.done
+b10.try.done:  ; preds b9
+  v8 = call v7()                          ; exceptional → b12.catch
+  jump b11.try.done
+b11.try.done:  ; preds b10
+  jump b13.try.done
+b12.catch:  ; preds b6 b7 b9 b10
+  v9 = catchval
+  v10 = load global d
+  v11 = call v10(v9)
+  jump b13.try.done
+b13.try.done:  ; preds b11 b12
+  return undefined

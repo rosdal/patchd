@@ -1,0 +1,19 @@
+module jsx-namespaced-attr.tsx
+  export Icon = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Icon
+  store global Icon = v2
+  return undefined
+
+func f2 Icon() function in f1
+b1.entry:
+  v1 = this
+  v2 = const "svg"
+  v3 = const "#a"
+  v4 = object {"xlink:href": v3}
+  v5 = array []
+  v6 = call %jsx(v2, v4, v5)              ; jsx
+  return v6

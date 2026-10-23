@@ -1,0 +1,30 @@
+module require-basic.js
+  import default as util from "./util" (require) → ./util.js
+  import default from "./util" (require) → ./util.js
+  export run = v11 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global require
+  v3 = const "./util"
+  v4 = call v2(v3)                        ; require
+  store global util = v4
+  v5 = load global require
+  v6 = const "./util"
+  v7 = call v5(v6)                        ; require
+  v8 = load v7.helper
+  store global helper = v8
+  v9 = load global module
+  v10 = load v9.exports
+  v11 = closure f2 []                     ; module.exports.run
+  store v10.run = v11
+  return undefined
+
+func f2 module.exports.run() arrow in f1
+b1.entry:
+  v1 = load global helper
+  v2 = load global util
+  v3 = load v2.name
+  v4 = call v1(v3)
+  return v4

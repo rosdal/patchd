@@ -106,17 +106,19 @@ Phase 1 builds the bottom of the analysis engine and ends with `patchd scan` fin
 
 **Goal:** every function in a project becomes a typed control-flow graph in SSA form.
 
-- [ ] `ir.go`: core types: `Module`, `Func`, `Block`, `Instr`, `Value`, each value carrying a type handle and source range.
-- [ ] Instruction set: `call`, `new`, `load`, `store`, `assign`, `return`, `throw`, `await`, `yield`, `phi`, `branch`, `jump`, plus `unknown` for anything not yet lowered (never crash on new syntax).
-- [ ] Lowering for expressions and statements: variables, operators, conditionals, loops, `switch`, `try`/`catch`/`finally`, labelled breaks.
-- [ ] Lowering for functions: declarations, arrows, methods, closures with captured variables, default parameters, rest and spread.
-- [ ] Lowering for objects and classes: object literals, property access, computed keys, class fields, constructors, getters and setters, `super`, static members.
-- [ ] Lowering for modern syntax: destructuring (nested, with defaults), optional chaining, nullish coalescing, template literals and tagged templates, `async`/`await`, generators.
-- [ ] Module-level code and imports/exports, including default, named, namespace and re-exports.
-- [ ] SSA construction with phi nodes; dominator tree.
-- [ ] `print.go`: a readable text form of the IR; golden-file snapshot tests (`.ts` → `.ir.golden`) for every construct above.
-- [ ] `patchd debug ir <file>` developer command.
-- [ ] Coverage report: share of syntax nodes lowered to real instructions vs `unknown`, measured on the 10 reference repos.
+**Status (2026-10-23):** built on branch `feat/ir-v0.3`; tag `v0.3.0` follows the merge. All 10 reference repos lower with 100% of syntax nodes lowered to real instructions and every function passing the verifier (vscode: 22.7M nodes, 440,462 functions); 411 golden tests; pnpm (445k lines) lowers in 3.3 s with 236 MB of IR, 13 bytes per source byte. Design in [ADR 0009](adr/0009-patchd-ir.md), details in [docs/engine/ir.md](engine/ir.md) and [ir-ops.md](engine/ir-ops.md). Deviations from this list: the instruction set also has the v0.3 TODO's `const`, `binop`, `unop`, `template`, `delete`, `object`, `array`, `closure`, `spread`, `catchval` and `unreachable`, plus `cell` for captured variables; the coverage report is `patchd debug ir-coverage`, run nightly by the `ir-coverage` workflow.
+
+- [x] `ir.go`: core types: `Module`, `Func`, `Block`, `Instr`, `Value`, each value carrying a type handle and source range.
+- [x] Instruction set: `call`, `new`, `load`, `store`, `assign`, `return`, `throw`, `await`, `yield`, `phi`, `branch`, `jump`, plus `unknown` for anything not yet lowered (never crash on new syntax).
+- [x] Lowering for expressions and statements: variables, operators, conditionals, loops, `switch`, `try`/`catch`/`finally`, labelled breaks.
+- [x] Lowering for functions: declarations, arrows, methods, closures with captured variables, default parameters, rest and spread.
+- [x] Lowering for objects and classes: object literals, property access, computed keys, class fields, constructors, getters and setters, `super`, static members.
+- [x] Lowering for modern syntax: destructuring (nested, with defaults), optional chaining, nullish coalescing, template literals and tagged templates, `async`/`await`, generators.
+- [x] Module-level code and imports/exports, including default, named, namespace and re-exports.
+- [x] SSA construction with phi nodes; dominator tree.
+- [x] `print.go`: a readable text form of the IR; golden-file snapshot tests (`.ts` → `.ir.golden`) for every construct above.
+- [x] `patchd debug ir <file>` developer command.
+- [x] Coverage report: share of syntax nodes lowered to real instructions vs `unknown`, measured on the 10 reference repos.
 
 **Exit criteria:** above 98% of syntax nodes lowered on the reference repos; all snapshot tests pass; lowering a 500k-line repo takes under a minute on a laptop.
 

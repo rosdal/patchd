@@ -1,0 +1,26 @@
+module arrow-nested-this.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; outer
+  store global outer = v2
+  return undefined
+
+func f2 outer() function in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 [v1]                    ; outer.<anon@2:10>
+  return v2
+
+func f3 outer.<anon@2:10>() arrow in f2
+b1.entry:
+  v1 = free this
+  v2 = closure f4 [v1]                    ; outer.<anon@2:10>.<anon@2:16>
+  return v2
+
+func f4 outer.<anon@2:10>.<anon@2:16>() arrow in f3
+b1.entry:
+  v1 = free this
+  v2 = load v1.v
+  return v2

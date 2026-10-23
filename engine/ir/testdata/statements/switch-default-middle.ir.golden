@@ -1,0 +1,38 @@
+module switch-default-middle.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(n) function in f1
+b1.entry:
+  v1 = param n
+  v2 = this
+  v3 = const 0
+  v4 = const 1
+  v5 = binop === v1 v4
+  branch v5 b4.switch.case b2.switch.test
+b2.switch.test:  ; preds b1
+  v6 = const 2
+  v7 = binop === v1 v6
+  branch v7 b6.switch.case b3.switch.test
+b3.switch.test:  ; preds b2
+  jump b5.switch.default
+b4.switch.case:  ; preds b1
+  v8 = const 1
+  jump b7.switch.done
+b5.switch.default:  ; preds b3
+  v9 = const 1
+  v10 = unop - v9
+  jump b6.switch.case
+b6.switch.case:  ; preds b2 b5
+  v11 = phi [b2: v3, b5: v10]
+  v12 = const 2
+  v13 = binop + v11 v12
+  jump b7.switch.done
+b7.switch.done:  ; preds b4 b6
+  v14 = phi [b4: v8, b6: v13]
+  return v14

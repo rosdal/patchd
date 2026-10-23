@@ -1,0 +1,16 @@
+module overloads.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; parse
+  store global parse = v2
+  return undefined
+
+func f2 parse(x) function in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  v3 = load global Number
+  v4 = call v3(v1)
+  return v4

@@ -1,0 +1,44 @@
+module switch-in-loop-continue.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = this
+  v3 = const 0
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b6 b9
+  v4 = phi [b1: v3, b6: v4, b9: v14]
+  branch * b3.forof.body b10.forof.done
+b3.forof.body:  ; preds b2
+  v5 = load v1[of]
+  v6 = const 0
+  v7 = binop === v5 v6
+  branch v7 b6.switch.case b4.switch.test
+b4.switch.test:  ; preds b3
+  v8 = const 1
+  v9 = binop === v5 v8
+  branch v9 b7.switch.case b5.switch.test
+b5.switch.test:  ; preds b4
+  jump b8.switch.default
+b6.switch.case:  ; preds b3
+  jump b2.forof.head
+b7.switch.case:  ; preds b4
+  jump b9.switch.done
+b8.switch.default:  ; preds b5
+  v10 = const 1
+  v11 = binop + v4 v10
+  jump b9.switch.done
+b9.switch.done:  ; preds b7 b8
+  v12 = phi [b7: v4, b8: v11]
+  v13 = const 2
+  v14 = binop * v12 v13
+  jump b2.forof.head
+b10.forof.done:  ; preds b2
+  return v4

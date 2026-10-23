@@ -1,0 +1,25 @@
+module do-while.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f() function in f1
+b1.entry:
+  v1 = this
+  v2 = const 0
+  jump b2.do.body
+b2.do.body:  ; preds b1 b3
+  v3 = phi [b1: v2, b3: v5]
+  v4 = const 2
+  v5 = binop + v3 v4
+  jump b3.do.test
+b3.do.test:  ; preds b2
+  v6 = const 10
+  v7 = binop < v5 v6
+  branch v7 b2.do.body b4.do.done
+b4.do.done:  ; preds b3
+  return v5

@@ -1,0 +1,31 @@
+module optional-element.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(xs, i) function in f1
+b1.entry:
+  v1 = param xs
+  v2 = param i
+  v3 = this
+  v4 = binop === v2 undefined
+  branch v4 b2.default b3.default.done
+b2.default:  ; preds b1
+  v5 = const 0
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v6 = phi [b1: v2, b2: v5]
+  v7 = binop == v1 undefined
+  branch v7 b5.opt.short b4.opt.cont
+b4.opt.cont:  ; preds b3
+  v8 = load v1[v6]
+  jump b6.opt.done
+b5.opt.short:  ; preds b3
+  jump b6.opt.done
+b6.opt.done:  ; preds b4 b5
+  v9 = phi [b4: v8, b5: undefined]
+  return v9

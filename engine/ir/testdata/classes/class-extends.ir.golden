@@ -1,0 +1,50 @@
+module class-extends.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Animal.constructor class
+  store global Animal = v2
+  v3 = load v2.prototype
+  v4 = closure f3 []                      ; Animal.speak
+  store v3.speak = v4                     ; method
+  v5 = load global Animal
+  v6 = closure f4 []                      ; Dog.constructor class derived
+  store v6.__proto__ = v5                 ; proto
+  store global Dog = v6
+  v7 = load v6.prototype
+  v8 = load v5.prototype
+  store v7.__proto__ = v8                 ; proto
+  v9 = closure f5 []                      ; Dog.speak
+  store v7.speak = v9                     ; method
+  return undefined
+
+func f2 Animal.constructor(name) constructor in f1
+b1.entry:
+  v1 = param name
+  v2 = this
+  store v2.name = v1
+  return undefined
+
+func f3 Animal.speak() method in f1
+b1.entry:
+  v1 = this
+  v2 = load v1.name
+  return v2
+
+func f4 Dog.constructor(name, breed) constructor derived in f1
+b1.entry:
+  v1 = param name
+  v2 = param breed
+  v3 = this
+  v4 = call super(v1) this=v3
+  store v3.breed = v2
+  return undefined
+
+func f5 Dog.speak() method in f1
+b1.entry:
+  v1 = this
+  v2 = call super.speak() this=v1
+  v3 = const " woof"
+  v4 = binop + v2 v3
+  return v4

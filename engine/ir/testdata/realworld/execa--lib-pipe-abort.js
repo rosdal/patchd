@@ -1,0 +1,23 @@
+// From https://github.com/sindresorhus/execa lib/pipe/abort.js at e7e0664c25e3.
+// Licence: MIT, Copyright (c) Sindre Sorhus. See THIRD_PARTY_NOTICES.md.
+import {aborted} from 'node:util';
+import {createNonCommandError} from './throw.js';
+import {unpipeSubprocessStream} from './streaming.js';
+
+// When passing an `unpipeSignal` option, abort piping when the signal is aborted.
+// However, do not terminate the subprocesses.
+export const unpipeOnAbort = (unpipeSignal, unpipeContext) => unpipeSignal === undefined
+	? []
+	: [unpipeOnSignalAbort(unpipeSignal, unpipeContext)];
+
+const unpipeOnSignalAbort = async (unpipeSignal, {sourceStream, mergedStream, fileDescriptors, sourceOptions, startTime}) => {
+	await aborted(unpipeSignal, sourceStream);
+	await unpipeSubprocessStream(mergedStream, sourceStream);
+	const error = new Error('Pipe canceled by `unpipeSignal` option.');
+	throw createNonCommandError({
+		error,
+		fileDescriptors,
+		sourceOptions,
+		startTime,
+	});
+};

@@ -1,0 +1,16 @@
+module module-shadowed.js
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(module) function in f1
+b1.entry:
+  v1 = param module
+  v2 = this
+  v3 = const 1
+  store v1.exports = v3
+  return undefined

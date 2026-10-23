@@ -1,0 +1,30 @@
+module jsx-fragment.tsx
+  export List = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; List
+  store global List = v2
+  return undefined
+
+func f2 List(p) function in f1
+b1.entry:
+  v1 = param p
+  v2 = this
+  v3 = object {}
+  v4 = load v1.items
+  v5 = closure f3 []                      ; List.<anon@5:20>
+  v6 = call v4.map(v5) this=v4
+  v7 = array [v6]
+  v8 = call %jsx(%Fragment, v3, v7)       ; jsx
+  return v8
+
+func f3 List.<anon@5:20>(i) arrow in f2
+b1.entry:
+  v1 = param i
+  v2 = const "li"
+  v3 = object {key: v1}
+  v4 = array [v1]
+  v5 = call %jsx(v2, v3, v4)              ; jsx
+  return v5

@@ -1,0 +1,23 @@
+module export-default-class-anonymous.ts
+  export default = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; default.constructor class
+  v3 = load v2.prototype
+  return undefined
+
+func f2 default.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; default.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 default.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const 1
+  store v1.x = v2
+  return undefined

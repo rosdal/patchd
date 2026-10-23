@@ -57,7 +57,8 @@ func newDebugCmd() *cobra.Command {
 	pf.IntVar(&f.checkers, "checkers", 0, "typescript-go checkers per project (default: 8 for projects of 2,000+ files, else 4)")
 	pf.BoolVar(&f.noCache, "no-shared-cache", false, "do not share parsed declaration files between projects")
 	pf.BoolVarP(&f.verbose, "verbose", "v", false, "log debug output, including recovered compiler panics, to stderr")
-	cmd.AddCommand(newDebugProjectCmd(f), newDebugTypesCmd(f), newDebugResolveCmd(f), newDebugStatsCmd(f))
+	cmd.AddCommand(newDebugProjectCmd(f), newDebugTypesCmd(f), newDebugResolveCmd(f), newDebugStatsCmd(f),
+		newDebugIRCmd(f), newDebugIRCoverageCmd(f))
 	return cmd
 }
 

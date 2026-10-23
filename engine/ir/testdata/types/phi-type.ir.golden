@@ -1,0 +1,22 @@
+module phi-type.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; phi-type.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (c: boolean) => string | number  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(c) function in f1  ; phi-type.ts:1:1  : (c: boolean) => string | number
+b1.entry:
+  v1 = param c                           : boolean
+  v2 = this
+  v3 = const 1                           : 1
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v4 = const "s"                         : "s"
+  jump b3.if.done
+b3.if.done:  ; preds b1 b2
+  v5 = phi [b1: v3, b2: v4]              : string | number
+  return v5

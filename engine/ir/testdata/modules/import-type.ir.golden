@@ -1,0 +1,13 @@
+module import-type.ts
+  import Mode from "./lib" (type) → ./lib.ts
+  import Tools from "./lib" (type) → ./lib.ts
+  import version from "./lib" → ./lib.ts
+  export v = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  store global m = undefined
+  v2 = load global version
+  store global v = v2
+  return undefined

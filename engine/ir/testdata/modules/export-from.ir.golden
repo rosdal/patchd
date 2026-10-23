@@ -1,0 +1,10 @@
+module export-from.ts
+  import version from "./lib" (re-export) → ./lib.ts
+  import default from "./lib" (re-export) → ./lib.ts
+  export version = version from "./lib" (re-export)
+  export Client = default from "./lib" (re-export)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  return undefined

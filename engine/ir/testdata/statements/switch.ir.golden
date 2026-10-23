@@ -1,0 +1,33 @@
+module switch.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(k) function in f1
+b1.entry:
+  v1 = param k
+  v2 = this
+  v3 = const "a"
+  v4 = binop === v1 v3
+  branch v4 b4.switch.case b2.switch.test
+b2.switch.test:  ; preds b1
+  v5 = const "b"
+  v6 = binop === v1 v5
+  branch v6 b5.switch.case b3.switch.test
+b3.switch.test:  ; preds b2
+  jump b6.switch.default
+b4.switch.case:  ; preds b1
+  v7 = const 1
+  return v7
+b5.switch.case:  ; preds b2
+  v8 = const 2
+  return v8
+b6.switch.default:  ; preds b3
+  v9 = const 0
+  return v9
+b7.switch.done:  ; unreachable
+  return undefined

@@ -1,0 +1,53 @@
+module class-extends-fields.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Base.constructor class
+  store global Base = v2
+  v3 = load v2.prototype
+  v4 = load global Base
+  v5 = closure f4 []                      ; Derived.constructor class derived
+  store v5.__proto__ = v4                 ; proto
+  store global Derived = v5
+  v6 = load v5.prototype
+  v7 = load v4.prototype
+  store v6.__proto__ = v7                 ; proto
+  return undefined
+
+func f2 Base.constructor() constructor implicit in f1
+b1.entry:
+  v1 = this
+  v2 = closure f3 []                      ; Base.<init>
+  v3 = call v2() this=v1
+  return undefined
+
+func f3 Base.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = const 1
+  store v1.base = v2
+  return undefined
+
+func f4 Derived.constructor() constructor derived in f1
+b1.entry:
+  v1 = this
+  v2 = load global console
+  v3 = const "before"
+  v4 = call v2.log(v3) this=v2
+  v5 = call super() this=v1
+  v6 = closure f5 []                      ; Derived.<init>
+  v7 = call v6() this=v1
+  v8 = load global console
+  v9 = load v1.extra
+  v10 = call v8.log(v9) this=v8
+  return undefined
+
+func f5 Derived.<init>() classinit in f4
+b1.entry:
+  v1 = this
+  v2 = load v1.base
+  v3 = const 1
+  v4 = binop + v2 v3
+  store v1.extra = v4
+  return undefined

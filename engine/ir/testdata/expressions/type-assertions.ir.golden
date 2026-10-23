@@ -1,0 +1,20 @@
+module type-assertions.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(x) function in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  v3 = v1
+  v4 = v1
+  v5 = v1
+  v6 = const 1
+  v7 = object {k: v6}
+  v8 = array [v3, v4, v5, v7]
+  return v8

@@ -1,0 +1,17 @@
+module generator-delegate.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; all
+  store global all = v2
+  return undefined
+
+func f2 all(a, b) function generator in f1
+b1.entry:
+  v1 = param a
+  v2 = param b
+  v3 = this
+  v4 = yield* v1
+  v5 = yield* v2
+  return undefined

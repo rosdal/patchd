@@ -1,0 +1,26 @@
+module for-await.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(stream) function async in f1
+b1.entry:
+  v1 = param stream
+  v2 = this
+  v3 = const 0
+  jump b2.forof.head
+b2.forof.head:  ; preds b1 b3
+  v4 = phi [b1: v3, b3: v8]
+  branch * b3.forof.body b4.forof.done
+b3.forof.body:  ; preds b2
+  v5 = load v1[of]
+  v6 = await v5
+  v7 = load v6.length
+  v8 = binop + v4 v7
+  jump b2.forof.head
+b4.forof.done:  ; preds b2
+  return v4

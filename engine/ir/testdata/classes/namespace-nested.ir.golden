@@ -1,0 +1,32 @@
+module namespace-nested.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = object {}
+  store global A = v2
+  v3 = closure f2 []                      ; A
+  v4 = call v3(v2)
+  v5 = load global A
+  v6 = load v5.B
+  v7 = load v6.x
+  store global y = v7
+  return undefined
+
+func f2 A(A) namespace in f1
+b1.entry:
+  v1 = param A
+  v2 = this
+  v3 = object {}
+  store v1.B = v3
+  v4 = closure f3 []                      ; A.B
+  v5 = call v4(v3)
+  return undefined
+
+func f3 A.B(B) namespace in f2
+b1.entry:
+  v1 = param B
+  v2 = this
+  v3 = const 1
+  store v1.x = v3
+  return undefined

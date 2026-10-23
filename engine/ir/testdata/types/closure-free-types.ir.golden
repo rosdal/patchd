@@ -1,0 +1,33 @@
+module closure-free-types.ts
+  export f = v2 (declaration)
+
+func f1 <module>() module  ; closure-free-types.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (prefix: string) => () => string  ; f
+  store global f = v2
+  return undefined
+
+func f2 f(prefix) function in f1  ; closure-free-types.ts:1:1  : (prefix: string) => () => string
+b1.entry:
+  v1 = param prefix                      : string
+  v2 = this
+  v3 = cell prefix
+  store *v3 = v1
+  v4 = cell count
+  v5 = const 0                           : 0
+  store *v4 = v5
+  v6 = closure f3 [v3, v4]               : () => string  ; f.<anon@3:10>
+  return v6
+
+func f3 f.<anon@3:10>() arrow in f2  ; closure-free-types.ts:3:10  : () => string
+b1.entry:
+  v1 = free prefix (cell)                : string
+  v2 = free count (cell)                 : number
+  v3 = load *v1                          : string
+  v4 = load *v2                          : number
+  v5 = const 1                           : number
+  v6 = binop + v4 v5                     : number
+  store *v2 = v6
+  v7 = binop + v3 v4                     : string
+  return v7

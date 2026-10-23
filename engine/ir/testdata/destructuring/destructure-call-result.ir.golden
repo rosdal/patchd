@@ -1,0 +1,23 @@
+module destructure-call-result.ts
+  export C = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; C
+  store global C = v2
+  return undefined
+
+func f2 C() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global useState               ; useState
+  v3 = const 0
+  v4 = call v2(v3)
+  v5 = spread v4
+  v6 = load v5[0]                         ; count, path v4[0]
+  v7 = load v5[1]                         ; setCount, path v4[1]
+  v8 = const 1
+  v9 = binop + v6 v8
+  v10 = call v7(v9)
+  return v6

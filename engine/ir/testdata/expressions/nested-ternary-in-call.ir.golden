@@ -1,0 +1,25 @@
+module nested-ternary-in-call.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a, g) function in f1
+b1.entry:
+  v1 = param a
+  v2 = param g
+  v3 = this
+  branch v1 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v4 = const 1
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v5 = const 2
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v6 = phi [b2: v4, b3: v5]
+  v7 = call v2(v6)
+  return undefined

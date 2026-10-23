@@ -1,0 +1,20 @@
+module interface-receiver.ts
+  export rows = v2 (declaration)
+
+func f1 <module>() module  ; interface-receiver.ts:1:1
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                     : (db: Db, id: string) => Promise<string[]>  ; rows
+  store global rows = v2
+  return undefined
+
+func f2 rows(db, id) function async in f1  ; interface-receiver.ts:4:1  : (db: Db, id: string) => Promise<string[]>
+b1.entry:
+  v1 = param db                          : Db
+  v2 = param id                          : string
+  v3 = this
+  v4 = template ["SELECT ", v2]          : string
+  v5 = call v1.query(v4) this=v1         : Promise<{ rows: string[]; }>
+  v6 = await v5                          : { rows: string[]; }
+  v7 = load v6.rows                      : string[]
+  return v7

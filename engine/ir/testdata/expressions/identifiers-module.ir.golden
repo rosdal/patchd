@@ -1,0 +1,19 @@
+module identifiers-module.ts
+  export port = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; port
+  store global port = v2
+  v3 = const 80
+  v4 = object {port: v3}
+  store global config = v4
+  return undefined
+
+func f2 port() function in f1
+b1.entry:
+  v1 = this
+  v2 = load global config
+  v3 = load v2.port
+  return v3

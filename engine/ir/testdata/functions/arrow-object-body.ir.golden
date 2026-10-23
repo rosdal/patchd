@@ -1,0 +1,14 @@
+module arrow-object-body.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; mk
+  store global mk = v2
+  return undefined
+
+func f2 mk(a) arrow in f1
+b1.entry:
+  v1 = param a
+  v2 = object {a: v1}
+  return v2

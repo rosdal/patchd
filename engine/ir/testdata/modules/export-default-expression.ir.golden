@@ -1,0 +1,9 @@
+module export-default-expression.ts
+  export default = v3 (default)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const 3000
+  v3 = object {port: v2}
+  return undefined

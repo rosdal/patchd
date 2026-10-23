@@ -1,0 +1,99 @@
+module create-t3-turbo--packages-api-src-router-post.ts
+  import TRPCRouterRecord from "@trpc/server" (type)
+  import z from "zod/v4"
+  import desc from "@acme/db"
+  import eq from "@acme/db"
+  import CreatePostSchema from "@acme/db/schema"
+  import Post from "@acme/db/schema"
+  import protectedProcedure from "../trpc"
+  import publicProcedure from "../trpc"
+  export postRouter = v25 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global publicProcedure
+  v3 = closure f2 []                      ; <anon@12:30>
+  v4 = call v2.query(v3) this=v2
+  v5 = load global publicProcedure
+  v6 = load global z
+  v7 = load global z
+  v8 = call v7.string() this=v7
+  v9 = object {id: v8}
+  v10 = call v6.object(v9) this=v6
+  v11 = call v5.input(v10) this=v5
+  v12 = closure f3 []                     ; <anon@21:12>
+  v13 = call v11.query(v12) this=v11
+  v14 = load global protectedProcedure
+  v15 = load global CreatePostSchema
+  v16 = call v14.input(v15) this=v14
+  v17 = closure f4 []                     ; <anon@29:15>
+  v18 = call v16.mutation(v17) this=v16
+  v19 = load global protectedProcedure
+  v20 = load global z
+  v21 = call v20.string() this=v20
+  v22 = call v19.input(v21) this=v19
+  v23 = closure f5 []                     ; <anon@33:57>
+  v24 = call v22.mutation(v23) this=v22
+  v25 = object {all: v4, byId: v13, create: v18, delete: v24}
+  store global postRouter = v25
+  return undefined
+
+func f2 <anon@12:30>(v1) arrow in f1
+b1.entry:
+  v1 = param
+  v2 = load v1.ctx
+  v3 = load v2.db
+  v4 = load v3.query
+  v5 = load v4.Post
+  v6 = load global desc
+  v7 = load global Post
+  v8 = load v7.id
+  v9 = call v6(v8)
+  v10 = const 10
+  v11 = object {orderBy: v9, limit: v10}
+  v12 = call v5.findMany(v11) this=v5
+  return v12
+
+func f3 <anon@21:12>(v1) arrow in f1
+b1.entry:
+  v1 = param
+  v2 = load v1.ctx
+  v3 = load v1.input
+  v4 = load v2.db
+  v5 = load v4.query
+  v6 = load v5.Post
+  v7 = load global eq
+  v8 = load global Post
+  v9 = load v8.id
+  v10 = load v3.id
+  v11 = call v7(v9, v10)
+  v12 = object {where: v11}
+  v13 = call v6.findFirst(v12) this=v6
+  return v13
+
+func f4 <anon@29:15>(v1) arrow in f1
+b1.entry:
+  v1 = param
+  v2 = load v1.ctx
+  v3 = load v1.input
+  v4 = load v2.db
+  v5 = load global Post
+  v6 = call v4.insert(v5) this=v4
+  v7 = call v6.values(v3) this=v6
+  return v7
+
+func f5 <anon@33:57>(v1) arrow in f1
+b1.entry:
+  v1 = param
+  v2 = load v1.ctx
+  v3 = load v1.input
+  v4 = load v2.db
+  v5 = load global Post
+  v6 = call v4.delete(v5) this=v4
+  v7 = load global eq
+  v8 = load global Post
+  v9 = load v8.id
+  v10 = call v7(v9, v3)
+  v11 = call v6.where(v10) this=v6
+  return v11

@@ -1,0 +1,10 @@
+module import-attributes.ts
+  import default as data from "./data.json" → ./data.json
+  export d = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global data
+  store global d = v2
+  return undefined

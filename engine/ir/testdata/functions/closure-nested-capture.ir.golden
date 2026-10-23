@@ -1,0 +1,31 @@
+module closure-nested-capture.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; a
+  store global a = v2
+  return undefined
+
+func f2 a() function in f1
+b1.entry:
+  v1 = this
+  v2 = cell x
+  v3 = closure f3 [v2]                    ; a.b
+  v4 = const 1
+  store *v2 = v4
+  return v3
+
+func f3 a.b() function in f2
+b1.entry:
+  v1 = this
+  v2 = free x (cell)
+  v3 = closure f4 [v2]                    ; a.b.c
+  return v3
+
+func f4 a.b.c() function in f3
+b1.entry:
+  v1 = this
+  v2 = free x (cell)
+  v3 = load *v2
+  return v3

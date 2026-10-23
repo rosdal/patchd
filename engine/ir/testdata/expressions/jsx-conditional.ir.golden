@@ -1,0 +1,30 @@
+module jsx-conditional.tsx
+  export C = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; C
+  store global C = v2
+  return undefined
+
+func f2 C(p) function in f1
+b1.entry:
+  v1 = param p
+  v2 = this
+  v3 = const "p"
+  v4 = object {}
+  v5 = load v1.show
+  branch v5 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v6 = const "b"
+  v7 = object {}
+  v8 = load v1.text
+  v9 = array [v8]
+  v10 = call %jsx(v6, v7, v9)             ; jsx
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v11 = phi [b1: v5, b2: v10]
+  v12 = array [v11]
+  v13 = call %jsx(v3, v4, v12)            ; jsx
+  return v13

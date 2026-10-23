@@ -1,0 +1,15 @@
+module async-iife.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; <anon@1:2>
+  v3 = call v2()                          ; iife
+  return undefined
+
+func f2 <anon@1:2>() arrow async in f1
+b1.entry:
+  v1 = load global main
+  v2 = call v1()
+  v3 = await v2
+  return undefined

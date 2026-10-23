@@ -1,0 +1,19 @@
+module object-literal-basic.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(name, age) function in f1
+b1.entry:
+  v1 = param name
+  v2 = param age
+  v3 = this
+  v4 = const "person"
+  v5 = const 1
+  v6 = const true
+  v7 = object {name: v1, age: v2, kind: v4, "odd-key": v5, "42": v6}
+  return v7

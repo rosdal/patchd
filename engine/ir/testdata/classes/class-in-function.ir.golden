@@ -1,0 +1,35 @@
+module class-in-function.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; make
+  store global make = v2
+  return undefined
+
+func f2 make(prefix) function in f1
+b1.entry:
+  v1 = param prefix
+  v2 = this
+  v3 = cell prefix
+  store *v3 = v1
+  v4 = closure f3 []                      ; make.Local.constructor class
+  v5 = load v4.prototype
+  v6 = closure f4 [v3]                    ; make.Local.say
+  store v5.say = v6                       ; method
+  v7 = new v4()
+  return v7
+
+func f3 make.Local.constructor() constructor implicit in f2
+b1.entry:
+  v1 = this
+  return undefined
+
+func f4 make.Local.say(x) method in f2
+b1.entry:
+  v1 = param x
+  v2 = this
+  v3 = free prefix (cell)
+  v4 = load *v3
+  v5 = binop + v4 v1
+  return v5

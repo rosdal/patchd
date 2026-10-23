@@ -20,6 +20,7 @@
     "**/routeTree.gen.ts",
     "engine/testdata/**",
     "engine/tsbridge/testdata/**",
+    "engine/ir/testdata/**",
     ".patchd/**"
   ]
 }

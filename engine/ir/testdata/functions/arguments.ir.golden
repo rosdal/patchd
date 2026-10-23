@@ -1,0 +1,32 @@
+module arguments.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; sum
+  store global sum = v2
+  return undefined
+
+func f2 sum() function in f1
+b1.entry:
+  v1 = this
+  v2 = arguments
+  v3 = const 0
+  v4 = const 0
+  jump b2.for.head
+b2.for.head:  ; preds b1 b4
+  v5 = phi [b1: v4, b4: v12]
+  v6 = phi [b1: v3, b4: v10]
+  v7 = load v2.length
+  v8 = binop < v5 v7
+  branch v8 b3.for.body b5.for.done
+b3.for.body:  ; preds b2
+  v9 = load v2[v5]
+  v10 = binop + v6 v9
+  jump b4.for.update
+b4.for.update:  ; preds b3
+  v11 = const 1
+  v12 = binop + v5 v11
+  jump b2.for.head
+b5.for.done:  ; preds b2
+  return v6

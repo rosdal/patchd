@@ -1,0 +1,13 @@
+module jsx-types.tsx
+  export el = v6 (declaration)
+
+func f1 <module>() module  ; jsx-types.tsx:1:1
+b1.entry:
+  v1 = this
+  v2 = const "div"                       : any
+  v3 = const "x"                         : any
+  v4 = object {id: v3}
+  v5 = array []
+  v6 = call %jsx(v2, v4, v5)             : any  ; jsx
+  store global el = v6
+  return undefined

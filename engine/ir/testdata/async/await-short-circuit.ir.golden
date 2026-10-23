@@ -1,0 +1,27 @@
+module await-short-circuit.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(a) function async in f1
+b1.entry:
+  v1 = param a
+  v2 = this
+  branch v1 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v3 = await v1
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v4 = phi [b1: v1, b2: v3]
+  v5 = binop == v4 undefined
+  branch v5 b4.nullish.rhs b5.nullish.done
+b4.nullish.rhs:  ; preds b3
+  v6 = const "none"
+  jump b5.nullish.done
+b5.nullish.done:  ; preds b3 b4
+  v7 = phi [b3: v4, b4: v6]
+  return v7

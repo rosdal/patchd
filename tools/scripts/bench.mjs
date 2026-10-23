@@ -1,7 +1,8 @@
-// pnpm bench [id...]: runs the tsbridge benchmarks (engine/tsbridge/bench_test.go)
-// on each fetched reference repo, one process per repo so the peak RSS is that
-// repo's, and writes bench-results.json (numbers per repo) and
-// bench-results.txt (raw `go test -bench` output, the input benchstat reads).
+// pnpm bench [id...]: runs the engine benchmarks (engine/tsbridge/bench_test.go
+// and engine/ir/bench_test.go) on each fetched reference repo, one process per
+// repo and package so the peak RSS is that run's, and writes
+// bench-results.json (numbers per repo) and bench-results.txt (raw
+// `go test -bench` output, the input benchstat reads).
 //
 // Options: --count N (repeat each benchmark; the median is recorded).
 import { execFileSync } from "node:child_process";
@@ -13,16 +14,18 @@ import { repoRoot, selectTargets, targetsDir } from "./lib/targets.mjs";
 const args = process.argv.slice(2);
 const countIdx = args.indexOf("--count");
 const count = countIdx >= 0 ? args.splice(countIdx, 2)[1] : "1";
-const bin = join(
-  repoRoot,
-  "bin",
-  process.platform === "win32" ? "tsbridge.test.exe" : "tsbridge.test",
-);
+const exe = process.platform === "win32" ? ".test.exe" : ".test";
+const packages = [
+  { pkg: "tsbridge", bin: join(repoRoot, "bin", "tsbridge" + exe) },
+  { pkg: "ir", bin: join(repoRoot, "bin", "ir" + exe) },
+];
 
-execFileSync("go", ["test", "-c", "-o", bin, "./engine/tsbridge"], {
-  cwd: repoRoot,
-  stdio: "inherit",
-});
+for (const { pkg, bin } of packages) {
+  execFileSync("go", ["test", "-c", "-o", bin, `./engine/${pkg}`], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+}
 
 let raw = "";
 const repos = {};
@@ -32,33 +35,37 @@ for (const t of selectTargets(args)) {
     continue;
   }
   console.log(`${t.id}: benchmarking`);
-  const out = execFileSync(
-    bin,
-    [
-      "-test.run",
-      "^$",
-      "-test.bench",
-      ".",
-      "-test.benchtime",
-      "1x",
-      "-test.benchmem",
-      "-test.count",
-      count,
-      "-test.timeout",
-      "60m",
-    ],
-    {
-      cwd: join(repoRoot, "engine", "tsbridge"),
-      env: { ...process.env, PATCHD_TARGETS: targetsDir, PATCHD_BENCH_REPOS: t.id },
-      encoding: "utf8",
-      maxBuffer: 1 << 26,
-    },
-  );
-  raw += out;
-  repos[t.id] = summarise(parse(out));
+  const rows = [];
+  for (const { pkg, bin } of packages) {
+    const out = execFileSync(
+      bin,
+      [
+        "-test.run",
+        "^$",
+        "-test.bench",
+        ".",
+        "-test.benchtime",
+        "1x",
+        "-test.benchmem",
+        "-test.count",
+        count,
+        "-test.timeout",
+        "60m",
+      ],
+      {
+        cwd: join(repoRoot, "engine", pkg),
+        env: { ...process.env, PATCHD_TARGETS: targetsDir, PATCHD_BENCH_REPOS: t.id },
+        encoding: "utf8",
+        maxBuffer: 1 << 26,
+      },
+    );
+    raw += out;
+    rows.push(...parse(out));
+  }
+  repos[t.id] = summarise(rows);
   const r = repos[t.id];
   console.log(
-    `${t.id}: load+check ${(r.check.ns / 1e9).toFixed(2)} s, peak RSS ${r.peakRssMB.toFixed(0)} MB`,
+    `${t.id}: load+check ${(r.check.ns / 1e9).toFixed(2)} s, lower ${(r.lower.ns / 1e9).toFixed(2)} s, peak RSS ${r.peakRssMB.toFixed(0)} MB`,
   );
 }
 
@@ -98,9 +105,9 @@ function median(xs) {
 function summarise(rows) {
   const by = {};
   for (const r of rows) (by[r.bench] ??= []).push(r.metrics);
-  const pick = (bench) => {
+  const pick = (bench, extra = []) => {
     const ms = by[bench] ?? [];
-    return {
+    const out = {
       ns: median(ms.map((m) => m["ns/op"])),
       bytes: median(ms.map((m) => m["B/op"])),
       allocs: median(ms.map((m) => m["allocs/op"])),
@@ -109,6 +116,10 @@ function summarise(rows) {
         ? { peakHeapMB: median(ms.map((m) => m["peak-heap-MB"])) }
         : {}),
     };
+    for (const [unit, key] of extra) {
+      if (ms[0]?.[unit] !== undefined) out[key] = median(ms.map((m) => m[unit]));
+    }
+    return out;
   };
   const rss = rows.map((r) => r.metrics["peak-rss-MB"]).filter((x) => x !== undefined);
   return {
@@ -116,6 +127,12 @@ function summarise(rows) {
     load: pick("Load"),
     check: pick("Check"),
     typeOf: pick("TypeOf"),
+    lower: pick("Lower", [
+      ["lines", "lines"],
+      ["ns/kline", "nsPerKLine"],
+      ["ir-B/src-B", "irBytesPerSourceByte"],
+      ["extra-heap-MB", "extraHeapMB"],
+    ]),
     peakRssMB: rss.length ? Math.max(...rss) : 0,
   };
 }

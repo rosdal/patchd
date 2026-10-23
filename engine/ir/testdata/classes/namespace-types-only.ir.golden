@@ -1,0 +1,8 @@
+module namespace-types-only.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = const "x"
+  store global t = v2
+  return undefined

@@ -1,0 +1,24 @@
+module util.js
+  export default = v6 (commonjs)
+  export helper = v4 (commonjs)
+  export name = v5 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; helper
+  store global helper = v2
+  v3 = load global module
+  v4 = load global helper
+  v5 = const "util"
+  v6 = object {helper: v4, name: v5}
+  store v3.exports = v6
+  return undefined
+
+func f2 helper(x) function in f1
+b1.entry:
+  v1 = param x
+  v2 = this
+  v3 = const 2
+  v4 = binop * v1 v3
+  return v4

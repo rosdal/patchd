@@ -1,0 +1,121 @@
+module nodegoat--app-data-memos-dao.js
+  export default = v5 (commonjs)
+  export MemosDAO = v4 (commonjs)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; MemosDAO
+  store global MemosDAO = v2
+  v3 = load global module
+  v4 = load global MemosDAO
+  v5 = object {MemosDAO: v4}
+  store v3.exports = v5
+  return undefined
+
+func f2 MemosDAO(db) function in f1
+b1.entry:
+  v1 = param db
+  v2 = this
+  v3 = cell memosCol
+  v4 = const "use strict"
+  v5 = const false
+  v6 = load global MemosDAO
+  v7 = binop instanceof v2 v6
+  v8 = binop === v5 v7
+  branch v8 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v9 = load global console
+  v10 = const "Warning: MemosDAO constructor called without 'new' operator"
+  v11 = call v9.log(v10) this=v9
+  v12 = load global MemosDAO
+  v13 = new v12(v1)
+  return v13
+b3.if.done:  ; preds b1
+  v14 = const "memos"
+  v15 = call v1.collection(v14) this=v1
+  store *v3 = v15
+  v16 = closure f3 [v3]                   ; MemosDAO.insert
+  store v2.insert = v16
+  v17 = closure f5 [v3]                   ; MemosDAO.getAllMemos
+  store v2.getAllMemos = v17
+  return undefined
+
+func f3 MemosDAO.insert(memo, callback) arrow in f2
+b1.entry:
+  v1 = param memo
+  v2 = param callback
+  v3 = free memosCol (cell)
+  v4 = cell callback
+  store *v4 = v2
+  v5 = load global Date
+  v6 = new v5()
+  v7 = object {memo: v1, timestamp: v6}
+  v8 = load *v3
+  v9 = closure f4 [v4]                    ; MemosDAO.insert.<anon@25:32>
+  v10 = call v8.insert(v7, v9) this=v8
+  return undefined
+
+func f4 MemosDAO.insert.<anon@25:32>(err, result) arrow in f3
+b1.entry:
+  v1 = param err
+  v2 = param result
+  v3 = free callback (cell)
+  v4 = unop ! v1
+  branch v4 b2.cond.true b3.cond.false
+b2.cond.true:  ; preds b1
+  v5 = load *v3
+  v6 = const null
+  v7 = call v5(v6, v2)
+  jump b4.cond.done
+b3.cond.false:  ; preds b1
+  v8 = load *v3
+  v9 = const null
+  v10 = call v8(v1, v9)
+  jump b4.cond.done
+b4.cond.done:  ; preds b2 b3
+  v11 = phi [b2: v7, b3: v10]
+  return v11
+
+func f5 MemosDAO.getAllMemos(callback) arrow in f2
+b1.entry:
+  v1 = param callback
+  v2 = free memosCol (cell)
+  v3 = cell callback
+  store *v3 = v1
+  v4 = load *v2
+  v5 = object {}
+  v6 = call v4.find(v5) this=v4
+  v7 = const 1
+  v8 = unop - v7
+  v9 = object {timestamp: v8}
+  v10 = call v6.sort(v9) this=v6
+  v11 = closure f6 [v3]                   ; MemosDAO.getAllMemos.<anon@32:20>
+  v12 = call v10.toArray(v11) this=v10
+  return undefined
+
+func f6 MemosDAO.getAllMemos.<anon@32:20>(err, memos) arrow in f5
+b1.entry:
+  v1 = param err
+  v2 = param memos
+  v3 = free callback (cell)
+  branch v1 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v4 = load *v3
+  v5 = const null
+  v6 = call v4(v1, v5)
+  return v6
+b3.if.done:  ; preds b1
+  v7 = unop ! v2
+  branch v7 b4.if.then b5.if.done
+b4.if.then:  ; preds b3
+  v8 = load *v3
+  v9 = const "ERROR: No memos found"
+  v10 = const null
+  v11 = call v8(v9, v10)
+  return v11
+b5.if.done:  ; preds b3
+  v12 = load *v3
+  v13 = const null
+  v14 = call v12(v13, v2)
+  return undefined

@@ -1,0 +1,196 @@
+module zod--packages-zod-src-v4-core-doc.ts
+  export Doc = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Doc.constructor class
+  store global Doc = v2
+  v3 = load v2.prototype
+  v4 = closure f4 []                      ; Doc.indented
+  store v3.indented = v4                  ; method
+  v5 = closure f5 []                      ; Doc.write
+  store v3.write = v5                     ; method
+  v6 = closure f10 []                     ; Doc.compile
+  store v3.compile = v6                   ; method
+  return undefined
+
+func f2 Doc.constructor(args, closed) constructor in f1
+b1.entry:
+  v1 = param args
+  v2 = param closed
+  v3 = this
+  v4 = binop === v1 undefined
+  branch v4 b2.default b3.default.done
+b2.default:  ; preds b1
+  v5 = array []
+  jump b3.default.done
+b3.default.done:  ; preds b1 b2
+  v6 = phi [b1: v1, b2: v5]
+  v7 = binop === v2 undefined
+  branch v7 b4.default b5.default.done
+b4.default:  ; preds b3
+  v8 = object {}
+  jump b5.default.done
+b5.default.done:  ; preds b3 b4
+  v9 = phi [b3: v2, b4: v8]
+  v10 = closure f3 []                     ; Doc.<init>
+  v11 = call v10() this=v3
+  store v3.args = v6
+  store v3.closed = v9
+  return undefined
+
+func f3 Doc.<init>() classinit in f2
+b1.entry:
+  v1 = this
+  v2 = array []
+  store v1.content = v2
+  v3 = const 0
+  store v1.indent = v3
+  return undefined
+
+func f4 Doc.indented(fn) method in f1
+b1.entry:
+  v1 = param fn
+  v2 = this
+  v3 = load v2.indent
+  v4 = const 1
+  v5 = binop + v3 v4
+  store v2.indent = v5
+  jump b2.try
+b2.try:  ; preds b1
+  v6 = call v1(v2)                        ; exceptional → b4.finally.throw
+  jump b3.try
+b3.try:  ; preds b2
+  v7 = load v2.indent
+  v8 = const 1
+  v9 = binop - v7 v8
+  store v2.indent = v9
+  jump b5.try.done
+b4.finally.throw:  ; preds b2
+  v10 = catchval
+  v11 = load v2.indent
+  v12 = const 1
+  v13 = binop - v11 v12
+  store v2.indent = v13
+  throw v10
+b5.try.done:  ; preds b3
+  return undefined
+
+func f5 Doc.write(arg) method in f1
+b1.entry:
+  v1 = param arg
+  v2 = this
+  v3 = cell minIndent
+  v4 = unop typeof v1
+  v5 = const "function"
+  v6 = binop === v4 v5
+  branch v6 b2.if.then b3.if.done
+b2.if.then:  ; preds b1
+  v7 = const "sync"
+  v8 = object {execution: v7}
+  v9 = call v1(v2, v8)
+  v10 = const "async"
+  v11 = object {execution: v10}
+  v12 = call v1(v2, v11)
+  return undefined
+b3.if.done:  ; preds b1
+  v13 = v1
+  v14 = const "\n"
+  v15 = call v13.split(v14) this=v13
+  v16 = closure f6 []                     ; Doc.write.<anon@37:46>
+  v17 = call v15.filter(v16) this=v15
+  v18 = load global Math
+  v19 = closure f7 []                     ; Doc.write.<anon@38:45>
+  v20 = call v17.map(v19) this=v17
+  v21 = spread v20
+  v22 = call v18.min(...v21) this=v18
+  store *v3 = v22
+  v23 = closure f8 [v3]                   ; Doc.write.<anon@39:32>
+  v24 = call v17.map(v23) this=v17
+  v25 = closure f9 [v2]                   ; Doc.write.<anon@39:63>
+  v26 = call v24.map(v25) this=v24
+  jump b4.forof.head
+b4.forof.head:  ; preds b3 b5
+  branch * b5.forof.body b6.forof.done
+b5.forof.body:  ; preds b4
+  v27 = load v26[of]
+  v28 = load v2.content
+  v29 = call v28.push(v27) this=v28
+  jump b4.forof.head
+b6.forof.done:  ; preds b4
+  return undefined
+
+func f6 Doc.write.<anon@37:46>(x) arrow in f5
+b1.entry:
+  v1 = param x
+  return v1
+
+func f7 Doc.write.<anon@38:45>(x) arrow in f5
+b1.entry:
+  v1 = param x
+  v2 = load v1.length
+  v3 = call v1.trimStart() this=v1
+  v4 = load v3.length
+  v5 = binop - v2 v4
+  return v5
+
+func f8 Doc.write.<anon@39:32>(x) arrow in f5
+b1.entry:
+  v1 = param x
+  v2 = free minIndent (cell)
+  v3 = load *v2
+  v4 = call v1.slice(v3) this=v1
+  return v4
+
+func f9 Doc.write.<anon@39:63>(x) arrow in f5
+b1.entry:
+  v1 = param x
+  v2 = free this
+  v3 = const " "
+  v4 = load v2.indent
+  v5 = const 2
+  v6 = binop * v4 v5
+  v7 = call v3.repeat(v6) this=v3
+  v8 = binop + v7 v1
+  return v8
+
+func f10 Doc.compile() method in f1
+b1.entry:
+  v1 = this
+  v2 = load global Function
+  v3 = v2
+  v4 = binop == v1 undefined
+  branch v4 b3.opt.short b2.opt.cont
+b2.opt.cont:  ; preds b1
+  v5 = load v1.content
+  jump b4.opt.done
+b3.opt.short:  ; preds b1
+  jump b4.opt.done
+b4.opt.done:  ; preds b2 b3
+  v6 = phi [b2: v5, b3: undefined]
+  v7 = binop == v6 undefined
+  branch v7 b5.nullish.rhs b6.nullish.done
+b5.nullish.rhs:  ; preds b4
+  v8 = const ""
+  v9 = array [v8]
+  jump b6.nullish.done
+b6.nullish.done:  ; preds b4 b5
+  v10 = phi [b4: v6, b5: v9]
+  v11 = load global Object
+  v12 = load v1.closed
+  v13 = call v11.keys(v12) this=v11
+  v14 = spread v13
+  v15 = load v1.args
+  v16 = const ", "
+  v17 = call v15.join(v16) this=v15
+  v18 = const "\n"
+  v19 = call v10.join(v18) this=v10
+  v20 = template ["return function (", v17, ") {\n", v19, "\n};"]
+  v21 = new v3(...v14, v20)
+  v22 = load global Object
+  v23 = load v1.closed
+  v24 = call v22.values(v23) this=v22
+  v25 = spread v24
+  v26 = call v21(...v25)
+  return v26

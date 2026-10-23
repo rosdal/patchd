@@ -1,0 +1,23 @@
+module binary-in-instanceof.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o, k) function in f1
+b1.entry:
+  v1 = param o
+  v2 = param k
+  v3 = this
+  v4 = binop in v2 v1
+  branch v4 b2.and.rhs b3.and.done
+b2.and.rhs:  ; preds b1
+  v5 = load global Date
+  v6 = binop instanceof v1 v5
+  jump b3.and.done
+b3.and.done:  ; preds b1 b2
+  v7 = phi [b1: v4, b2: v6]
+  return v7

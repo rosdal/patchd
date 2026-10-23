@@ -1,0 +1,21 @@
+module jsx-dangerous.tsx
+  export Raw = v2 (declaration)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; Raw
+  store global Raw = v2
+  return undefined
+
+func f2 Raw(p) function in f1
+b1.entry:
+  v1 = param p
+  v2 = this
+  v3 = const "div"
+  v4 = load v1.html
+  v5 = object {__html: v4}
+  v6 = object {dangerouslySetInnerHTML: v5}
+  v7 = array []
+  v8 = call %jsx(v3, v6, v7)              ; jsx
+  return v8

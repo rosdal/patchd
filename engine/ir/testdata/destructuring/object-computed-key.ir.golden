@@ -1,0 +1,19 @@
+module object-computed-key.ts
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = closure f2 []                      ; f
+  store global f = v2
+  return undefined
+
+func f2 f(o, k) function in f1
+b1.entry:
+  v1 = param o
+  v2 = param k
+  v3 = this
+  v4 = load v1[v2]                        ; v, path v1[?]
+  v5 = const "lit"
+  v6 = load v1[v5]                        ; w, path v1[?]
+  v7 = array [v4, v6]
+  return v7

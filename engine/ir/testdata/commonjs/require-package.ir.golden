@@ -1,0 +1,34 @@
+module require-package.js
+  import default as express from "express" (require) → package express
+  import default from "child_process" (require)
+
+func f1 <module>() module
+b1.entry:
+  v1 = this
+  v2 = load global require
+  v3 = const "express"
+  v4 = call v2(v3)                        ; require
+  store global express = v4
+  v5 = load global require
+  v6 = const "child_process"
+  v7 = call v5(v6)                        ; require
+  v8 = load v7.exec
+  store global exec = v8
+  v9 = load global express
+  v10 = call v9()
+  store global app = v10
+  v11 = load global app
+  v12 = const "/run"
+  v13 = closure f2 []                     ; <anon@4:17>
+  v14 = call v11.get(v12, v13) this=v11
+  return undefined
+
+func f2 <anon@4:17>(req, res) arrow in f1
+b1.entry:
+  v1 = param req
+  v2 = param res
+  v3 = load global exec
+  v4 = load v1.query
+  v5 = load v4.cmd
+  v6 = call v3(v5)
+  return v6
