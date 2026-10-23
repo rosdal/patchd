@@ -1,5 +1,5 @@
-// pnpm bench [id...]: runs the engine benchmarks (engine/tsbridge/bench_test.go
-// and engine/ir/bench_test.go) on each fetched reference repo, one process per
+// pnpm bench [id...]: runs the engine benchmarks (engine/tsbridge/bench_test.go,
+// engine/ir/bench_test.go and engine/bench_test.go) on each fetched reference repo, one process per
 // repo and package so the peak RSS is that run's, and writes
 // bench-results.json (numbers per repo) and bench-results.txt (raw
 // `go test -bench` output, the input benchstat reads).
@@ -18,10 +18,11 @@ const exe = process.platform === "win32" ? ".test.exe" : ".test";
 const packages = [
   { pkg: "tsbridge", bin: join(repoRoot, "bin", "tsbridge" + exe) },
   { pkg: "ir", bin: join(repoRoot, "bin", "ir" + exe) },
+  { pkg: "", bin: join(repoRoot, "bin", "engine" + exe) },
 ];
 
 for (const { pkg, bin } of packages) {
-  execFileSync("go", ["test", "-c", "-o", bin, `./engine/${pkg}`], {
+  execFileSync("go", ["test", "-c", "-o", bin, pkg ? `./engine/${pkg}` : "./engine"], {
     cwd: repoRoot,
     stdio: "inherit",
   });
@@ -65,7 +66,7 @@ for (const t of selectTargets(args)) {
   repos[t.id] = summarise(rows);
   const r = repos[t.id];
   console.log(
-    `${t.id}: load+check ${(r.check.ns / 1e9).toFixed(2)} s, lower ${(r.lower.ns / 1e9).toFixed(2)} s, peak RSS ${r.peakRssMB.toFixed(0)} MB`,
+    `${t.id}: load+check ${(r.check.ns / 1e9).toFixed(2)} s, lower ${(r.lower.ns / 1e9).toFixed(2)} s, taint ${(r.taint.ns / 1e9).toFixed(2)} s, scan ${(r.scan.ns / 1e9).toFixed(2)} s, peak RSS ${r.peakRssMB.toFixed(0)} MB`,
   );
 }
 
@@ -133,6 +134,8 @@ function summarise(rows) {
       ["ir-B/src-B", "irBytesPerSourceByte"],
       ["extra-heap-MB", "extraHeapMB"],
     ]),
+    taint: pick("Taint", [["functions-analysed", "functionsAnalysed"]]),
+    scan: pick("Scan", [["findings", "findings"]]),
     peakRssMB: rss.length ? Math.max(...rss) : 0,
   };
 }

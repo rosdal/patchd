@@ -188,7 +188,12 @@ func (p *projectScan) run(ctx context.Context) ([]Finding, Stats) {
 	}
 	st.Functions = len(jobs)
 	report(p.opts, p.prog.Config().Name, "lower", st.Lower, fmt.Sprintf("%d functions", len(jobs)))
+	return p.analyse(ctx, jobs, st)
+}
 
+// analyse runs taint and the rules on every function, in parallel: in v0.4
+// functions are independent.
+func (p *projectScan) analyse(ctx context.Context, jobs []funcJob, st Stats) ([]Finding, Stats) {
 	t1 := time.Now()
 	analyzer := taint.NewAnalyzer(p.prog, taint.Config{Spec: p.spec, IncludeEnvironment: p.opts.IncludeEnvironment})
 	workers := p.opts.Jobs

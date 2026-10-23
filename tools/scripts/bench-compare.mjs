@@ -20,8 +20,10 @@ export function compare(base, head) {
     }
     const dt = b.check.ns ? h.check.ns / b.check.ns - 1 : 0;
     const dm = b.peakRssMB ? h.peakRssMB / b.peakRssMB - 1 : 0;
-    // Results from before the IR existed have no lowering time.
+    // Results from before the IR existed have no lowering time, and from
+    // before v0.4 no taint time.
     const dl = b.lower?.ns && h.lower?.ns ? h.lower.ns / b.lower.ns - 1 : undefined;
+    const dtaint = b.taint?.ns && h.taint?.ns ? h.taint.ns / b.taint.ns - 1 : undefined;
     rows.push({
       repo,
       baseTime: b.check.ns,
@@ -33,7 +35,14 @@ export function compare(base, head) {
       baseMemory: b.peakRssMB,
       memory: h.peakRssMB,
       dm,
-      regressed: dt > thresholds.time || (dl ?? 0) > thresholds.time || dm > thresholds.memory,
+      baseTaint: b.taint?.ns,
+      taint: h.taint?.ns,
+      dtaint,
+      regressed:
+        dt > thresholds.time ||
+        (dl ?? 0) > thresholds.time ||
+        (dtaint ?? 0) > thresholds.time ||
+        dm > thresholds.memory,
     });
   }
   // A repo main measured that the PR didn't is a failure, not a pass: its
@@ -50,12 +59,12 @@ const mb = (m) => (m === undefined ? "–" : `${m.toFixed(0)} MB`);
 
 export function table(rows) {
   return [
-    "| Repo | Load + check (main → PR) | Δ | Lower to IR (main → PR) | Δ | Peak RSS (main → PR) | Δ | |",
-    "| --- | --- | ---: | --- | ---: | --- | ---: | --- |",
+    "| Repo | Load + check (main → PR) | Δ | Lower to IR (main → PR) | Δ | Taint + rules (main → PR) | Δ | Peak RSS (main → PR) | Δ | |",
+    "| --- | --- | ---: | --- | ---: | --- | ---: | --- | ---: | --- |",
     ...rows.map((r) =>
       r.missing
-        ? `| ${r.repo} | missing from this run | | | | | | regression |`
-        : `| ${r.repo} | ${s(r.baseTime)} → ${s(r.time)} | ${pct(r.dt)} | ${s(r.baseLower)} → ${s(r.lower)} | ${pct(r.dl)} | ${mb(r.baseMemory)} → ${mb(r.memory)} | ${pct(r.dm)} | ${r.regressed ? "regression" : ""} |`,
+        ? `| ${r.repo} | missing from this run | | | | | | | | regression |`
+        : `| ${r.repo} | ${s(r.baseTime)} → ${s(r.time)} | ${pct(r.dt)} | ${s(r.baseLower)} → ${s(r.lower)} | ${pct(r.dl)} | ${s(r.baseTaint)} → ${s(r.taint)} | ${pct(r.dtaint)} | ${mb(r.baseMemory)} → ${mb(r.memory)} | ${pct(r.dm)} | ${r.regressed ? "regression" : ""} |`,
     ),
     "",
     `Alarm: load + check or lowering more than ${thresholds.time * 100}% slower, or peak memory more than ${thresholds.memory * 100}% higher, on any repo.`,
