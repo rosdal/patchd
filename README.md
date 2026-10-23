@@ -2,7 +2,34 @@
 
 Patchd reviews TypeScript and JavaScript pull requests. A dataflow engine built on typescript-go finds candidate bugs, agents confirm each one with evidence before it is posted, and patches are verified in a sandbox before Patchd suggests them. It is built for teams that want fewer, provable review comments, hosted in the EU or self-hosted.
 
-**Status:** pre-alpha, v0.3: TypeScript lowered to Patchd IR. `engine/tsbridge` discovers, loads and type-checks any TypeScript or JavaScript repo ([docs/engine/tsbridge.md](docs/engine/tsbridge.md)), and `engine/ir` lowers every function to a typed control-flow graph in SSA form, the input of the analyses to come ([docs/engine/ir.md](docs/engine/ir.md)); inspect them with `patchd debug project|types|resolve|stats|ir|ir-coverage`. The review subcommands still return "not implemented yet".
+**Status:** pre-alpha, v0.4 (milestone M1): first vulnerability findings. `patchd scan` finds command injection and SQL injection (and, opt-in, path traversal) where untrusted input reaches a dangerous call inside one function, and reports them in the terminal, as SARIF for GitHub code scanning, or as JSON, each with a step-by-step trace ([docs/cli/scan.md](docs/cli/scan.md), [docs/engine/taint.md](docs/engine/taint.md)). Underneath, `engine/tsbridge` loads and type-checks any TypeScript or JavaScript repo ([docs/engine/tsbridge.md](docs/engine/tsbridge.md)) and `engine/ir` lowers every function to a typed SSA control-flow graph ([docs/engine/ir.md](docs/engine/ir.md)). The review subcommands still return "not implemented yet".
+
+## Try it
+
+```sh
+pnpm install && pnpm build
+./bin/patchd scan path/to/your/app              # every rule on by default
+./bin/patchd scan . --format sarif -o out.sarif # for GitHub code scanning
+./bin/patchd rules list
+```
+
+On [DVNA](https://github.com/appsecco/dvna), a deliberately vulnerable Node app (`pnpm targets:fetch dvna`):
+
+```text
+$ ./bin/patchd scan .patchd/targets/dvna
+core/appHandler.js
+
+  CRITICAL ts/cmdi Command injection  39:2
+  User input from `req.body.address` (line 39) reaches `exec` (line 39) without escaping.
+    1. 39:22  read `req.body.address` (HTTP request body)
+       │ exec('ping -c 2 ' + req.body.address, function (err, stdout, stderr) {
+    2. 39:7  concatenated into a string
+       │ exec('ping -c 2 ' + req.body.address, function (err, stdout, stderr) {
+    3. 39:2  passed as argument 1 to `exec`
+       │ exec('ping -c 2 ' + req.body.address, function (err, stdout, stderr) {
+
+1 finding (1 critical) in 14 files, 300ms
+```
 
 ## Prerequisites
 
@@ -25,7 +52,7 @@ pnpm lint           # golangci-lint, oxlint, tsc, prettier --check
 
 Go tools (golangci-lint, gofumpt, buf and its Go plugins, sqlc, goose) are pinned in `tools/go.mod` and run through `go tool`, so there is nothing else to install.
 
-pnpm is the only task runner, for Go as well as TypeScript (see [ADR 0003](docs/adr/0003-pnpm-task-runner.md)). `pnpm format` rewrites Go and TypeScript files; `pnpm gen` and `pnpm eval` are placeholders until code generation and the eval harness exist.
+pnpm is the only task runner, for Go as well as TypeScript (see [ADR 0003](docs/adr/0003-pnpm-task-runner.md)). `pnpm format` rewrites Go and TypeScript files; `pnpm fixtures:install` installs the types the engine's fixture suite needs (`pnpm test` runs it first); `pnpm eval:targets` and `pnpm eval:reference` score the scanner on the vulnerable targets and the reference repos (`pnpm targets:fetch` first). `pnpm gen` and `pnpm eval` are placeholders until code generation and the gold sets exist.
 
 ## Layout
 

@@ -126,16 +126,18 @@ Phase 1 builds the bottom of the analysis engine and ends with `patchd scan` fin
 
 **Goal:** find real injection vulnerabilities inside single functions and report them in SARIF.
 
-- [ ] `dataflow/`: lattice, worklist solver, reaching definitions over the IR.
-- [ ] `taint/spec.go`: source, sink, sanitizer and propagator types; taint kinds (sql, command, path, url, html, code).
-- [ ] Intraprocedural taint: propagation through assignments, string concatenation, template literals, array and object operations, common string methods.
-- [ ] Hard-coded models (moved to YAML in v0.6): Express `req.*` as sources; `child_process.exec`, `fs.*` paths, `pg` `query` with a string argument as sinks.
-- [ ] First rules: command injection, path traversal, SQL injection (`pg`).
-- [ ] `taint/trace.go`: every finding carries the step-by-step path with source ranges.
-- [ ] Finding fingerprints that stay stable when unrelated lines move.
-- [ ] `patchd scan <path>`: outputs SARIF 2.1.0 (`--format sarif`), a readable terminal report (`--format pretty`), and JSON.
-- [ ] Fixture harness: `.ts` files with `// expect:` and `// expect-none` comments, run by `go test ./engine/...`.
-- [ ] Integration targets pinned: OWASP Juice Shop, OWASP NodeGoat, DVNA; expected findings recorded.
+**Status (2026-10-23):** built on branch `feat/v0.4-taint`; tag `v0.4.0` follows the merge and a manual check that the SARIF uploads to GitHub code scanning (it validates against the SARIF 2.1.0 schema in tests). `patchd scan` finds DVNA's command injection and Juice Shop's three single-function path traversals; NodeGoat has nothing in v0.4's scope (its injections are `eval` and a MongoDB `$where`), and every documented miss is tagged with the version that will catch it in `eval/targets/expected/`. Zero findings on the 111 safe fixtures (178 positive cases pass) and on Patchd's own code; taint and rules take 0.6 s on pnpm's 445k lines. Design in [ADR 0010](adr/0010-taint-model.md), details in [docs/engine/taint.md](engine/taint.md), [docs/cli/scan.md](cli/scan.md) and the [rule docs](engine/rules/). Deviations from this list: `ts/path-traversal` ships off by default (0 true and 3 false positives on the non-vulnerable reference repos, below the 80% gate; `--rules` enables it); calls to functions in the repo and lookups with a tainted key pass no taint (decided in triage); untyped `(req, res)` JavaScript handlers are recognised by shape, with medium confidence; `tsbridge` gained `TypeQualifiedName`.
+
+- [x] `dataflow/`: lattice, worklist solver, reaching definitions over the IR.
+- [x] `taint/spec.go`: source, sink, sanitizer and propagator types; taint kinds (sql, command, path, url, html, code).
+- [x] Intraprocedural taint: propagation through assignments, string concatenation, template literals, array and object operations, common string methods.
+- [x] Hard-coded models (moved to YAML in v0.6): Express `req.*` as sources; `child_process.exec`, `fs.*` paths, `pg` `query` with a string argument as sinks.
+- [x] First rules: command injection, path traversal, SQL injection (`pg`).
+- [x] `taint/trace.go`: every finding carries the step-by-step path with source ranges.
+- [x] Finding fingerprints that stay stable when unrelated lines move.
+- [x] `patchd scan <path>`: outputs SARIF 2.1.0 (`--format sarif`), a readable terminal report (`--format pretty`), and JSON.
+- [x] Fixture harness: `.ts` files with `// expect:` and `// expect-none` comments, run by `go test ./engine/...`.
+- [x] Integration targets pinned: OWASP Juice Shop, OWASP NodeGoat, DVNA; expected findings recorded.
 
 **Exit criteria:** finds the known command-injection, path-traversal and SQL-injection issues in NodeGoat and DVNA that live inside one function; zero findings on a set of 20 safe fixtures; SARIF uploads cleanly to GitHub code scanning.
 

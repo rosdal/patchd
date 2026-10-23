@@ -1,6 +1,6 @@
 # 0010. Intraprocedural taint as sets of kinded, origin-carrying labels over SSA values
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-23
 
 ## Context
