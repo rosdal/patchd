@@ -1,6 +1,6 @@
 // Taint through local variables, control flow and string operations.
 import express, { type Request, type Response } from "express";
-import { exec, execSync, spawn, spawnSync, execFile } from "node:child_process";
+import { exec, execSync, spawn, spawnSync, execFile, execFileSync } from "node:child_process";
 import * as cp from "node:child_process";
 
 const router = express.Router();
@@ -181,3 +181,27 @@ router.post("/annotated", (req, res) => {
 });
 
 export default router;
+
+router.get("/execfilesync-command", (req, res) => {
+  execFileSync(String(req.query.tool), ["--help"]); // expect: ts/cmdi
+  res.end();
+});
+
+router.get("/legacy-param", (req, res) => {
+  exec("cat " + req.param("file")); // expect: ts/cmdi
+  res.end();
+});
+
+router.get("/unshift", (req, res) => {
+  const args = ["--quiet"];
+  args.unshift(String(req.query.flag));
+  exec("tool " + args.join(" ")); // expect: ts/cmdi
+  res.end();
+});
+
+router.get("/splice", (req, res) => {
+  const args = ["a", "b"];
+  args.splice(1, 0, String(req.query.flag));
+  exec("tool " + args.join(" ")); // expect: ts/cmdi
+  res.end();
+});
