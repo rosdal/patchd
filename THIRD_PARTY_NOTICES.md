@@ -19,3 +19,15 @@ Patchd includes or is derived from the following third-party software. Dependenc
 - Source: https://github.com/oxc-project/tsgolint (`tools/gen_shims`)
 - Licence: MIT, Copyright (c) 2025 VoidZero Inc., typescript-eslint and contributors
 - Used by: [`engine/tsbridge/shim/gen`](engine/tsbridge/shim/gen/main.go), adapted from tsgolint's shim generator; attribution is in the file
+
+## SARIF 2.1.0 JSON schema
+
+- Source: https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json
+- Licence: Copyright (c) OASIS Open 2020, distributed under the OASIS IPR Policy, which permits copying and distributing the specification and its schemas unmodified
+- Used by: [`engine/report/testdata/sarif-schema-2.1.0.json`](engine/report/testdata/sarif-schema-2.1.0.json), an unmodified copy the SARIF output is validated against in tests
+
+## OWASP Juice Shop handler in a taint fixture
+
+- Source: https://github.com/juice-shop/juice-shop `routes/keyServer.ts` at the commit pinned in [`eval/targets/reference-repos.yaml`](eval/targets/reference-repos.yaml)
+- Licence: MIT, Copyright (c) 2014-2026 Bjoern Kimminich & the OWASP Juice Shop contributors
+- Used by: `serveKeyFiles` in [`engine/testdata/fixtures/path-traversal/positive/send_file.ts`](engine/testdata/fixtures/path-traversal/positive/send_file.ts), adapted as a path-traversal test case
