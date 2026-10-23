@@ -135,7 +135,12 @@ function summarise(rows) {
       ["extra-heap-MB", "extraHeapMB"],
     ]),
     taint: pick("Taint", [["functions-analysed", "functionsAnalysed"]]),
-    scan: pick("Scan", [["findings", "findings"]]),
+    // A whole scan loads projects in parallel: its RSS is its own number,
+    // not part of peakRssMB, which compares load + check and lowering.
+    scan: pick("Scan", [
+      ["findings", "findings"],
+      ["scan-peak-rss-MB", "peakRssMB"],
+    ]),
     peakRssMB: rss.length ? Math.max(...rss) : 0,
   };
 }

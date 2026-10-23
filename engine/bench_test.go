@@ -120,7 +120,7 @@ func BenchmarkScan(b *testing.B) {
 			}
 			b.ReportMetric(float64(res.Stats.Lines), "lines")
 			b.ReportMetric(float64(len(res.Findings)), "findings")
-			b.ReportMetric(float64(tsbridge.ProcessPeakRSS())/(1<<20), "peak-rss-MB")
+			b.ReportMetric(float64(tsbridge.ProcessPeakRSS())/(1<<20), "scan-peak-rss-MB")
 		})
 	}
 }
